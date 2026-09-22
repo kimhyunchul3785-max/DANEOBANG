@@ -8,18 +8,20 @@ type DTO = {
   revision: number;
   deadlineAt: string | null;
   serverTime: string;
-  exam: { title: string; questionCount: number; timeLimitMin: number | null };
+  exam: { title: string; questionCount: number; timeLimitMin: number | null; secondsPerItem?: number };
   items: { itemId: string; position: number; prompt: string; options: { optionId: string; position: number; text: string }[] }[];
   answers: Record<string, string | null>;
 };
 
 type SaveState = "idle" | "saving" | "saved" | "error" | "offline";
+const KEYS = ["1", "2", "3", "4"];
 
 /**
- * 학생 응시 화면 (최대 420px). 한 화면에 한 문항.
- * - 선택 즉시 서버 저장 (revision 낙관적 잠금), 실패 시 재시도, 오프라인 임시 보관
- * - 새로고침/재로그인 시 서버 저장값 복원
- * - 마감은 서버 시각 기준
+ * 게임형 응시 화면 — 단어 하나씩, 크게.
+ * - 단어마다 secondsPerItem(기본 7초) 카운트다운 링. 고르면 즉시 다음 단어, 시간이 다 되면 무응답으로 넘어간다.
+ * - 뒤로 가기 없음. 마지막 단어 뒤 자동 제출.
+ * - 탭 반응: 타일 눌림·플래시·진동(모바일), 키보드 1~4.
+ * - 답은 고르는 즉시 서버 저장(revision 잠금), 새로고침·재로그인 시 첫 미응답 단어부터 이어진다. 마감은 서버 시각 기준.
  */
 export function TestRunner({ attemptId }: { attemptId: string }) {
   const [dto, setDto] = useState<DTO | null>(null);
@@ -29,11 +31,18 @@ export function TestRunner({ attemptId }: { attemptId: string }) {
   const [err, setErr] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [remaining, setRemaining] = useState<number | null>(null);
+  const [left, setLeft] = useState(7); // 현재 단어 남은 초 (소수)
+  const [picked, setPicked] = useState<string | null>(null); // 방금 고른 보기 (플래시)
+  const [phase, setPhase] = useState<"in" | "out">("in");
+  const [timeouts, setTimeouts] = useState(0);
   const revision = useRef(0);
   const pendingQueue = useRef<Map<string, string | null>>(new Map());
   const flushing = useRef(false);
   const clockOffset = useRef(0);
+  const itemStart = useRef<number>(0);
+  const advancing = useRef(false);
   const router = useRouter();
+  const perItem = Math.max(3, dto?.exam.secondsPerItem ?? 7);
 
   const load = useCallback(async () => {
     const r = await fetch(`/api/v1/attempts/${attemptId}`);
@@ -51,9 +60,9 @@ export function TestRunner({ attemptId }: { attemptId: string }) {
     setAnswers(d.answers);
     revision.current = d.revision;
     clockOffset.current = new Date(d.serverTime).getTime() - Date.now();
-    // 첫 미응답 문항으로 이동
     const first = d.items.findIndex((it) => !d.answers[it.itemId]);
-    setIdx(first === -1 ? 0 : first);
+    setIdx(first === -1 ? d.items.length - 1 : first);
+    itemStart.current = Date.now();
     return d;
   }, [attemptId, router]);
 
@@ -61,7 +70,7 @@ export function TestRunner({ attemptId }: { attemptId: string }) {
     load();
   }, [load]);
 
-  // 남은 시간
+  // 전체 마감 (서버 시각)
   useEffect(() => {
     if (!dto?.deadlineAt) return;
     const dl = new Date(dto.deadlineAt).getTime();
@@ -92,7 +101,6 @@ export function TestRunner({ attemptId }: { attemptId: string }) {
       });
       const j = await r.json();
       if (r.status === 409 && j.error?.code === "revision_conflict") {
-        // 다른 탭/기기에서 변경됨 → 최신 상태 다시 불러오고 로컬 미전송분 재적용
         for (const [k, v] of batch) pendingQueue.current.set(k, v);
         await load();
         flushing.current = false;
@@ -106,8 +114,7 @@ export function TestRunner({ attemptId }: { attemptId: string }) {
       if (!r.ok) throw new Error(j.error?.message ?? "save_failed");
       revision.current = j.data.revision;
       setSave("saved");
-    } catch (e) {
-      // 네트워크 단절 등: 큐에 되돌리고 재시도
+    } catch {
       for (const [k, v] of batch) if (!pendingQueue.current.has(k)) pendingQueue.current.set(k, v);
       setSave(navigator.onLine ? "error" : "offline");
       setTimeout(() => {
@@ -120,19 +127,9 @@ export function TestRunner({ attemptId }: { attemptId: string }) {
     if (pendingQueue.current.size) flush();
   }, [attemptId, load, router]);
 
-  const choose = (itemId: string, optionId: string) => {
-    setAnswers((a) => ({ ...a, [itemId]: optionId }));
-    pendingQueue.current.set(itemId, optionId);
-    flush();
-  };
-
   const submit = async (auto = false) => {
     if (!dto || submitting) return;
-    const unanswered = dto.items.filter((it) => !answers[it.itemId]).length;
-    if (!auto && unanswered > 0 && !window.confirm(`답하지 않은 문항이 ${unanswered}개 있습니다. 그래도 제출할까요?`)) return;
-    if (!auto && unanswered === 0 && !window.confirm("제출하면 수정할 수 없습니다. 제출할까요?")) return;
     setSubmitting(true);
-    // 미전송 답안을 제출과 함께 원자적으로 처리
     const pending = [...pendingQueue.current.entries()];
     pendingQueue.current.clear();
     try {
@@ -159,14 +156,88 @@ export function TestRunner({ attemptId }: { attemptId: string }) {
     }
   };
 
-  if (err && !dto) return <div className="card card-body text-sm text-red-600">{err}</div>;
+  /** 다음 단어로 (마지막이면 제출) */
+  const advance = useCallback(
+    (fromIdx: number) => {
+      if (!dto || advancing.current) return;
+      advancing.current = true;
+      setPhase("out");
+      setTimeout(() => {
+        if (fromIdx >= dto.items.length - 1) {
+          submit(true);
+          return;
+        }
+        setIdx(fromIdx + 1);
+        setPicked(null);
+        itemStart.current = Date.now();
+        setLeft(perItem);
+        setPhase("in");
+        advancing.current = false;
+      }, 220);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [dto, perItem],
+  );
+
+  // 단어별 카운트다운
+  useEffect(() => {
+    if (!dto || submitting) return;
+    itemStart.current = Date.now();
+    setLeft(perItem);
+    const t = setInterval(() => {
+      const l = perItem - (Date.now() - itemStart.current) / 1000;
+      setLeft(Math.max(0, l));
+      if (l <= 0) {
+        clearInterval(t);
+        setTimeouts((n) => n + 1);
+        advance(idx); // 시간 초과: 무응답으로 다음
+      }
+    }, 100);
+    return () => clearInterval(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dto, idx, submitting]);
+
+  const choose = (itemId: string, optionId: string) => {
+    if (advancing.current || submitting) return;
+    setAnswers((a) => ({ ...a, [itemId]: optionId }));
+    pendingQueue.current.set(itemId, optionId);
+    flush();
+    setPicked(optionId);
+    try {
+      navigator.vibrate?.(18);
+    } catch {}
+    advance(idx);
+  };
+
+  // 키보드 1~4
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!dto) return;
+      const k = KEYS.indexOf(e.key);
+      if (k === -1) return;
+      const it = dto.items[idx];
+      const o = it?.options[k];
+      if (o) choose(it.itemId, o.optionId);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dto, idx]);
+
+  if (err && !dto) return <div className="card card-body text-sm" style={{ color: "var(--accent)" }}>{err}</div>;
   if (!dto) return <div className="card card-body text-sm">불러오는 중…</div>;
   const it = dto.items[idx];
   const answered = dto.items.filter((x) => answers[x.itemId]).length;
-  const fmt = (s: number) => (s >= 86400 ? `D-${Math.floor(s / 86400)}` : s >= 3600 ? `${Math.floor(s / 3600)}H${String(Math.floor((s % 3600) / 60)).padStart(2, "0")}` : `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`);
+  const total = dto.items.length;
+  const fmt = (s: number) => (s >= 3600 ? `${Math.floor(s / 3600)}H${String(Math.floor((s % 3600) / 60)).padStart(2, "0")}` : `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`);
+  const ringR = 26;
+  const ringC = 2 * Math.PI * ringR;
+  const frac = Math.max(0, Math.min(1, left / perItem));
+  const urgent = left <= 2;
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-3 select-none" data-testid="runner">
+      {/* 상단: 제목 · 저장 상태 · 전체 남은 시간 */}
       <div className="flex items-center justify-between px-1">
         <span className="lbl truncate">{dto.exam.title}</span>
         <span className="digital">
@@ -178,34 +249,51 @@ export function TestRunner({ attemptId }: { attemptId: string }) {
           {save === "idle" && "READY"}
         </span>
       </div>
-      <div className="h-[4px] w-full rounded-full" style={{ background: "rgba(27,26,24,0.10)" }}>
-        <div className="h-full rounded-full tick" style={{ width: `${(answered / dto.items.length) * 100}%`, background: "var(--ink)" }} />
+      {/* 진행 바: 단어 수 기준 */}
+      <div className="flex gap-[3px] px-1" aria-hidden>
+        {dto.items.map((x, i) => (
+          <div key={x.itemId} className="h-[5px] flex-1 rounded-full" style={{ background: i < idx ? (answers[x.itemId] ? "var(--ink)" : "rgba(232,67,26,0.6)") : i === idx ? "var(--accent)" : "rgba(27,26,24,0.10)", transition: "background-color 200ms" }} />
+        ))}
       </div>
-      <div className="card card-body">
-        <div className="flex items-baseline justify-between">
+
+      {/* 단어 카드 */}
+      <div className={`card card-body relative overflow-hidden ${phase === "in" ? "anim-fade-up" : ""}`} style={{ minHeight: 300, opacity: phase === "out" ? 0 : 1, transform: phase === "out" ? "translateX(-14px)" : "none", transition: "opacity 200ms ease, transform 200ms ease" }} key={it.itemId}>
+        <div className="flex items-start justify-between">
           <span className="digital-lg">
             {String(it.position).padStart(2, "0")}
-            <span style={{ color: "var(--ink-3)" }}>/{String(dto.items.length).padStart(2, "0")}</span>
+            <span style={{ color: "var(--ink-3)" }}>/{String(total).padStart(2, "0")}</span>
           </span>
-          <span className="lbl">Choose meaning</span>
+          {/* 단어별 카운트다운 링 */}
+          <div className="relative" style={{ width: 60, height: 60 }} aria-label={`남은 시간 ${Math.ceil(left)}초`}>
+            <svg width="60" height="60" viewBox="0 0 60 60" className="-rotate-90">
+              <circle cx="30" cy="30" r={ringR} fill="none" stroke="rgba(27,26,24,0.10)" strokeWidth="5" />
+              <circle cx="30" cy="30" r={ringR} fill="none" stroke={urgent ? "var(--accent)" : "var(--ink)"} strokeWidth="5" strokeLinecap="round" strokeDasharray={ringC} strokeDashoffset={ringC * (1 - frac)} style={{ transition: "stroke-dashoffset 100ms linear, stroke 200ms" }} />
+            </svg>
+            <span className="digital absolute inset-0 flex items-center justify-center" style={{ fontSize: 18, color: urgent ? "var(--accent)" : "var(--ink)" }}>
+              {Math.ceil(left)}
+            </span>
+          </div>
         </div>
-        <div className="num-xl my-8 text-center" style={{ fontWeight: 300, fontSize: "clamp(36px, 10vw, 52px)" }}>
+        <div className="my-7 text-center font-bold tracking-tight" style={{ fontFamily: "var(--font-num)", fontWeight: 300, fontSize: "clamp(40px, 12vw, 64px)", lineHeight: 1, wordBreak: "break-word" }}>
           {it.prompt}
         </div>
-        <div className="space-y-2">
-          {it.options.map((o) => {
-            const sel = answers[it.itemId] === o.optionId;
+        <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
+          {it.options.map((o, i) => {
+            const sel = picked === o.optionId || answers[it.itemId] === o.optionId;
             return (
               <button
                 key={o.optionId}
                 type="button"
                 aria-pressed={sel}
+                onPointerDown={(e) => e.currentTarget.classList.add("pressed")}
+                onPointerUp={(e) => e.currentTarget.classList.remove("pressed")}
+                onPointerLeave={(e) => e.currentTarget.classList.remove("pressed")}
                 onClick={() => choose(it.itemId, o.optionId)}
-                className="flex w-full items-center gap-3 rounded-[18px] px-4 py-3 text-left text-[15px] transition-colors"
-                style={sel ? { background: "var(--ink)", color: "var(--surface-2)" } : { background: "var(--surface-2)", color: "var(--ink)" }}
+                className="tile flex min-h-[64px] w-full items-center gap-3 rounded-[20px] px-4 py-3 text-left text-[17px] font-medium"
+                style={sel ? { background: "var(--accent)", color: "var(--accent-ink)" } : { background: "var(--surface-2)", color: "var(--ink)" }}
               >
-                <span className="digital w-5 shrink-0" style={{ color: sel ? "rgba(250,249,246,0.7)" : "var(--ink-3)" }}>
-                  {o.position}
+                <span className="digital shrink-0" style={{ color: sel ? "rgba(255,244,240,0.8)" : "var(--ink-3)", width: 18 }}>
+                  {i + 1}
                 </span>
                 <span>{o.text}</span>
               </button>
@@ -213,33 +301,19 @@ export function TestRunner({ attemptId }: { attemptId: string }) {
           })}
         </div>
       </div>
-      <div className="flex gap-2">
-        <button type="button" className="btn-secondary flex-1 py-3" disabled={idx === 0} onClick={() => setIdx(idx - 1)}>
-          Prev
-        </button>
-        {idx < dto.items.length - 1 ? (
-          <button type="button" className="btn-primary flex-1 py-3" onClick={() => setIdx(idx + 1)}>
-            Next
-          </button>
-        ) : (
-          <button type="button" className="btn-accent flex-1 py-3" disabled={submitting} onClick={() => submit(false)}>
-            {submitting ? "…" : "제출"}
-          </button>
-        )}
+
+      <div className="flex items-center justify-between px-1">
+        <span className="lbl">
+          {answered} answered · {timeouts} skipped
+        </span>
+        <span className="lbl">{perItem}s / word · 1–4 keys</span>
       </div>
-      <div className="flex flex-wrap gap-1 px-1">
-        {dto.items.map((x, i) => (
-          <button key={x.itemId} type="button" onClick={() => setIdx(i)} className="digital h-7 w-7 rounded-full" style={i === idx ? { background: "var(--ink)", color: "var(--surface-2)" } : answers[x.itemId] ? { background: "rgba(27,26,24,0.12)", color: "var(--ink)" } : { color: "var(--ink-3)" }} aria-label={`${x.position}번 문항으로`}>
-            {x.position}
-          </button>
-        ))}
-      </div>
-      {idx < dto.items.length - 1 && (
-        <button type="button" className="btn-ghost w-full" disabled={submitting} onClick={() => submit(false)}>
-          지금 제출 · {answered}/{dto.items.length}
-        </button>
-      )}
       {err && <p className="px-1 text-xs" style={{ color: "var(--accent)" }}>{err}</p>}
+      {submitting && (
+        <div className="card-dark card-body text-center">
+          <span className="digital-lg">SUBMITTING…</span>
+        </div>
+      )}
     </div>
   );
 }

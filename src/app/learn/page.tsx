@@ -59,7 +59,7 @@ export default async function LearnHome() {
               <div className="mt-2 text-[20px] font-semibold leading-tight tracking-tight">{primary.exam.title}</div>
               <div className="lbl-on mt-2">
                 {primary.exam.questionCount} Q · Pass {primary.exam.passScore}
-                {primary.exam.timeLimitMin ? ` · ${primary.exam.timeLimitMin} min` : ""}
+                {primary.mode === "paper" ? " · paper · no time limit" : ` · ${primary.exam.secondsPerItem ?? 7}s / word`}
               </div>
             </div>
             <div className="shrink-0 text-right">
@@ -69,7 +69,9 @@ export default async function LearnHome() {
           </div>
           <div className="mt-5">
             {primary.mode === "paper" ? (
-              <span className="lbl-on">종이 시험 진행 중 · 선생님이 사진으로 채점합니다</span>
+              <Link href="/learn/paper" className="btn w-full py-3 text-[13px]" style={{ background: "var(--accent-ink)", color: "var(--accent)" }}>
+                종이 시험 · 사진 찍어 제출
+              </Link>
             ) : primary.canStart ? (
               <StartButton assignmentId={primary.assignmentId} label={primary.attemptStatus === "in_progress" ? "이어서 응시" : "응시 시작"} variant="on-accent" />
             ) : (
@@ -93,7 +95,11 @@ export default async function LearnHome() {
             <div className="truncate text-[14px] font-medium">{a.exam.title}</div>
             <div className="lbl mt-0.5">{a.dueAt ? `due ${fmtDate(a.dueAt, false).slice(5)}` : "no due"}</div>
           </div>
-          {a.mode === "paper" ? <span className="badge-gray">PAPER</span> : a.canStart ? <StartButton assignmentId={a.assignmentId} label="시작" compact /> : <span className="badge-gray">WAIT</span>}
+          {a.mode === "paper" ? (
+            <Link href="/learn/paper" className="btn-secondary btn-sm">
+              사진 제출
+            </Link>
+          ) : a.canStart ? <StartButton assignmentId={a.assignmentId} label="시작" compact /> : <span className="badge-gray">WAIT</span>}
         </div>
       ))}
 

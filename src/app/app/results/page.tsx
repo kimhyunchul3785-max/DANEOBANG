@@ -5,8 +5,9 @@ import { studentScope } from "@/lib/scope";
 import { fmtDate } from "@/lib/util";
 import { StatusBadge } from "@/components/StatusBadge";
 import { CountUp, SortHeader } from "@/components/Motion";
+import { GradesDashboard } from "./Dashboard";
 
-export default async function ResultsPage({ searchParams }: { searchParams: Promise<{ filter?: string; examId?: string; classId?: string }> }) {
+export default async function ResultsPage({ searchParams }: { searchParams: Promise<{ filter?: string; examId?: string; classId?: string; group?: string; range?: string; teacher?: string; q?: string; pick?: string; view?: string }> }) {
   const ctx = await requireAcademy();
   const sp = await searchParams;
   const academyId = ctx.member.academyId;
@@ -75,10 +76,16 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
   const retakePass = retakes.length ? Math.round((retakes.filter((g) => g.passed).length / retakes.length) * 100) : null;
 
   return (
-    <div>
-      <div className="kicker">Results · 성적</div>
-      <h1 className="h1 mb-4 mt-1">성적</h1>
-      <form className="mb-3 flex flex-wrap gap-2" method="get">
+    <div className="mx-auto max-w-6xl">
+      <GradesDashboard ctx={ctx} sp={sp} />
+
+      <div className="mb-3 mt-8 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <div className="kicker">Detail · 확정 성적</div>
+          <div className="h3">시험별 상세 성적</div>
+        </div>
+      </div>
+      <form className="mb-3 flex flex-wrap gap-2" method="get" id="detail">
         <select className="input w-64" name="examId" defaultValue={sp.examId ?? ""}>
           <option value="">모든 시험</option>
           {exams.map((e) => (

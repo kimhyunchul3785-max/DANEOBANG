@@ -314,6 +314,7 @@ export const ExamScalarFieldEnum = {
   questionCount: 'questionCount',
   passScore: 'passScore',
   timeLimitMin: 'timeLimitMin',
+  secondsPerItem: 'secondsPerItem',
   scoreVisibility: 'scoreVisibility',
   answerVisibility: 'answerVisibility',
   answersReleased: 'answersReleased',
@@ -462,6 +463,7 @@ export const ScanUploadScalarFieldEnum = {
   fileName: 'fileName',
   sha256: 'sha256',
   status: 'status',
+  source: 'source',
   pageId: 'pageId',
   detections: 'detections',
   reviewed: 'reviewed',
@@ -540,6 +542,7 @@ export const NotificationScalarFieldEnum = {
   userId: 'userId',
   title: 'title',
   body: 'body',
+  link: 'link',
   read: 'read',
   createdAt: 'createdAt'
 } as const

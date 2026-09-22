@@ -55,35 +55,85 @@ const shot = async (page: Page, name: string) => {
     const nav = await p.locator("nav[aria-label='주 메뉴'] a").allInnerTexts();
     check("owner sees Teachers + Setup", nav.some((t) => t.includes("선생님")) && nav.some((t) => t.includes("학원 설정")), nav.join(" | "));
     // 사이드바 활성: 클라이언트 내비게이션 후 즉시 반영
-    await p.click("nav[aria-label='주 메뉴'] a[data-nav='/app/students']");
-    await p.waitForURL(/\/app\/students/);
+    await p.click("nav[aria-label='주 메뉴'] a[data-nav='/app/results']");
+    await p.waitForURL(/\/app\/results/);
     await p.waitForTimeout(300);
     const activeAfterNav = await p.locator("nav[aria-label='주 메뉴'] a.on").getAttribute("data-nav");
-    check("sidebar active follows client navigation", activeAfterNav === "/app/students", `active=${activeAfterNav}`);
+    check("sidebar active follows client navigation", activeAfterNav === "/app/results", `active=${activeAfterNav}`);
     await p.waitForLoadState("networkidle");
-    await shot(p, "11-owner-students-dashboard");
+    await shot(p, "11-owner-results-dashboard");
+    check("results tab = at-a-glance dashboard + detail list", (await p.locator("text=Group ·").count()) > 0 && (await p.locator("#results-body").count()) === 1);
     check("heatmap cells link to results", (await p.locator("a[href^='/app/results/'][aria-label*='결과 보기']").count()) > 0);
     check("KPI numbers are rolling counters", (await p.locator("[data-value]").count()) >= 4);
     // 정렬: 평균 헤더 클릭 → 오름차순
-    await p.locator("th button.sort-h", { hasText: "평균" }).click();
+    await p.locator("th button.sort-h", { hasText: "평균" }).first().click();
     await p.waitForTimeout(300);
     const avgs = await p.locator("#students-body tr").evaluateAll((rows) => rows.map((r) => Number(r.getAttribute("data-avg"))).filter((n) => !Number.isNaN(n)));
     check("students table sorts ascending by avg", avgs.every((v, i) => i === 0 || v >= avgs[i - 1]), avgs.join(","));
     await p.click("nav[aria-label='주 메뉴'] a[data-nav='/app/retakes']");
     await p.waitForTimeout(300);
     check("sidebar active → retakes", (await p.locator("nav[aria-label='주 메뉴'] a.on").getAttribute("data-nav")) === "/app/retakes");
+    await p.goto(`${BASE}/login`);
+    await p.waitForLoadState("networkidle");
+    check("login shows Google + Kakao buttons", (await p.locator("a[data-provider='google']").count()) === 1 && (await p.locator("a[data-provider='kakao']").count()) === 1);
+    check("logo image on login", (await p.locator("img[alt='단어방']").count()) >= 1);
     for (const [g, name] of [
-      ["school", "12-owner-students-school"],
-      ["teacher", "13-owner-students-teacher"],
-      ["week", "14-owner-students-week"],
+      ["school", "12-owner-results-school"],
+      ["teacher", "13-owner-results-teacher"],
+      ["week", "14-owner-results-week"],
     ]) {
-      await p.goto(`${BASE}/app/students?group=${g}&range=12`);
+      await p.goto(`${BASE}/app/results?group=${g}&range=12`);
       await p.waitForLoadState("networkidle");
       await shot(p, name);
     }
+    // 학생 탭 = 명단 관리: 양식 내려받기 · 엑셀 업로드 · 반 이동 · 삭제 · 반 관리
+    await p.goto(`${BASE}/app/students`);
+    await p.waitForLoadState("networkidle");
+    await shot(p, "14b-owner-students-roster");
+    check("students tab = roster with bulk bar + class panel", (await p.locator("[data-testid='bulk-bar']").count()) === 1 && (await p.locator("[data-testid='class-row']").count()) > 0);
+    const tpl = await ctx.request.get(`${BASE}/api/files/roster-template`);
+    check("roster template downloads as xlsx", tpl.status() === 200 && (tpl.headers()["content-type"] ?? "").includes("spreadsheetml"), String(tpl.status()));
+    // 업로드용 엑셀 생성 (시트 = 반)
+    const ExcelJS = (await import("exceljs")).default;
+    const wb = new ExcelJS.Workbook();
+    const ws = wb.addWorksheet("QA반");
+    ws.addRow(["이름", "학교", "학년(예: 고1)"]);
+    ws.addRow(["QA 학생1", "한빛고", "고1"]);
+    ws.addRow(["QA 학생2", "중앙고", "고2"]);
+    const xlsxPath = path.join(OUT, "roster-qa.xlsx");
+    await wb.xlsx.writeFile(xlsxPath);
+    await p.setInputFiles('input[type="file"][accept=".xlsx"]', xlsxPath);
+    await p.click('button:has-text("업로드 · 학생 등록")');
+    await p.waitForSelector("text=2명 등록", { timeout: 15000 });
+    await p.waitForLoadState("networkidle");
+    check("xlsx upload registered students into new class", (await p.locator("a.chip", { hasText: "QA반" }).count()) === 1 && (await p.locator("#roster-body tr", { hasText: "QA 학생1" }).count()) === 1);
+    // 선택 → 반 없음으로 이동 → 삭제
+    await p.locator("#roster-body tr", { hasText: "QA 학생1" }).locator("input[type=checkbox]").check();
+    await p.locator("#roster-body tr", { hasText: "QA 학생2" }).locator("input[type=checkbox]").check();
+    await p.locator("[data-testid='bulk-bar'] select").first().selectOption("");
+    await p.click("[data-testid='bulk-bar'] button:has-text('반 이동')");
+    await p.waitForSelector("text=반 없음으로 변경", { timeout: 10000 });
+    await p.waitForLoadState("networkidle");
+    const moved = await p.locator("#roster-body tr", { hasText: "QA 학생1" }).innerText();
+    check("bulk move to no-class", !moved.includes("QA반"), moved.replace(/\s+/g, " ").slice(0, 60));
+    await p.locator("#roster-body tr", { hasText: "QA 학생1" }).locator("input[type=checkbox]").check();
+    await p.locator("#roster-body tr", { hasText: "QA 학생2" }).locator("input[type=checkbox]").check();
+    p.once("dialog", (d) => d.accept());
+    await p.click("[data-testid='bulk-bar'] button:has-text('삭제')");
+    await p.waitForSelector("text=2명을 삭제", { timeout: 10000 });
+    await p.waitForLoadState("networkidle");
+    check("bulk delete (owner)", (await p.locator("#roster-body tr", { hasText: "QA 학생" }).count()) === 0);
+    // 빈 반 삭제
+    const qaRow = p.locator("[data-testid='class-row']", { hasText: "QA반" });
+    if (await qaRow.count()) {
+      p.once("dialog", (d) => d.accept());
+      await qaRow.locator("button:has-text('삭제')").click();
+      await p.waitForTimeout(800);
+    }
+    await shot(p, "14c-owner-students-after-bulk");
     // 학생 상세
-    await p.goto(`${BASE}/app/students?group=class`);
-    const first = p.locator("table.tbl tbody a").first();
+    await p.goto(`${BASE}/app/students`);
+    const first = p.locator("#roster-body a").first();
     await first.click();
     await p.waitForURL(/\/app\/students\/[a-z0-9]+/);
     await p.waitForLoadState("networkidle");
@@ -192,6 +242,12 @@ const shot = async (page: Page, name: string) => {
     await shot(p, "32-student-retake");
     const txt = await p.locator("main").innerText();
     check("student retake shows scheduled date or pending", /scheduled|pending|예정된 재시험이 없습니다/i.test(txt));
+    await p.click("nav[aria-label='학생 메뉴'] a[href='/learn/paper']");
+    await p.waitForURL(/\/learn\/paper/);
+    await p.waitForLoadState("networkidle");
+    await shot(p, "33-student-paper");
+    check("student paper tab has photo submit", (await p.locator("[data-testid='submit-photo']").count()) === 1);
+    check("student header has notification bell", (await p.locator("[data-testid='bell']").count()) === 1);
     await ctx.close();
   }
   await browser.close();

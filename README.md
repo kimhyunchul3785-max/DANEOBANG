@@ -47,6 +47,7 @@ node scripts/gen-sqlite-ddl.cjs   # schema.prisma 변경 후 init.sql 재생성 
 
 ## 문서
 
+- `docs/IA_REVIEW_v4.md` — v4 계정별 IA 검수 (소셜 로그인, 엑셀 등록, 학생/성적 탭 재정의, 게임형 응시, 종이 시험 학생 제출·QR)
 - `docs/QA_REPORT_v3.md` — IA·UX 개선 v3 (업로드 자동 저장·DAY 나누기, 그룹 대시보드, 1화면 출제, 재시험→보강 흐름) QA 결과
 - `docs/PRD.md` — 제품 요구사항 (학원 SaaS 기준, 1차 구현 상태 표기)
 - `docs/MVP.md` — 범위·수용 기준·검증 결과

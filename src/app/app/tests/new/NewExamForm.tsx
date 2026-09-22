@@ -32,6 +32,7 @@ export function NewExamForm({ books, defaultBookId, defaultDays, classes }: { bo
   const [due, setDue] = useState<string>(seoulDate(sundayOffset()));
   const [duePreset, setDuePreset] = useState<"today" | "week" | "custom" | "none">("week");
   const [timeLimit, setTimeLimit] = useState(0);
+  const [perWord, setPerWord] = useState(7);
   const [preview, setPreview] = useState<Preview | null>(null);
   const [previewMsg, setPreviewMsg] = useState<string | null>(null);
   const [seed, setSeed] = useState(() => Math.random().toString(36).slice(2));
@@ -82,6 +83,7 @@ export function NewExamForm({ books, defaultBookId, defaultDays, classes }: { bo
       <input type="hidden" name="questionCount" value={count} />
       <input type="hidden" name="passScore" value={pass} />
       <input type="hidden" name="timeLimitMin" value={timeLimit} />
+      <input type="hidden" name="secondsPerItem" value={perWord} />
       <input type="hidden" name="dueAt" value={due} />
 
       <div className="space-y-4 lg:col-span-3">
@@ -197,7 +199,17 @@ export function NewExamForm({ books, defaultBookId, defaultDays, classes }: { bo
             <summary className="lbl cursor-pointer">More · 시간 제한 · 공개 설정</summary>
             <div className="mt-2 grid gap-3 sm:grid-cols-3">
               <div>
-                <label className="label">시간 제한 (분, 0=없음)</label>
+                <label className="label">단어당 시간 (초, 온라인)</label>
+                <div className="seg">
+                  {[5, 7, 10].map((n) => (
+                    <button key={n} type="button" className={`seg-item${perWord === n ? " on" : ""}`} onClick={() => setPerWord(n)}>
+                      {n}s
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <label className="label">전체 시간 제한 (분, 0=없음)</label>
                 <input className="input" type="number" min={0} max={600} value={timeLimit} onChange={(e) => setTimeLimit(Number(e.target.value) || 0)} />
               </div>
               <div>
@@ -235,7 +247,7 @@ export function NewExamForm({ books, defaultBookId, defaultDays, classes }: { bo
           <div className="mt-2 text-[20px] font-semibold leading-tight">{range}</div>
           <div className="lbl-on mt-1">
             {count} Q · Pass {pass}
-            {timeLimit ? ` · ${timeLimit} min` : ""} · {due ? `due ${due.slice(5, 10).replace("-", "/")} ${due.slice(11)}` : "no due"}
+            {` · ${perWord}s/word`}{timeLimit ? ` · ${timeLimit} min` : ""} · {due ? `due ${due.slice(5, 10).replace("-", "/")} ${due.slice(11)}` : "no due"}
           </div>
           <div className="mt-4 flex-1 space-y-2">
             {!sel.length && <p className="text-[13px]" style={{ color: "rgba(255,244,240,0.8)" }}>범위를 고르면 문항 예시가 나타납니다.</p>}

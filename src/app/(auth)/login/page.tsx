@@ -4,8 +4,8 @@ import { LoginForm } from "./LoginForm";
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string; error?: string }> }) {
   const sp = await searchParams;
   const messages: Record<string, string> = {
-    google_not_configured: "Google 로그인 키가 설정되지 않았습니다.",
-    kakao_not_configured: "카카오 로그인 키가 설정되지 않았습니다.",
+    google_not_configured: "Google 로그인 키가 아직 설정되지 않았습니다. 아래 '설정 방법'을 눌러 .env 에 키를 넣어 주세요.",
+    kakao_not_configured: "카카오 로그인 키가 아직 설정되지 않았습니다. 아래 '설정 방법'을 눌러 .env 에 키를 넣어 주세요.",
     oauth_state: "로그인 상태 검증에 실패했습니다. 다시 시도하세요.",
     google_failed: "Google 로그인에 실패했습니다.",
     kakao_failed: "카카오 로그인에 실패했습니다.",

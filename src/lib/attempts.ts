@@ -19,7 +19,7 @@ export async function listStudentAssignments(userId: string) {
   const assignments = await prisma.assignment.findMany({
     where: { studentId: { in: students.map((s) => s.id) }, exam: { status: "published" } },
     include: {
-      exam: { select: { id: true, title: true, questionCount: true, passScore: true, timeLimitMin: true, isRetake: true, scoreVisibility: true, answerVisibility: true, answersReleased: true, academy: { select: { name: true } } } },
+      exam: { select: { id: true, title: true, questionCount: true, passScore: true, timeLimitMin: true, secondsPerItem: true, isRetake: true, scoreVisibility: true, answerVisibility: true, answersReleased: true, academy: { select: { name: true } } } },
       attempts: { include: { grades: { where: { current: true } } }, orderBy: { attemptNo: "desc" } },
       student: { select: { id: true, name: true } },
     },
@@ -70,7 +70,10 @@ export async function startAttempt(assignmentId: string, userId: string) {
     return inProgress;
   }
   if (a.status === "completed") throw new ApiError(409, "already_completed", "이미 응시를 완료했습니다.");
-  const deadlines = [a.dueAt, a.exam.timeLimitMin ? new Date(now.getTime() + a.exam.timeLimitMin * 60000) : null].filter(Boolean) as Date[];
+  // 단어당 제한 시간(기본 7초) × 문항 수 + 여유 20초 → 서버 기준 마감. 시간 제한(분)·기한이 더 이르면 그것을 따른다.
+  const itemCount = await prisma.formItem.count({ where: { formId: a.formId } });
+  const perItemMs = Math.max(3, a.exam.secondsPerItem || 7) * 1000;
+  const deadlines = [a.dueAt, a.exam.timeLimitMin ? new Date(now.getTime() + a.exam.timeLimitMin * 60000) : null, new Date(now.getTime() + itemCount * perItemMs + 20000)].filter(Boolean) as Date[];
   const deadlineAt = deadlines.length ? new Date(Math.min(...deadlines.map((d) => d.getTime()))) : null;
   return prisma.$transaction(async (tx) => {
     const fresh = await tx.assignment.findUnique({ where: { id: a.id }, include: { attempts: { where: { status: "in_progress" } } } });
@@ -87,7 +90,7 @@ export async function getAttemptForStudent(attemptId: string, userId: string) {
     where: { id: attemptId, assignment: { student: { userId } } },
     include: {
       answers: true,
-      assignment: { include: { exam: { select: { id: true, title: true, questionCount: true, timeLimitMin: true, scoreVisibility: true, answerVisibility: true, answersReleased: true, passScore: true } }, form: { include: { items: { include: { options: { select: { id: true, position: true, text: true } } }, orderBy: { position: "asc" } } } } } },
+      assignment: { include: { exam: { select: { id: true, title: true, questionCount: true, timeLimitMin: true, secondsPerItem: true, scoreVisibility: true, answerVisibility: true, answersReleased: true, passScore: true } }, form: { include: { items: { include: { options: { select: { id: true, position: true, text: true } } }, orderBy: { position: "asc" } } } } } },
       grades: { where: { current: true } },
     },
   });

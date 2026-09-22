@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getCurrentUser } from "@/lib/auth";
+import { Logo } from "@/components/Logo";
 
 /** 로그인 전 첫 화면: 부가 설명 없이 워드마크 · 한 줄 · 진입 버튼만 */
 export default async function Home() {
@@ -7,7 +8,7 @@ export default async function Home() {
   return (
     <main className="flex min-h-screen flex-col">
       <header className="mx-auto flex w-full max-w-5xl items-center justify-between px-5 py-5">
-        <div className="lbl-ink">Daneobang</div>
+        <Logo height={24} />
         <nav className="flex items-center gap-2">
           {user ? (
             <>
@@ -28,9 +29,9 @@ export default async function Home() {
         </nav>
       </header>
       <section className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-5 pb-24">
-        <div className="lbl mb-5">Vocabulary tests for academies</div>
-        <h1 className="font-bold tracking-tight" style={{ fontSize: "clamp(34px, 6vw, 64px)", lineHeight: 1.05 }}>
-          단어방
+        <div className="lbl mb-6">Vocabulary tests for academies</div>
+        <h1 className="anim-fade-up">
+          <Logo variant="full" height={170} href={null} />
         </h1>
         <p className="mt-3 text-[18px]" style={{ color: "var(--ink-2)" }}>
           등록 → 출제 → 채점 → 재시험<span style={{ color: "var(--accent)" }}>.</span>

@@ -23,6 +23,7 @@
     "@prisma/client": "^7.10.0",
     "bcryptjs": "3.0.2",
     "dotenv": "^18.0.1",
+    "exceljs": "^4.4.0",
     "fast-xml-parser": "5.2.5",
     "jose": "6.0.11",
     "jsqr": "1.4.0",
@@ -44,11 +45,11 @@
     "@types/qrcode": "1.5.5",
     "@types/react": "19.1.12",
     "@types/react-dom": "19.1.9",
+    "playwright": "1.49.1",
     "postcss": "8.5.6",
     "prisma": "^7.10.0",
     "tailwindcss": "4.1.13",
     "tsx": "4.20.5",
-    "typescript": "5.9.2",
-    "playwright": "1.49.1"
+    "typescript": "5.9.2"
   }
 }

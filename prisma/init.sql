@@ -194,6 +194,7 @@ CREATE TABLE IF NOT EXISTS "Exam" (
   "questionCount" INTEGER NOT NULL DEFAULT 40,
   "passScore" INTEGER NOT NULL DEFAULT 90,
   "timeLimitMin" INTEGER,
+  "secondsPerItem" INTEGER NOT NULL DEFAULT 7,
   "scoreVisibility" TEXT NOT NULL DEFAULT 'immediate',
   "answerVisibility" TEXT NOT NULL DEFAULT 'after_release',
   "answersReleased" BOOLEAN NOT NULL DEFAULT false,
@@ -328,6 +329,7 @@ CREATE TABLE IF NOT EXISTS "ScanUpload" (
   "fileName" TEXT NOT NULL,
   "sha256" TEXT NOT NULL,
   "status" TEXT NOT NULL DEFAULT 'queued',
+  "source" TEXT NOT NULL DEFAULT 'teacher',
   "pageId" TEXT,
   "detections" TEXT NOT NULL DEFAULT '[]',
   "reviewed" TEXT NOT NULL DEFAULT '{}',
@@ -401,6 +403,7 @@ CREATE TABLE IF NOT EXISTS "Notification" (
   "userId" TEXT NOT NULL,
   "title" TEXT NOT NULL,
   "body" TEXT NOT NULL,
+  "link" TEXT,
   "read" BOOLEAN NOT NULL DEFAULT false,
   "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "Notification_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE

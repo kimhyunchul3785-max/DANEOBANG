@@ -61,6 +61,7 @@ export async function createRetakeExamAction(form: FormData): Promise<ActionResu
       questionCount,
       passScore: src.passScore,
       timeLimitMin: src.timeLimitMin,
+      secondsPerItem: src.secondsPerItem,
       scoreVisibility: src.scoreVisibility,
       answerVisibility: src.answerVisibility,
       isRetake: true,

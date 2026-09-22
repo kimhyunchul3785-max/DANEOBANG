@@ -16,6 +16,9 @@ const MIGRATIONS: { table: string; column: string; ddl: string }[] = [
   { table: "ImportRow", column: "section", ddl: 'ALTER TABLE "ImportRow" ADD COLUMN "section" TEXT' },
   { table: "RetakeTask", column: "scheduledAt", ddl: 'ALTER TABLE "RetakeTask" ADD COLUMN "scheduledAt" DATETIME' },
   { table: "RetakeTask", column: "note", ddl: 'ALTER TABLE "RetakeTask" ADD COLUMN "note" TEXT' },
+  { table: "Exam", column: "secondsPerItem", ddl: 'ALTER TABLE "Exam" ADD COLUMN "secondsPerItem" INTEGER NOT NULL DEFAULT 7' },
+  { table: "ScanUpload", column: "source", ddl: 'ALTER TABLE "ScanUpload" ADD COLUMN "source" TEXT NOT NULL DEFAULT \'teacher\'' },
+  { table: "Notification", column: "link", ddl: 'ALTER TABLE "Notification" ADD COLUMN "link" TEXT' },
 ];
 
 async function main() {

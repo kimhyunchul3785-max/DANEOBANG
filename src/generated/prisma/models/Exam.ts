@@ -30,12 +30,14 @@ export type ExamAvgAggregateOutputType = {
   questionCount: number | null
   passScore: number | null
   timeLimitMin: number | null
+  secondsPerItem: number | null
 }
 
 export type ExamSumAggregateOutputType = {
   questionCount: number | null
   passScore: number | null
   timeLimitMin: number | null
+  secondsPerItem: number | null
 }
 
 export type ExamMinAggregateOutputType = {
@@ -47,6 +49,7 @@ export type ExamMinAggregateOutputType = {
   questionCount: number | null
   passScore: number | null
   timeLimitMin: number | null
+  secondsPerItem: number | null
   scoreVisibility: string | null
   answerVisibility: string | null
   answersReleased: boolean | null
@@ -65,6 +68,7 @@ export type ExamMaxAggregateOutputType = {
   questionCount: number | null
   passScore: number | null
   timeLimitMin: number | null
+  secondsPerItem: number | null
   scoreVisibility: string | null
   answerVisibility: string | null
   answersReleased: boolean | null
@@ -83,6 +87,7 @@ export type ExamCountAggregateOutputType = {
   questionCount: number
   passScore: number
   timeLimitMin: number
+  secondsPerItem: number
   scoreVisibility: number
   answerVisibility: number
   answersReleased: number
@@ -98,12 +103,14 @@ export type ExamAvgAggregateInputType = {
   questionCount?: true
   passScore?: true
   timeLimitMin?: true
+  secondsPerItem?: true
 }
 
 export type ExamSumAggregateInputType = {
   questionCount?: true
   passScore?: true
   timeLimitMin?: true
+  secondsPerItem?: true
 }
 
 export type ExamMinAggregateInputType = {
@@ -115,6 +122,7 @@ export type ExamMinAggregateInputType = {
   questionCount?: true
   passScore?: true
   timeLimitMin?: true
+  secondsPerItem?: true
   scoreVisibility?: true
   answerVisibility?: true
   answersReleased?: true
@@ -133,6 +141,7 @@ export type ExamMaxAggregateInputType = {
   questionCount?: true
   passScore?: true
   timeLimitMin?: true
+  secondsPerItem?: true
   scoreVisibility?: true
   answerVisibility?: true
   answersReleased?: true
@@ -151,6 +160,7 @@ export type ExamCountAggregateInputType = {
   questionCount?: true
   passScore?: true
   timeLimitMin?: true
+  secondsPerItem?: true
   scoreVisibility?: true
   answerVisibility?: true
   answersReleased?: true
@@ -256,6 +266,7 @@ export type ExamGroupByOutputType = {
   questionCount: number
   passScore: number
   timeLimitMin: number | null
+  secondsPerItem: number
   scoreVisibility: string
   answerVisibility: string
   answersReleased: boolean
@@ -297,6 +308,7 @@ export type ExamWhereInput = {
   questionCount?: Prisma.IntFilter<"Exam"> | number
   passScore?: Prisma.IntFilter<"Exam"> | number
   timeLimitMin?: Prisma.IntNullableFilter<"Exam"> | number | null
+  secondsPerItem?: Prisma.IntFilter<"Exam"> | number
   scoreVisibility?: Prisma.StringFilter<"Exam"> | string
   answerVisibility?: Prisma.StringFilter<"Exam"> | string
   answersReleased?: Prisma.BoolFilter<"Exam"> | boolean
@@ -320,6 +332,7 @@ export type ExamOrderByWithRelationInput = {
   questionCount?: Prisma.SortOrder
   passScore?: Prisma.SortOrder
   timeLimitMin?: Prisma.SortOrderInput | Prisma.SortOrder
+  secondsPerItem?: Prisma.SortOrder
   scoreVisibility?: Prisma.SortOrder
   answerVisibility?: Prisma.SortOrder
   answersReleased?: Prisma.SortOrder
@@ -346,6 +359,7 @@ export type ExamWhereUniqueInput = Prisma.AtLeast<{
   questionCount?: Prisma.IntFilter<"Exam"> | number
   passScore?: Prisma.IntFilter<"Exam"> | number
   timeLimitMin?: Prisma.IntNullableFilter<"Exam"> | number | null
+  secondsPerItem?: Prisma.IntFilter<"Exam"> | number
   scoreVisibility?: Prisma.StringFilter<"Exam"> | string
   answerVisibility?: Prisma.StringFilter<"Exam"> | string
   answersReleased?: Prisma.BoolFilter<"Exam"> | boolean
@@ -369,6 +383,7 @@ export type ExamOrderByWithAggregationInput = {
   questionCount?: Prisma.SortOrder
   passScore?: Prisma.SortOrder
   timeLimitMin?: Prisma.SortOrderInput | Prisma.SortOrder
+  secondsPerItem?: Prisma.SortOrder
   scoreVisibility?: Prisma.SortOrder
   answerVisibility?: Prisma.SortOrder
   answersReleased?: Prisma.SortOrder
@@ -395,6 +410,7 @@ export type ExamScalarWhereWithAggregatesInput = {
   questionCount?: Prisma.IntWithAggregatesFilter<"Exam"> | number
   passScore?: Prisma.IntWithAggregatesFilter<"Exam"> | number
   timeLimitMin?: Prisma.IntNullableWithAggregatesFilter<"Exam"> | number | null
+  secondsPerItem?: Prisma.IntWithAggregatesFilter<"Exam"> | number
   scoreVisibility?: Prisma.StringWithAggregatesFilter<"Exam"> | string
   answerVisibility?: Prisma.StringWithAggregatesFilter<"Exam"> | string
   answersReleased?: Prisma.BoolWithAggregatesFilter<"Exam"> | boolean
@@ -411,6 +427,7 @@ export type ExamCreateInput = {
   questionCount?: number
   passScore?: number
   timeLimitMin?: number | null
+  secondsPerItem?: number
   scoreVisibility?: string
   answerVisibility?: string
   answersReleased?: boolean
@@ -434,6 +451,7 @@ export type ExamUncheckedCreateInput = {
   questionCount?: number
   passScore?: number
   timeLimitMin?: number | null
+  secondsPerItem?: number
   scoreVisibility?: string
   answerVisibility?: string
   answersReleased?: boolean
@@ -453,6 +471,7 @@ export type ExamUpdateInput = {
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   passScore?: Prisma.IntFieldUpdateOperationsInput | number
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  secondsPerItem?: Prisma.IntFieldUpdateOperationsInput | number
   scoreVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answerVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answersReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -476,6 +495,7 @@ export type ExamUncheckedUpdateInput = {
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   passScore?: Prisma.IntFieldUpdateOperationsInput | number
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  secondsPerItem?: Prisma.IntFieldUpdateOperationsInput | number
   scoreVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answerVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answersReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -497,6 +517,7 @@ export type ExamCreateManyInput = {
   questionCount?: number
   passScore?: number
   timeLimitMin?: number | null
+  secondsPerItem?: number
   scoreVisibility?: string
   answerVisibility?: string
   answersReleased?: boolean
@@ -513,6 +534,7 @@ export type ExamUpdateManyMutationInput = {
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   passScore?: Prisma.IntFieldUpdateOperationsInput | number
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  secondsPerItem?: Prisma.IntFieldUpdateOperationsInput | number
   scoreVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answerVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answersReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -531,6 +553,7 @@ export type ExamUncheckedUpdateManyInput = {
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   passScore?: Prisma.IntFieldUpdateOperationsInput | number
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  secondsPerItem?: Prisma.IntFieldUpdateOperationsInput | number
   scoreVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answerVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answersReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -559,6 +582,7 @@ export type ExamCountOrderByAggregateInput = {
   questionCount?: Prisma.SortOrder
   passScore?: Prisma.SortOrder
   timeLimitMin?: Prisma.SortOrder
+  secondsPerItem?: Prisma.SortOrder
   scoreVisibility?: Prisma.SortOrder
   answerVisibility?: Prisma.SortOrder
   answersReleased?: Prisma.SortOrder
@@ -572,6 +596,7 @@ export type ExamAvgOrderByAggregateInput = {
   questionCount?: Prisma.SortOrder
   passScore?: Prisma.SortOrder
   timeLimitMin?: Prisma.SortOrder
+  secondsPerItem?: Prisma.SortOrder
 }
 
 export type ExamMaxOrderByAggregateInput = {
@@ -583,6 +608,7 @@ export type ExamMaxOrderByAggregateInput = {
   questionCount?: Prisma.SortOrder
   passScore?: Prisma.SortOrder
   timeLimitMin?: Prisma.SortOrder
+  secondsPerItem?: Prisma.SortOrder
   scoreVisibility?: Prisma.SortOrder
   answerVisibility?: Prisma.SortOrder
   answersReleased?: Prisma.SortOrder
@@ -601,6 +627,7 @@ export type ExamMinOrderByAggregateInput = {
   questionCount?: Prisma.SortOrder
   passScore?: Prisma.SortOrder
   timeLimitMin?: Prisma.SortOrder
+  secondsPerItem?: Prisma.SortOrder
   scoreVisibility?: Prisma.SortOrder
   answerVisibility?: Prisma.SortOrder
   answersReleased?: Prisma.SortOrder
@@ -614,6 +641,7 @@ export type ExamSumOrderByAggregateInput = {
   questionCount?: Prisma.SortOrder
   passScore?: Prisma.SortOrder
   timeLimitMin?: Prisma.SortOrder
+  secondsPerItem?: Prisma.SortOrder
 }
 
 export type ExamScalarRelationFilter = {
@@ -754,6 +782,7 @@ export type ExamCreateWithoutAcademyInput = {
   questionCount?: number
   passScore?: number
   timeLimitMin?: number | null
+  secondsPerItem?: number
   scoreVisibility?: string
   answerVisibility?: string
   answersReleased?: boolean
@@ -775,6 +804,7 @@ export type ExamUncheckedCreateWithoutAcademyInput = {
   questionCount?: number
   passScore?: number
   timeLimitMin?: number | null
+  secondsPerItem?: number
   scoreVisibility?: string
   answerVisibility?: string
   answersReleased?: boolean
@@ -824,6 +854,7 @@ export type ExamScalarWhereInput = {
   questionCount?: Prisma.IntFilter<"Exam"> | number
   passScore?: Prisma.IntFilter<"Exam"> | number
   timeLimitMin?: Prisma.IntNullableFilter<"Exam"> | number | null
+  secondsPerItem?: Prisma.IntFilter<"Exam"> | number
   scoreVisibility?: Prisma.StringFilter<"Exam"> | string
   answerVisibility?: Prisma.StringFilter<"Exam"> | string
   answersReleased?: Prisma.BoolFilter<"Exam"> | boolean
@@ -840,6 +871,7 @@ export type ExamCreateWithoutBookInput = {
   questionCount?: number
   passScore?: number
   timeLimitMin?: number | null
+  secondsPerItem?: number
   scoreVisibility?: string
   answerVisibility?: string
   answersReleased?: boolean
@@ -861,6 +893,7 @@ export type ExamUncheckedCreateWithoutBookInput = {
   questionCount?: number
   passScore?: number
   timeLimitMin?: number | null
+  secondsPerItem?: number
   scoreVisibility?: string
   answerVisibility?: string
   answersReleased?: boolean
@@ -905,6 +938,7 @@ export type ExamCreateWithoutScopesInput = {
   questionCount?: number
   passScore?: number
   timeLimitMin?: number | null
+  secondsPerItem?: number
   scoreVisibility?: string
   answerVisibility?: string
   answersReleased?: boolean
@@ -927,6 +961,7 @@ export type ExamUncheckedCreateWithoutScopesInput = {
   questionCount?: number
   passScore?: number
   timeLimitMin?: number | null
+  secondsPerItem?: number
   scoreVisibility?: string
   answerVisibility?: string
   answersReleased?: boolean
@@ -961,6 +996,7 @@ export type ExamUpdateWithoutScopesInput = {
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   passScore?: Prisma.IntFieldUpdateOperationsInput | number
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  secondsPerItem?: Prisma.IntFieldUpdateOperationsInput | number
   scoreVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answerVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answersReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -983,6 +1019,7 @@ export type ExamUncheckedUpdateWithoutScopesInput = {
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   passScore?: Prisma.IntFieldUpdateOperationsInput | number
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  secondsPerItem?: Prisma.IntFieldUpdateOperationsInput | number
   scoreVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answerVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answersReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1001,6 +1038,7 @@ export type ExamCreateWithoutFormsInput = {
   questionCount?: number
   passScore?: number
   timeLimitMin?: number | null
+  secondsPerItem?: number
   scoreVisibility?: string
   answerVisibility?: string
   answersReleased?: boolean
@@ -1023,6 +1061,7 @@ export type ExamUncheckedCreateWithoutFormsInput = {
   questionCount?: number
   passScore?: number
   timeLimitMin?: number | null
+  secondsPerItem?: number
   scoreVisibility?: string
   answerVisibility?: string
   answersReleased?: boolean
@@ -1057,6 +1096,7 @@ export type ExamUpdateWithoutFormsInput = {
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   passScore?: Prisma.IntFieldUpdateOperationsInput | number
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  secondsPerItem?: Prisma.IntFieldUpdateOperationsInput | number
   scoreVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answerVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answersReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1079,6 +1119,7 @@ export type ExamUncheckedUpdateWithoutFormsInput = {
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   passScore?: Prisma.IntFieldUpdateOperationsInput | number
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  secondsPerItem?: Prisma.IntFieldUpdateOperationsInput | number
   scoreVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answerVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answersReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1097,6 +1138,7 @@ export type ExamCreateWithoutAssignmentsInput = {
   questionCount?: number
   passScore?: number
   timeLimitMin?: number | null
+  secondsPerItem?: number
   scoreVisibility?: string
   answerVisibility?: string
   answersReleased?: boolean
@@ -1119,6 +1161,7 @@ export type ExamUncheckedCreateWithoutAssignmentsInput = {
   questionCount?: number
   passScore?: number
   timeLimitMin?: number | null
+  secondsPerItem?: number
   scoreVisibility?: string
   answerVisibility?: string
   answersReleased?: boolean
@@ -1153,6 +1196,7 @@ export type ExamUpdateWithoutAssignmentsInput = {
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   passScore?: Prisma.IntFieldUpdateOperationsInput | number
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  secondsPerItem?: Prisma.IntFieldUpdateOperationsInput | number
   scoreVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answerVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answersReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1175,6 +1219,7 @@ export type ExamUncheckedUpdateWithoutAssignmentsInput = {
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   passScore?: Prisma.IntFieldUpdateOperationsInput | number
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  secondsPerItem?: Prisma.IntFieldUpdateOperationsInput | number
   scoreVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answerVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answersReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1194,6 +1239,7 @@ export type ExamCreateManyAcademyInput = {
   questionCount?: number
   passScore?: number
   timeLimitMin?: number | null
+  secondsPerItem?: number
   scoreVisibility?: string
   answerVisibility?: string
   answersReleased?: boolean
@@ -1210,6 +1256,7 @@ export type ExamUpdateWithoutAcademyInput = {
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   passScore?: Prisma.IntFieldUpdateOperationsInput | number
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  secondsPerItem?: Prisma.IntFieldUpdateOperationsInput | number
   scoreVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answerVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answersReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1231,6 +1278,7 @@ export type ExamUncheckedUpdateWithoutAcademyInput = {
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   passScore?: Prisma.IntFieldUpdateOperationsInput | number
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  secondsPerItem?: Prisma.IntFieldUpdateOperationsInput | number
   scoreVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answerVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answersReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1251,6 +1299,7 @@ export type ExamUncheckedUpdateManyWithoutAcademyInput = {
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   passScore?: Prisma.IntFieldUpdateOperationsInput | number
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  secondsPerItem?: Prisma.IntFieldUpdateOperationsInput | number
   scoreVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answerVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answersReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1268,6 +1317,7 @@ export type ExamCreateManyBookInput = {
   questionCount?: number
   passScore?: number
   timeLimitMin?: number | null
+  secondsPerItem?: number
   scoreVisibility?: string
   answerVisibility?: string
   answersReleased?: boolean
@@ -1284,6 +1334,7 @@ export type ExamUpdateWithoutBookInput = {
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   passScore?: Prisma.IntFieldUpdateOperationsInput | number
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  secondsPerItem?: Prisma.IntFieldUpdateOperationsInput | number
   scoreVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answerVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answersReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1305,6 +1356,7 @@ export type ExamUncheckedUpdateWithoutBookInput = {
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   passScore?: Prisma.IntFieldUpdateOperationsInput | number
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  secondsPerItem?: Prisma.IntFieldUpdateOperationsInput | number
   scoreVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answerVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answersReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1325,6 +1377,7 @@ export type ExamUncheckedUpdateManyWithoutBookInput = {
   questionCount?: Prisma.IntFieldUpdateOperationsInput | number
   passScore?: Prisma.IntFieldUpdateOperationsInput | number
   timeLimitMin?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  secondsPerItem?: Prisma.IntFieldUpdateOperationsInput | number
   scoreVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answerVisibility?: Prisma.StringFieldUpdateOperationsInput | string
   answersReleased?: Prisma.BoolFieldUpdateOperationsInput | boolean
@@ -1392,6 +1445,7 @@ export type ExamSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   questionCount?: boolean
   passScore?: boolean
   timeLimitMin?: boolean
+  secondsPerItem?: boolean
   scoreVisibility?: boolean
   answerVisibility?: boolean
   answersReleased?: boolean
@@ -1416,6 +1470,7 @@ export type ExamSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   questionCount?: boolean
   passScore?: boolean
   timeLimitMin?: boolean
+  secondsPerItem?: boolean
   scoreVisibility?: boolean
   answerVisibility?: boolean
   answersReleased?: boolean
@@ -1436,6 +1491,7 @@ export type ExamSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   questionCount?: boolean
   passScore?: boolean
   timeLimitMin?: boolean
+  secondsPerItem?: boolean
   scoreVisibility?: boolean
   answerVisibility?: boolean
   answersReleased?: boolean
@@ -1456,6 +1512,7 @@ export type ExamSelectScalar = {
   questionCount?: boolean
   passScore?: boolean
   timeLimitMin?: boolean
+  secondsPerItem?: boolean
   scoreVisibility?: boolean
   answerVisibility?: boolean
   answersReleased?: boolean
@@ -1465,7 +1522,7 @@ export type ExamSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ExamOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "academyId" | "bookId" | "createdById" | "title" | "questionCount" | "passScore" | "timeLimitMin" | "scoreVisibility" | "answerVisibility" | "answersReleased" | "status" | "isRetake" | "createdAt" | "updatedAt", ExtArgs["result"]["exam"]>
+export type ExamOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "academyId" | "bookId" | "createdById" | "title" | "questionCount" | "passScore" | "timeLimitMin" | "secondsPerItem" | "scoreVisibility" | "answerVisibility" | "answersReleased" | "status" | "isRetake" | "createdAt" | "updatedAt", ExtArgs["result"]["exam"]>
 export type ExamInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   academy?: boolean | Prisma.AcademyDefaultArgs<ExtArgs>
   book?: boolean | Prisma.VocabBookDefaultArgs<ExtArgs>
@@ -1501,6 +1558,7 @@ export type $ExamPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     questionCount: number
     passScore: number
     timeLimitMin: number | null
+    secondsPerItem: number
     scoreVisibility: string
     answerVisibility: string
     answersReleased: boolean
@@ -1944,6 +2002,7 @@ export interface ExamFieldRefs {
   readonly questionCount: Prisma.FieldRef<"Exam", 'Int'>
   readonly passScore: Prisma.FieldRef<"Exam", 'Int'>
   readonly timeLimitMin: Prisma.FieldRef<"Exam", 'Int'>
+  readonly secondsPerItem: Prisma.FieldRef<"Exam", 'Int'>
   readonly scoreVisibility: Prisma.FieldRef<"Exam", 'String'>
   readonly answerVisibility: Prisma.FieldRef<"Exam", 'String'>
   readonly answersReleased: Prisma.FieldRef<"Exam", 'Boolean'>

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { AcademyContext } from "@/lib/auth";
 import { SideNav } from "./SideNav";
+import { Logo } from "./Logo";
 
 /**
  * 앱 셸. 메뉴는 역할별로 다르다 (보이는 것이 곧 권한).
@@ -13,7 +14,7 @@ export function AppShell({ ctx, children }: { ctx: AcademyContext; children: Rea
       <aside className="md:sticky md:top-0 md:flex md:h-screen md:w-[220px] md:shrink-0 md:flex-col">
         <div className="flex items-center justify-between px-5 pt-5 md:block md:pb-2">
           <div>
-            <div className="lbl-ink">Daneobang</div>
+            <Logo height={20} href="/app" />
             {ctx.member.academy.logoPath ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src="/api/files/logo/current" alt="" className="mt-3 h-7 max-w-[150px] object-contain object-left" />

@@ -69,6 +69,11 @@ export default async function ScansPage() {
                     <td className="text-xs">{det.length ? `${det.length}문항${flagged ? ` · 확인 ${flagged}` : ""}` : "-"}</td>
                     <td>
                       <span className={cls}>{label}</span>
+                      {s.source === "student" && (
+                        <span className="badge-blue ml-1" title="학생이 앱·QR로 제출해 자동 확정된 사진">
+                          학생 제출
+                        </span>
+                      )}
                     </td>
                     <td className="text-xs text-slate-500">{fmtDate(s.createdAt)}</td>
                     <td className="text-right">

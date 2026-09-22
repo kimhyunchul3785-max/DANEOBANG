@@ -360,3 +360,10 @@ export async function analyzeWithManifest(gray0: Gray, qr: { cx: number; cy: num
   if (uncertain > detections.length * 0.3) warnings.push(`판독이 불확실한 문항이 ${uncertain}개입니다. 조명·초점을 확인하고 다시 촬영하는 것이 좋습니다.`);
   return { token: page.token, detections, corrected, warnings, debug: { thr, blobs: blobs.length, reprojErr: err.map((e) => Number(e.toFixed(1))), localScale: Number(localScale.toFixed(3)) } };
 }
+
+/** QR 내용에서 페이지 토큰만 뽑는다 (URL 형식 `…/q/<token>` 또는 토큰 자체) */
+export function tokenFromQr(text: string | null): string | null {
+  if (!text) return null;
+  const m = text.trim().match(/\/q\/([A-Za-z0-9_-]{8,})\/?(?:[?#].*)?$/);
+  return m ? m[1] : text.trim();
+}

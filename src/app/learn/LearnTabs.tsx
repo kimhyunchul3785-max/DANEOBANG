@@ -6,6 +6,7 @@ const TABS = [
   ["/learn", "Week", "이번 주"],
   ["/learn/grades", "Grades", "내 성적"],
   ["/learn/retake", "Retake", "재시험"],
+  ["/learn/paper", "Paper", "종이 제출"],
 ] as const;
 
 export function LearnTabs() {

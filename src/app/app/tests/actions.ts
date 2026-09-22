@@ -21,6 +21,7 @@ export async function createExamAction(_prev: { error?: string } | undefined, fo
       questionCount: z.coerce.number().int().min(1).max(200),
       passScore: z.coerce.number().int().min(0).max(100),
       timeLimitMin: z.coerce.number().int().min(0).max(600).optional(),
+      secondsPerItem: z.coerce.number().int().min(3).max(60).optional(),
       scoreVisibility: z.enum(["immediate", "after_release"]).optional(),
       answerVisibility: z.enum(["immediate", "after_release"]).optional(),
     })
@@ -47,6 +48,7 @@ export async function createExamAction(_prev: { error?: string } | undefined, fo
       questionCount: d.questionCount,
       passScore: d.passScore,
       timeLimitMin: d.timeLimitMin || null,
+      secondsPerItem: d.secondsPerItem ?? 7,
       scoreVisibility: d.scoreVisibility ?? "immediate",
       answerVisibility: d.answerVisibility ?? "after_release",
       scopes: { create: dayIds.map((dayId) => ({ dayId })) },

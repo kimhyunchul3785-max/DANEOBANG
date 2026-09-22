@@ -206,20 +206,20 @@ async function main() {
   const attemptId = sp.url().split("/").pop()!;
   const at = await prisma.attempt.findUnique({ where: { id: attemptId }, include: { assignment: { include: { form: { include: { items: { include: { options: true }, orderBy: { position: "asc" } } } } } } } });
   const items = at!.assignment.form.items;
-  for (let i = 0; i < items.length; i++) {
+  // 게임형 응시: 고르면 자동으로 다음 단어. 11번째까지 정답 → 새로고침해 12번째부터 이어지는지 확인 → 마지막은 오답 → 자동 제출
+  const pickOn = async (i: number) => {
     const correct = items[i].options.find((o) => o.isCorrect)!;
     const target = i === items.length - 1 ? items[i].options.find((o) => !o.isCorrect)! : correct;
-    await sp.locator("button", { hasText: target.text }).first().click();
-    if (i < items.length - 1) await sp.click('button:has-text("Next")');
-  }
+    await sp.waitForSelector(`.digital-lg >> text=${String(i + 1).padStart(2, "0")}`, { timeout: 8000 });
+    await sp.locator("button.tile", { hasText: target.text }).first().click();
+    await sp.waitForTimeout(320);
+  };
+  for (let i = 0; i < items.length - 1; i++) await pickOn(i);
   await sp.waitForSelector("text=SAVED", { timeout: 10000 });
-  // 새로고침 후 복원 확인
+  // 새로고침 후 복원: 첫 미응답(12번째) 단어에서 이어진다
   await sp.reload();
-  await sp.waitForSelector(".digital-lg >> text=/12");
-  const restored = await sp.locator('button[aria-pressed="true"]').count();
-  if (restored < 1) fail("answers not restored after reload");
-  sp.once("dialog", (d) => d.accept());
-  await sp.click('button:has-text("제출")');
+  await sp.waitForSelector(`.digital-lg >> text=${String(items.length).padStart(2, "0")}/`, { timeout: 10000 });
+  await pickOn(items.length - 1);
   await sp.waitForURL(/\/learn\/results\//, { timeout: 15000 });
   const scoreText = (await sp.locator(".num-xl [data-value]").getAttribute("data-value")) ?? (await sp.locator(".num-xl").innerText());
   if (!scoreText.includes("92")) fail("online score unexpected: " + scoreText);

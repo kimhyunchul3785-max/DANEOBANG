@@ -41,35 +41,6 @@ export async function createStudentAction(form: FormData): Promise<ActionResult>
   return { ok: true };
 }
 
-/** 여러 줄 텍스트로 학생 일괄 등록: "이름[,학교][,학년]" */
-export async function bulkCreateStudentsAction(form: FormData): Promise<ActionResult> {
-  const ctx = await requireAcademy();
-  const text = String(form.get("text") ?? "");
-  const classId = String(form.get("classId") ?? "") || null;
-  if (classId) {
-    const c = await prisma.classRoom.findFirst({ where: { id: classId, academyId: ctx.member.academyId } });
-    if (!c) return { ok: false, message: "반을 찾을 수 없습니다." };
-  }
-  const lines = text
-    .split(/\r?\n/)
-    .map((l) => l.trim())
-    .filter(Boolean)
-    .slice(0, 500);
-  if (!lines.length) return { ok: false, message: "등록할 학생이 없습니다." };
-  let n = 0;
-  for (const line of lines) {
-    const [name, school, grade] = line.split(/[,\t]/).map((s) => s.trim());
-    if (!name) continue;
-    await prisma.student.create({
-      data: { academyId: ctx.member.academyId, name, school: school || null, grade: grade || null, classId, teachers: { create: { memberId: ctx.member.id } } },
-    });
-    n++;
-  }
-  await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "student.bulk_create", detail: `${n}명` });
-  revalidatePath("/app/students");
-  return { ok: true, message: `${n}명 등록했습니다.` };
-}
-
 export async function updateStudentAction(form: FormData): Promise<ActionResult> {
   const ctx = await requireAcademy();
   const id = String(form.get("id") ?? "");
@@ -178,6 +149,7 @@ export async function createClassAction(form: FormData): Promise<ActionResult> {
   if (!name || name.length > 30) return { ok: false, message: "반 이름을 확인하세요." };
   await prisma.classRoom.create({ data: { academyId: ctx.member.academyId, name } });
   revalidatePath("/app/classes");
+  revalidatePath("/app/students");
   return { ok: true };
 }
 
@@ -187,6 +159,7 @@ export async function toggleClassArchiveAction(classId: string): Promise<ActionR
   if (!c) return { ok: false };
   await prisma.classRoom.update({ where: { id: classId }, data: { archived: !c.archived } });
   revalidatePath("/app/classes");
+  revalidatePath("/app/students");
   return { ok: true };
 }
 
@@ -242,4 +215,166 @@ function parseSeoulLocalOpt(v: FormDataEntryValue | null) {
   if (!v) return null;
   const m = String(v).match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
   return m ? new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4] - 9, +m[5])) : null;
+}
+
+// ───── 명단 관리: 엑셀 양식 업로드 · 일괄 반 이동 · 담당 지정 · 비활성 · 삭제 ─────
+
+/**
+ * 엑셀 양식 업로드: 시트 이름 = 반 이름, 열 = 이름 / 학교 / 학년.
+ * 없는 반은 만들고, 같은 이름+학교+학년 학생이 이미 있으면 건너뛴다. 올린 선생님이 담당으로 붙는다.
+ */
+export async function uploadRosterAction(form: FormData): Promise<ActionResult> {
+  const ctx = await requireAcademy();
+  const file = form.get("file");
+  if (!(file instanceof File) || file.size === 0) return { ok: false, message: "엑셀 파일(.xlsx)을 선택하세요." };
+  if (file.size > 5 * 1024 * 1024) return { ok: false, message: "5MB 이하 파일만 올릴 수 있습니다." };
+  const buf = Buffer.from(await file.arrayBuffer());
+  if (!(buf[0] === 0x50 && buf[1] === 0x4b)) return { ok: false, message: ".xlsx 형식이 아닙니다. 양식을 내려받아 작성해 주세요." };
+  const ExcelJS = (await import("exceljs")).default;
+  const wb = new ExcelJS.Workbook();
+  try {
+    await wb.xlsx.load(buf as unknown as ArrayBuffer);
+  } catch {
+    return { ok: false, message: "엑셀 파일을 읽지 못했습니다. 양식을 내려받아 작성해 주세요." };
+  }
+  const existing = await prisma.student.findMany({ where: { academyId: ctx.member.academyId }, select: { name: true, school: true, grade: true } });
+  const seen = new Set(existing.map((s) => `${s.name}|${s.school ?? ""}|${s.grade ?? ""}`));
+  const cell = (v: unknown) => (v === null || v === undefined ? "" : typeof v === "object" && "richText" in (v as object) ? (v as { richText: { text: string }[] }).richText.map((r) => r.text).join("") : typeof v === "object" && "result" in (v as object) ? String((v as { result: unknown }).result ?? "") : String(v)).trim();
+  let created = 0;
+  let skipped = 0;
+  let newClasses = 0;
+  const perClass: string[] = [];
+  for (const ws of wb.worksheets) {
+    const className = ws.name.trim();
+    const rows: { name: string; school: string; grade: string }[] = [];
+    ws.eachRow((row, idx) => {
+      const name = cell(row.getCell(1).value);
+      const school = cell(row.getCell(2).value);
+      const grade = cell(row.getCell(3).value);
+      if (!name) return;
+      if (idx === 1 && /^(이름|name)$/i.test(name)) return; // 머리글
+      if (/^예시\)/.test(name)) return; // 양식의 예시 행
+      rows.push({ name: name.slice(0, 30), school: school.slice(0, 40), grade: grade.slice(0, 20) });
+    });
+    if (!rows.length) continue;
+    const noClass = /^(sheet\d*|시트\d*|반 없음|없음)$/i.test(className);
+    let classId: string | null = null;
+    if (!noClass) {
+      let c = await prisma.classRoom.findFirst({ where: { academyId: ctx.member.academyId, name: className } });
+      if (!c) {
+        c = await prisma.classRoom.create({ data: { academyId: ctx.member.academyId, name: className.slice(0, 30) } });
+        newClasses++;
+      } else if (c.archived) await prisma.classRoom.update({ where: { id: c.id }, data: { archived: false } });
+      classId = c.id;
+    }
+    let n = 0;
+    for (const r of rows) {
+      const key = `${r.name}|${r.school}|${r.grade}`;
+      if (seen.has(key)) {
+        skipped++;
+        continue;
+      }
+      seen.add(key);
+      await prisma.student.create({ data: { academyId: ctx.member.academyId, name: r.name, school: r.school || null, grade: r.grade || null, classId, teachers: { create: { memberId: ctx.member.id } } } });
+      created++;
+      n++;
+    }
+    perClass.push(`${noClass ? "반 없음" : className} ${n}명`);
+  }
+  if (!created && !skipped) return { ok: false, message: "학생 행이 없습니다. 1열 이름, 2열 학교, 3열 학년으로 작성해 주세요." };
+  await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "student.roster_upload", detail: `${created}명 (${perClass.join(", ")})` });
+  revalidatePath("/app/students");
+  return { ok: true, message: `${created}명 등록${newClasses ? ` · 새 반 ${newClasses}개` : ""}${skipped ? ` · 이미 있는 ${skipped}명 제외` : ""} — ${perClass.join(", ")}` };
+}
+
+async function ownStudents(ctx: Awaited<ReturnType<typeof requireAcademy>>, ids: string[]) {
+  return prisma.student.findMany({ where: { id: { in: ids }, ...canAccessWhere(ctx) }, select: { id: true, name: true } });
+}
+function canAccessWhere(ctx: Awaited<ReturnType<typeof requireAcademy>>) {
+  return ctx.isOwner ? { academyId: ctx.member.academyId } : { academyId: ctx.member.academyId, teachers: { some: { memberId: ctx.member.id } } };
+}
+
+/** 선택 학생 반 이동 (classId 비우면 반 없음) */
+export async function moveStudentsAction(form: FormData): Promise<ActionResult> {
+  const ctx = await requireAcademy();
+  const ids = form.getAll("studentIds").map(String).filter(Boolean);
+  const classId = String(form.get("classId") ?? "") || null;
+  if (!ids.length) return { ok: false, message: "학생을 선택하세요." };
+  if (classId) {
+    const c = await prisma.classRoom.findFirst({ where: { id: classId, academyId: ctx.member.academyId } });
+    if (!c) return { ok: false, message: "반을 찾을 수 없습니다." };
+  }
+  const own = await ownStudents(ctx, ids);
+  await prisma.student.updateMany({ where: { id: { in: own.map((s) => s.id) } }, data: { classId } });
+  await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "student.move_class", detail: `${own.length}명 → ${classId ?? "반 없음"}` });
+  revalidatePath("/app/students");
+  return { ok: true, message: `${own.length}명을 ${classId ? "이동" : "반 없음으로 변경"}했습니다.` };
+}
+
+/** 선택 학생 상태 변경 (비활성: 기록 유지, 목록·배정에서 제외) */
+export async function setStudentsStatusAction(form: FormData): Promise<ActionResult> {
+  const ctx = await requireAcademy();
+  const ids = form.getAll("studentIds").map(String).filter(Boolean);
+  const status = String(form.get("status") ?? "") === "inactive" ? "inactive" : "active";
+  if (!ids.length) return { ok: false, message: "학생을 선택하세요." };
+  const own = await ownStudents(ctx, ids);
+  await prisma.student.updateMany({ where: { id: { in: own.map((s) => s.id) } }, data: { status } });
+  await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "student.status", detail: `${own.length}명 → ${status}` });
+  revalidatePath("/app/students");
+  return { ok: true, message: `${own.length}명을 ${status === "inactive" ? "비활성" : "활성"}으로 바꿨습니다.` };
+}
+
+/** 선택 학생 삭제 — 학원장만. 배정·응시·성적·재시험 기록이 함께 삭제된다 */
+export async function deleteStudentsAction(form: FormData): Promise<ActionResult> {
+  const ctx = await requireAcademy();
+  if (!ctx.isOwner) return { ok: false, message: "학원장만 학생을 삭제할 수 있습니다. 선생님은 비활성 처리를 사용하세요." };
+  const ids = form.getAll("studentIds").map(String).filter(Boolean);
+  if (!ids.length) return { ok: false, message: "학생을 선택하세요." };
+  const own = await ownStudents(ctx, ids);
+  await prisma.student.deleteMany({ where: { id: { in: own.map((s) => s.id) } } });
+  await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "student.delete", detail: own.map((s) => s.name).join(", ") });
+  revalidatePath("/app/students");
+  return { ok: true, message: `${own.length}명을 삭제했습니다.` };
+}
+
+/** 선택 학생에게 담당 선생님 추가/교체 — 학원장만 */
+export async function assignTeacherBulkAction(form: FormData): Promise<ActionResult> {
+  const ctx = await requireAcademy();
+  if (!ctx.isOwner) return { ok: false, message: "학원장만 담당을 지정할 수 있습니다." };
+  const ids = form.getAll("studentIds").map(String).filter(Boolean);
+  const memberId = String(form.get("memberId") ?? "");
+  const mode = String(form.get("mode") ?? "add"); // add | replace
+  if (!ids.length) return { ok: false, message: "학생을 선택하세요." };
+  const m = await prisma.academyMember.findFirst({ where: { id: memberId, academyId: ctx.member.academyId, status: "active" }, include: { user: { select: { name: true } } } });
+  if (!m) return { ok: false, message: "선생님을 찾을 수 없습니다." };
+  const own = await ownStudents(ctx, ids);
+  await prisma.$transaction(async (tx) => {
+    if (mode === "replace") await tx.teacherStudent.deleteMany({ where: { studentId: { in: own.map((s) => s.id) }, member: { role: "TEACHER" } } });
+    for (const s of own) await tx.teacherStudent.upsert({ where: { memberId_studentId: { memberId, studentId: s.id } }, update: {}, create: { memberId, studentId: s.id } });
+  });
+  await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "student.assign_teacher", detail: `${own.length}명 → ${m.user.name} (${mode})` });
+  revalidatePath("/app/students");
+  return { ok: true, message: `${own.length}명의 담당을 ${m.user.name} 선생님으로 ${mode === "replace" ? "교체" : "추가"}했습니다.` };
+}
+
+export async function renameClassAction(form: FormData): Promise<ActionResult> {
+  const ctx = await requireAcademy();
+  const classId = String(form.get("classId") ?? "");
+  const name = String(form.get("name") ?? "").trim();
+  if (!name || name.length > 30) return { ok: false, message: "반 이름을 확인하세요." };
+  const c = await prisma.classRoom.findFirst({ where: { id: classId, academyId: ctx.member.academyId } });
+  if (!c) return { ok: false };
+  await prisma.classRoom.update({ where: { id: classId }, data: { name } });
+  revalidatePath("/app/students");
+  return { ok: true, message: "반 이름을 바꿨습니다." };
+}
+
+export async function deleteClassAction(classId: string): Promise<ActionResult> {
+  const ctx = await requireAcademy();
+  const c = await prisma.classRoom.findFirst({ where: { id: classId, academyId: ctx.member.academyId }, include: { _count: { select: { students: true } } } });
+  if (!c) return { ok: false };
+  if (c._count.students > 0) return { ok: false, message: "학생이 있는 반은 지울 수 없습니다. 학생을 먼저 옮기세요." };
+  await prisma.classRoom.delete({ where: { id: classId } });
+  revalidatePath("/app/students");
+  return { ok: true, message: "반을 삭제했습니다." };
 }

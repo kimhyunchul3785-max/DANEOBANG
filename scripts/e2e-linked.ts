@@ -6,6 +6,8 @@ import "dotenv/config";
 import fs from "fs";
 import path from "path";
 import { chromium, type Page, type BrowserContext } from "playwright";
+import { execSync } from "child_process";
+import sharp from "sharp";
 
 const BASE = process.env.E2E_BASE || "http://localhost:3000";
 const EXEC = process.env.PW_CHROMIUM || undefined;
@@ -69,6 +71,7 @@ async function main() {
   const s1Ctx = await browser.newContext({ viewport: { width: 390, height: 800 } });
   const t2Ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } });
   const s5Ctx = await browser.newContext();
+  const s2Ctx = await browser.newContext({ viewport: { width: 390, height: 800 } });
   const { prisma } = await import("../src/lib/db");
   const RUN_TITLE = `연동 E2E 시험 ${RUN.slice(11)}`;
 
@@ -101,9 +104,9 @@ async function main() {
     expect(rows.some((r) => r.includes("테스터 선생님1")), "구성원에 선생님1 없음");
     await shot(owner, "owner-teachers");
     await owner.goto(`${BASE}/app/students`);
-    const st = await owner.locator("table.tbl tbody tr", { hasText: "테스터 학생01" }).last().innerText();
+    const st = await owner.locator("#roster-body tr", { hasText: "테스터 학생01" }).first().innerText();
     expect(st.includes("LINKED") && st.includes("테스터 선생님1"), "학생01 연결/담당 표시 이상: " + st);
-    await shot(owner, "owner-students-dashboard");
+    await shot(owner, "owner-students-roster");
   });
 
   // ── 2. 선생님1: 로그인 즉시 /app, 이번 주 시험 배정 확인, 새 시험 즉시 발행·배정
@@ -160,13 +163,11 @@ async function main() {
     const items = at!.assignment.form.items;
     for (let i = 0; i < items.length; i++) {
       const pick = i === items.length - 1 ? items[i].options.find((o) => !o.isCorrect)! : items[i].options.find((o) => o.isCorrect)!;
-      await s1.locator("button", { hasText: pick.text }).first().click();
-      if (i < items.length - 1) await s1.click('button:has-text("Next")');
+      await s1.waitForSelector(`.digital-lg >> text=${String(i + 1).padStart(2, "0")}`, { timeout: 8000 });
+      if (i === items.length - 1) await shot(s1, "s01-attempt-last");
+      await s1.locator("button.tile", { hasText: pick.text }).first().click();
+      await s1.waitForTimeout(320);
     }
-    await s1.waitForSelector("text=SAVED", { timeout: 10000 });
-    await shot(s1, "s01-attempt-last");
-    s1.once("dialog", (d) => d.accept());
-    await s1.click('button:has-text("제출")');
     await s1.waitForURL(/\/learn\/results\//, { timeout: 15000 });
     const score = (await s1.locator(".num-xl [data-value]").getAttribute("data-value")) ?? (await s1.locator(".num-xl").innerText());
     expect(score.includes("90"), "점수 90 기대: " + score);
@@ -177,9 +178,9 @@ async function main() {
 
   // ── 4. 선생님1·학원장이 같은 결과를 본다
   await check("선생님1 대시보드·성적에 학생01 결과 반영", async () => {
-    await t1.goto(`${BASE}/app/students`);
-    const st = await t1.locator("table.tbl tbody tr", { hasText: "테스터 학생01" }).last().innerText();
-    expect(/\b90\b/.test(st), "학생 대시보드 최근 점수에 학생01 90 없음: " + st);
+    await t1.goto(`${BASE}/app/results`);
+    const st = await t1.locator("#students-body tr", { hasText: "테스터 학생01" }).first().innerText();
+    expect(/\b90\b/.test(st), "성적 대시보드 학생별 요약에 학생01 90 없음: " + st);
     await t1.goto(`${BASE}/app/results`);
     expect((await t1.locator("table tbody tr", { hasText: "테스터 학생01" }).count()) >= 1, "성적 목록에 학생01 없음");
     await shot(t1, "t1-results");
@@ -215,6 +216,79 @@ async function main() {
     return `${(pdf.length / 1024).toFixed(0)}KB, template v2`;
   });
 
+  // ── 5b. 학생02: 종이 시험지 사진을 직접 제출 → 자동 채점 → 알림 → QR 페이지에서 비밀번호로 결과 확인
+  await check("학생02: 시험지 사진 제출(앱) → 자동 채점·알림 → QR 페이지 비밀번호 확인", async () => {
+    const print = await prisma.printInstance.findFirst({ where: { attempt: { assignment: { exam: { title: RUN_TITLE }, student: { name: "테스터 학생02" } } }, status: "active" }, orderBy: { createdAt: "desc" }, include: { pages: true, form: { include: { items: { include: { options: true } } } } } });
+    expect(!!print, "학생02 시험지 없음");
+    const pdfPath = path.join(SHOT_DIR, "paper-s02.pdf");
+    execSync(`pdftoppm -r 150 -png "${pdfPath}" "${path.join(SHOT_DIR, "s02paper")}"`);
+    const pngs = fs.readdirSync(SHOT_DIR).filter((f) => /^s02paper-?\d+\.png$/.test(f)).sort();
+    const manifest = JSON.parse(print!.manifest);
+    const scale = 150 / 72;
+    const photos: string[] = [];
+    for (const [pi, png] of pngs.entries()) {
+      const pm = manifest.pages[pi];
+      const circles: string[] = [];
+      for (const it of pm.items) {
+        const item = print!.form.items.find((x) => x.id === it.itemId)!;
+        const correct = item.options.find((o) => o.isCorrect)!;
+        const pickPos = it.position <= 2 ? ((correct.position % 4) + 1) : correct.position; // 2문항 오답 → 80점 재시험
+        const b = it.bubbles.find((x: { position: number }) => x.position === pickPos);
+        circles.push(`<circle cx="${b.cx * scale}" cy="${b.cy * scale}" r="${b.r * scale * 0.9}" fill="#111"/>`);
+      }
+      const meta = await sharp(path.join(SHOT_DIR, png)).metadata();
+      const svg = `<svg width="${meta.width}" height="${meta.height}" xmlns="http://www.w3.org/2000/svg">${circles.join("")}</svg>`;
+      const marked = await sharp(path.join(SHOT_DIR, png)).composite([{ input: Buffer.from(svg) }]).png().toBuffer();
+      const photo = await sharp(marked).rotate(-2, { background: "#666" }).extend({ top: 50, bottom: 70, left: 60, right: 40, background: "#666" }).resize({ width: 1400 }).jpeg({ quality: 78 }).toBuffer();
+      const out = path.join(SHOT_DIR, `s02-photo-${pi + 1}.jpg`);
+      fs.writeFileSync(out, photo);
+      photos.push(out);
+    }
+    const s2 = await login(s2Ctx, "tester.s02@daneobang.dev", "test1234", { width: 390, height: 800 });
+    await s2.goto(`${BASE}/learn/paper`);
+    expect((await s2.locator("[data-testid='submit-photo']").count()) === 1, "사진 제출 버튼 없음");
+    await shot(s2, "s02-paper-before");
+    // 카메라 input 은 sr-only: 파일을 직접 넣는다
+    await s2.setInputFiles('input[type="file"][accept="image/*"]', photos);
+    await s2.waitForSelector("text=채점 중", { timeout: 20000 });
+    await shot(s2, "s02-paper-grading");
+    // 자동 채점 완료 대기
+    let graded = null as null | { score: number; passed: boolean };
+    for (let i = 0; i < 40; i++) {
+      await new Promise((r) => setTimeout(r, 1000));
+      const g = await prisma.gradeRevision.findFirst({ where: { current: true, attemptId: print!.attemptId } });
+      if (g) {
+        graded = { score: g.score, passed: g.passed };
+        break;
+      }
+    }
+    expect(!!graded, "자동 채점이 40초 안에 끝나지 않음");
+    expect(Math.round(graded!.score) === 80 && !graded!.passed, `80점 재시험 기대: ${JSON.stringify(graded)}`);
+    const noti = await prisma.notification.findFirst({ where: { user: { email: "tester.s02@daneobang.dev" }, title: { contains: "채점 완료" } }, orderBy: { createdAt: "desc" } });
+    expect(!!noti && noti.title.includes("80") && noti.title.includes("재시험"), "채점 완료 알림 없음: " + noti?.title);
+    await s2.goto(`${BASE}/learn/paper`);
+    await s2.waitForSelector("text=RETAKE", { timeout: 10000 });
+    await shot(s2, "s02-paper-graded");
+    // QR 페이지: 로그인 없는 새 컨텍스트에서 비밀번호로 열람
+    const qctx = await browser.newContext({ viewport: { width: 390, height: 800 } });
+    const q = await qctx.newPage();
+    await q.goto(`${BASE}/q/${print!.pages[0].token}`);
+    await q.waitForSelector('input[name="password"]');
+    await shot(q, "s02-qr-password");
+    await q.fill('input[name="password"]', "wrong-pw");
+    await q.click('button:has-text("확인")');
+    await q.waitForSelector("text=비밀번호가 맞지 않습니다", { timeout: 10000 });
+    await q.fill('input[name="password"]', "test1234");
+    await q.click('button:has-text("확인")');
+    await q.waitForSelector(".num-xl", { timeout: 15000 });
+    const qs = (await q.locator(".num-xl [data-value]").getAttribute("data-value")) ?? "";
+    expect(qs === "80", "QR 페이지 점수 80 기대: " + qs);
+    expect((await q.locator("text=재시험 대상입니다").count()) === 1, "QR 페이지 재시험 표시 없음");
+    await shot(q, "s02-qr-result");
+    await qctx.close();
+    return `auto-graded ${Math.round(graded!.score)} · notification · QR ok`;
+  });
+
   // ── 6. 선생님1 정답 공개 → 학생01 오답 확인
   await check("선생님1 정답 공개 → 학생01 오답 복습·오답노트 PDF 열람", async () => {
     const exam = await prisma.exam.findFirst({ where: { title: RUN_TITLE } });
@@ -233,7 +307,7 @@ async function main() {
   await check("선생님2: 담당 아닌 학생01 은 목록·결과에서 차단", async () => {
     const t2 = await login(t2Ctx, "tester.t2@daneobang.dev", "test1234");
     await t2.goto(`${BASE}/app/students`);
-    const names = await t2.locator("table.tbl tbody tr").allTextContents();
+    const names = await t2.locator("#roster-body tr").allTextContents();
     expect(!names.some((n) => n.includes("테스터 학생01")) && names.some((n) => n.includes("테스터 학생06")), "선생님2 학생 범위 오류");
     const r = await t2.goto(`${BASE}/app/results/${attemptId}`);
     expect(r!.status() === 404, "선생님2가 학생01 결과 접근 가능 (" + r!.status() + ")");

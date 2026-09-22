@@ -14,6 +14,7 @@ export type RenderInput = {
   studentName: string;
   items: RenderItem[];
   pageTokens?: string[]; // exam 일 때 페이지별 QR 토큰 (부족하면 생성 시 오류)
+  qrUrlBase?: string; // QR 에 넣을 주소의 앞부분 (예: https://host/q) — 있으면 `${base}/${token}`, 없으면 토큰만
   note?: string;
   logo?: Buffer | null; // 학원 로고 (PNG/JPG) — 헤더 왼쪽
   academyName?: string;
@@ -111,10 +112,10 @@ export async function renderPdf(input: RenderInput): Promise<{ pdf: Buffer; mani
     doc.fillColor("#000");
 
     if (input.kind === "exam") {
-      const qrPng = await QRCode.toBuffer(token, { errorCorrectionLevel: "M", margin: 2, width: 256 });
+      const qrPng = await QRCode.toBuffer(input.qrUrlBase ? `${input.qrUrlBase}/${token}` : token, { errorCorrectionLevel: "M", margin: 2, width: 256 });
       doc.image(qrPng, pm.qr.x, pm.qr.y, { width: QR.size, height: QR.size });
     } else if (input.kind === "wrong_note") {
-      doc.fontSize(FONT.small).text("복습용", PAGE.w - MARGIN - QR.size, MARGIN + 10, { width: QR.size, align: "center" });
+      doc.fontSize(FONT.small).text("QR 로 채점 확인", PAGE.w - MARGIN - QR.size - 8, MARGIN + 10, { width: QR.size + 16, align: "center" });
     }
 
     let yy = contentTop;

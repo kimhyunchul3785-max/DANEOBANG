@@ -278,6 +278,7 @@ model Exam {
   questionCount    Int      @default(40)
   passScore        Int      @default(90)
   timeLimitMin     Int?
+  secondsPerItem   Int      @default(7) // 온라인 응시: 단어 1개당 제한 시간(초)
   scoreVisibility  String   @default("immediate") // immediate | after_release
   answerVisibility String   @default("after_release") // immediate | after_release
   answersReleased  Boolean  @default(false)
@@ -463,6 +464,7 @@ model ScanUpload {
   fileName     String
   sha256       String
   status       String    @default("queued") // queued | processing | needs_review | unrecognized | accepted | failed
+  source       String    @default("teacher") // teacher | student (학생 앱·QR 제출은 자동 확정)
   pageId       String?
   detections   String    @default("[]") // JSON [{itemId, position, status, optionPosition, fills[]}]
   reviewed     String    @default("{}") // JSON {position: optionPosition|null}
@@ -551,6 +553,7 @@ model Notification {
   userId    String
   title     String
   body      String
+  link      String?
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
 

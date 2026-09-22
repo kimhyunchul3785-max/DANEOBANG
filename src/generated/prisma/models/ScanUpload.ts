@@ -32,6 +32,7 @@ export type ScanUploadMinAggregateOutputType = {
   fileName: string | null
   sha256: string | null
   status: string | null
+  source: string | null
   pageId: string | null
   detections: string | null
   reviewed: string | null
@@ -50,6 +51,7 @@ export type ScanUploadMaxAggregateOutputType = {
   fileName: string | null
   sha256: string | null
   status: string | null
+  source: string | null
   pageId: string | null
   detections: string | null
   reviewed: string | null
@@ -68,6 +70,7 @@ export type ScanUploadCountAggregateOutputType = {
   fileName: number
   sha256: number
   status: number
+  source: number
   pageId: number
   detections: number
   reviewed: number
@@ -88,6 +91,7 @@ export type ScanUploadMinAggregateInputType = {
   fileName?: true
   sha256?: true
   status?: true
+  source?: true
   pageId?: true
   detections?: true
   reviewed?: true
@@ -106,6 +110,7 @@ export type ScanUploadMaxAggregateInputType = {
   fileName?: true
   sha256?: true
   status?: true
+  source?: true
   pageId?: true
   detections?: true
   reviewed?: true
@@ -124,6 +129,7 @@ export type ScanUploadCountAggregateInputType = {
   fileName?: true
   sha256?: true
   status?: true
+  source?: true
   pageId?: true
   detections?: true
   reviewed?: true
@@ -215,6 +221,7 @@ export type ScanUploadGroupByOutputType = {
   fileName: string
   sha256: string
   status: string
+  source: string
   pageId: string | null
   detections: string
   reviewed: string
@@ -254,6 +261,7 @@ export type ScanUploadWhereInput = {
   fileName?: Prisma.StringFilter<"ScanUpload"> | string
   sha256?: Prisma.StringFilter<"ScanUpload"> | string
   status?: Prisma.StringFilter<"ScanUpload"> | string
+  source?: Prisma.StringFilter<"ScanUpload"> | string
   pageId?: Prisma.StringNullableFilter<"ScanUpload"> | string | null
   detections?: Prisma.StringFilter<"ScanUpload"> | string
   reviewed?: Prisma.StringFilter<"ScanUpload"> | string
@@ -274,6 +282,7 @@ export type ScanUploadOrderByWithRelationInput = {
   fileName?: Prisma.SortOrder
   sha256?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  source?: Prisma.SortOrder
   pageId?: Prisma.SortOrderInput | Prisma.SortOrder
   detections?: Prisma.SortOrder
   reviewed?: Prisma.SortOrder
@@ -297,6 +306,7 @@ export type ScanUploadWhereUniqueInput = Prisma.AtLeast<{
   fileName?: Prisma.StringFilter<"ScanUpload"> | string
   sha256?: Prisma.StringFilter<"ScanUpload"> | string
   status?: Prisma.StringFilter<"ScanUpload"> | string
+  source?: Prisma.StringFilter<"ScanUpload"> | string
   pageId?: Prisma.StringNullableFilter<"ScanUpload"> | string | null
   detections?: Prisma.StringFilter<"ScanUpload"> | string
   reviewed?: Prisma.StringFilter<"ScanUpload"> | string
@@ -317,6 +327,7 @@ export type ScanUploadOrderByWithAggregationInput = {
   fileName?: Prisma.SortOrder
   sha256?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  source?: Prisma.SortOrder
   pageId?: Prisma.SortOrderInput | Prisma.SortOrder
   detections?: Prisma.SortOrder
   reviewed?: Prisma.SortOrder
@@ -341,6 +352,7 @@ export type ScanUploadScalarWhereWithAggregatesInput = {
   fileName?: Prisma.StringWithAggregatesFilter<"ScanUpload"> | string
   sha256?: Prisma.StringWithAggregatesFilter<"ScanUpload"> | string
   status?: Prisma.StringWithAggregatesFilter<"ScanUpload"> | string
+  source?: Prisma.StringWithAggregatesFilter<"ScanUpload"> | string
   pageId?: Prisma.StringNullableWithAggregatesFilter<"ScanUpload"> | string | null
   detections?: Prisma.StringWithAggregatesFilter<"ScanUpload"> | string
   reviewed?: Prisma.StringWithAggregatesFilter<"ScanUpload"> | string
@@ -358,6 +370,7 @@ export type ScanUploadCreateInput = {
   fileName: string
   sha256: string
   status?: string
+  source?: string
   detections?: string
   reviewed?: string
   correctedPath?: string | null
@@ -377,6 +390,7 @@ export type ScanUploadUncheckedCreateInput = {
   fileName: string
   sha256: string
   status?: string
+  source?: string
   pageId?: string | null
   detections?: string
   reviewed?: string
@@ -394,6 +408,7 @@ export type ScanUploadUpdateInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   sha256?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  source?: Prisma.StringFieldUpdateOperationsInput | string
   detections?: Prisma.StringFieldUpdateOperationsInput | string
   reviewed?: Prisma.StringFieldUpdateOperationsInput | string
   correctedPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -413,6 +428,7 @@ export type ScanUploadUncheckedUpdateInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   sha256?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  source?: Prisma.StringFieldUpdateOperationsInput | string
   pageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   detections?: Prisma.StringFieldUpdateOperationsInput | string
   reviewed?: Prisma.StringFieldUpdateOperationsInput | string
@@ -431,6 +447,7 @@ export type ScanUploadCreateManyInput = {
   fileName: string
   sha256: string
   status?: string
+  source?: string
   pageId?: string | null
   detections?: string
   reviewed?: string
@@ -448,6 +465,7 @@ export type ScanUploadUpdateManyMutationInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   sha256?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  source?: Prisma.StringFieldUpdateOperationsInput | string
   detections?: Prisma.StringFieldUpdateOperationsInput | string
   reviewed?: Prisma.StringFieldUpdateOperationsInput | string
   correctedPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -465,6 +483,7 @@ export type ScanUploadUncheckedUpdateManyInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   sha256?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  source?: Prisma.StringFieldUpdateOperationsInput | string
   pageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   detections?: Prisma.StringFieldUpdateOperationsInput | string
   reviewed?: Prisma.StringFieldUpdateOperationsInput | string
@@ -493,6 +512,7 @@ export type ScanUploadCountOrderByAggregateInput = {
   fileName?: Prisma.SortOrder
   sha256?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  source?: Prisma.SortOrder
   pageId?: Prisma.SortOrder
   detections?: Prisma.SortOrder
   reviewed?: Prisma.SortOrder
@@ -511,6 +531,7 @@ export type ScanUploadMaxOrderByAggregateInput = {
   fileName?: Prisma.SortOrder
   sha256?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  source?: Prisma.SortOrder
   pageId?: Prisma.SortOrder
   detections?: Prisma.SortOrder
   reviewed?: Prisma.SortOrder
@@ -529,6 +550,7 @@ export type ScanUploadMinOrderByAggregateInput = {
   fileName?: Prisma.SortOrder
   sha256?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  source?: Prisma.SortOrder
   pageId?: Prisma.SortOrder
   detections?: Prisma.SortOrder
   reviewed?: Prisma.SortOrder
@@ -630,6 +652,7 @@ export type ScanUploadCreateWithoutAcademyInput = {
   fileName: string
   sha256: string
   status?: string
+  source?: string
   detections?: string
   reviewed?: string
   correctedPath?: string | null
@@ -647,6 +670,7 @@ export type ScanUploadUncheckedCreateWithoutAcademyInput = {
   fileName: string
   sha256: string
   status?: string
+  source?: string
   pageId?: string | null
   detections?: string
   reviewed?: string
@@ -693,6 +717,7 @@ export type ScanUploadScalarWhereInput = {
   fileName?: Prisma.StringFilter<"ScanUpload"> | string
   sha256?: Prisma.StringFilter<"ScanUpload"> | string
   status?: Prisma.StringFilter<"ScanUpload"> | string
+  source?: Prisma.StringFilter<"ScanUpload"> | string
   pageId?: Prisma.StringNullableFilter<"ScanUpload"> | string | null
   detections?: Prisma.StringFilter<"ScanUpload"> | string
   reviewed?: Prisma.StringFilter<"ScanUpload"> | string
@@ -710,6 +735,7 @@ export type ScanUploadCreateWithoutPageInput = {
   fileName: string
   sha256: string
   status?: string
+  source?: string
   detections?: string
   reviewed?: string
   correctedPath?: string | null
@@ -728,6 +754,7 @@ export type ScanUploadUncheckedCreateWithoutPageInput = {
   fileName: string
   sha256: string
   status?: string
+  source?: string
   detections?: string
   reviewed?: string
   correctedPath?: string | null
@@ -769,6 +796,7 @@ export type ScanUploadCreateManyAcademyInput = {
   fileName: string
   sha256: string
   status?: string
+  source?: string
   pageId?: string | null
   detections?: string
   reviewed?: string
@@ -786,6 +814,7 @@ export type ScanUploadUpdateWithoutAcademyInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   sha256?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  source?: Prisma.StringFieldUpdateOperationsInput | string
   detections?: Prisma.StringFieldUpdateOperationsInput | string
   reviewed?: Prisma.StringFieldUpdateOperationsInput | string
   correctedPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -803,6 +832,7 @@ export type ScanUploadUncheckedUpdateWithoutAcademyInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   sha256?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  source?: Prisma.StringFieldUpdateOperationsInput | string
   pageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   detections?: Prisma.StringFieldUpdateOperationsInput | string
   reviewed?: Prisma.StringFieldUpdateOperationsInput | string
@@ -820,6 +850,7 @@ export type ScanUploadUncheckedUpdateManyWithoutAcademyInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   sha256?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  source?: Prisma.StringFieldUpdateOperationsInput | string
   pageId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   detections?: Prisma.StringFieldUpdateOperationsInput | string
   reviewed?: Prisma.StringFieldUpdateOperationsInput | string
@@ -838,6 +869,7 @@ export type ScanUploadCreateManyPageInput = {
   fileName: string
   sha256: string
   status?: string
+  source?: string
   detections?: string
   reviewed?: string
   correctedPath?: string | null
@@ -854,6 +886,7 @@ export type ScanUploadUpdateWithoutPageInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   sha256?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  source?: Prisma.StringFieldUpdateOperationsInput | string
   detections?: Prisma.StringFieldUpdateOperationsInput | string
   reviewed?: Prisma.StringFieldUpdateOperationsInput | string
   correctedPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -872,6 +905,7 @@ export type ScanUploadUncheckedUpdateWithoutPageInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   sha256?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  source?: Prisma.StringFieldUpdateOperationsInput | string
   detections?: Prisma.StringFieldUpdateOperationsInput | string
   reviewed?: Prisma.StringFieldUpdateOperationsInput | string
   correctedPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -889,6 +923,7 @@ export type ScanUploadUncheckedUpdateManyWithoutPageInput = {
   fileName?: Prisma.StringFieldUpdateOperationsInput | string
   sha256?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  source?: Prisma.StringFieldUpdateOperationsInput | string
   detections?: Prisma.StringFieldUpdateOperationsInput | string
   reviewed?: Prisma.StringFieldUpdateOperationsInput | string
   correctedPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -908,6 +943,7 @@ export type ScanUploadSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   fileName?: boolean
   sha256?: boolean
   status?: boolean
+  source?: boolean
   pageId?: boolean
   detections?: boolean
   reviewed?: boolean
@@ -928,6 +964,7 @@ export type ScanUploadSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   fileName?: boolean
   sha256?: boolean
   status?: boolean
+  source?: boolean
   pageId?: boolean
   detections?: boolean
   reviewed?: boolean
@@ -948,6 +985,7 @@ export type ScanUploadSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   fileName?: boolean
   sha256?: boolean
   status?: boolean
+  source?: boolean
   pageId?: boolean
   detections?: boolean
   reviewed?: boolean
@@ -968,6 +1006,7 @@ export type ScanUploadSelectScalar = {
   fileName?: boolean
   sha256?: boolean
   status?: boolean
+  source?: boolean
   pageId?: boolean
   detections?: boolean
   reviewed?: boolean
@@ -978,7 +1017,7 @@ export type ScanUploadSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ScanUploadOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "academyId" | "uploadedById" | "filePath" | "fileName" | "sha256" | "status" | "pageId" | "detections" | "reviewed" | "correctedPath" | "errorCode" | "reviewNotes" | "createdAt" | "updatedAt", ExtArgs["result"]["scanUpload"]>
+export type ScanUploadOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "academyId" | "uploadedById" | "filePath" | "fileName" | "sha256" | "status" | "source" | "pageId" | "detections" | "reviewed" | "correctedPath" | "errorCode" | "reviewNotes" | "createdAt" | "updatedAt", ExtArgs["result"]["scanUpload"]>
 export type ScanUploadInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   academy?: boolean | Prisma.AcademyDefaultArgs<ExtArgs>
   page?: boolean | Prisma.ScanUpload$pageArgs<ExtArgs>
@@ -1006,6 +1045,7 @@ export type $ScanUploadPayload<ExtArgs extends runtime.Types.Extensions.Internal
     fileName: string
     sha256: string
     status: string
+    source: string
     pageId: string | null
     detections: string
     reviewed: string
@@ -1446,6 +1486,7 @@ export interface ScanUploadFieldRefs {
   readonly fileName: Prisma.FieldRef<"ScanUpload", 'String'>
   readonly sha256: Prisma.FieldRef<"ScanUpload", 'String'>
   readonly status: Prisma.FieldRef<"ScanUpload", 'String'>
+  readonly source: Prisma.FieldRef<"ScanUpload", 'String'>
   readonly pageId: Prisma.FieldRef<"ScanUpload", 'String'>
   readonly detections: Prisma.FieldRef<"ScanUpload", 'String'>
   readonly reviewed: Prisma.FieldRef<"ScanUpload", 'String'>
