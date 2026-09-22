@@ -1,0 +1,14 @@
+node_modules
+.next
+.env
+storage/
+prisma/*.db
+prisma/*.db-journal
+*.log
+
+fixtures/e2e/
+fixtures/omr/
+src/.build-stamp
+tsconfig.tsbuildinfo
+next-env.d.ts
+node_modules/.pkg-stamp

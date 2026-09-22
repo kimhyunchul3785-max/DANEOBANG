@@ -1,0 +1,570 @@
+// 단어방 1차 MVP 데이터 모델
+// SQLite로 시작하며, provider만 postgresql로 바꾸면 그대로 이관 가능하도록
+// enum 대신 String + 상수(src/lib/constants.ts)를 사용한다.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+// ───────────── 사용자 · 학원 · 소속 ─────────────
+
+model User {
+  id              String   @id @default(cuid())
+  email           String   @unique
+  name            String
+  provider        String   @default("email") // email | google | kakao
+  providerId      String?
+  passwordHash    String?
+  isPlatformAdmin Boolean  @default(false)
+  status          String   @default("active") // active | suspended
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  memberships    AcademyMember[]
+  studentLinks   Student[]
+  auditLogs      AuditLog[]
+  deviceTokens   DeviceToken[]
+  notifications  Notification[]
+}
+
+model Academy {
+  id        String   @id @default(cuid())
+  name      String
+  slug      String   @unique
+  intro     String?
+  color     String   @default("#2563eb")
+  logoPath  String?  // storage 상대경로 (설정에서 업로드, 시험지 헤더에 인쇄)
+  status    String   @default("active") // active | suspended
+  plan      String   @default("free")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members     AcademyMember[]
+  invitations Invitation[]
+  classes     ClassRoom[]
+  students    Student[]
+  books       VocabBook[]
+  imports     Import[]
+  exams       Exam[]
+  scans       ScanUpload[]
+  jobs        Job[]
+  auditLogs   AuditLog[]
+}
+
+model AcademyMember {
+  id        String   @id @default(cuid())
+  academyId String
+  userId    String
+  role      String   // OWNER | TEACHER
+  status    String   @default("active")
+  createdAt DateTime @default(now())
+
+  academy  Academy @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  students TeacherStudent[]
+
+  @@unique([academyId, userId])
+  @@index([userId])
+}
+
+model Invitation {
+  id        String    @id @default(cuid())
+  academyId String
+  role      String    // TEACHER
+  email     String?
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdBy String
+  createdAt DateTime  @default(now())
+
+  academy Academy @relation(fields: [academyId], references: [id], onDelete: Cascade)
+}
+
+// ───────────── 반 · 학생 ─────────────
+
+model ClassRoom {
+  id        String   @id @default(cuid())
+  academyId String
+  name      String
+  archived  Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  academy  Academy   @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  students Student[]
+
+  @@index([academyId])
+}
+
+model Student {
+  id               String    @id @default(cuid())
+  academyId        String
+  classId          String?
+  name             String
+  school           String?
+  grade            String?
+  memo             String?
+  userId           String?   // 로그인 계정 연결 (없으면 오프라인 명단)
+  inviteTokenHash  String?   @unique
+  inviteExpiresAt  DateTime?
+  status           String    @default("active")
+  createdAt        DateTime  @default(now())
+
+  academy     Academy          @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  classRoom   ClassRoom?       @relation(fields: [classId], references: [id])
+  user        User?            @relation(fields: [userId], references: [id])
+  teachers    TeacherStudent[]
+  assignments Assignment[]
+  retakes     RetakeTask[]
+  linkRequests StudentLinkRequest[]
+
+  @@unique([academyId, userId])
+  @@index([academyId, classId])
+}
+
+model TeacherStudent {
+  memberId  String
+  studentId String
+
+  member  AcademyMember @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  student Student       @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@id([memberId, studentId])
+}
+
+model StudentLinkRequest {
+  id         String    @id @default(cuid())
+  studentId  String
+  userId     String
+  status     String    @default("pending") // pending | approved | rejected
+  createdAt  DateTime  @default(now())
+  decidedAt  DateTime?
+  decidedBy  String?
+
+  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@index([studentId, status])
+}
+
+// ───────────── 단어장 · DAY · 단어 ─────────────
+
+model VocabBook {
+  id          String   @id @default(cuid())
+  academyId   String
+  createdById String
+  title       String
+  level       String?
+  status      String   @default("active")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  academy Academy   @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  days    BookDay[]
+  words   Word[]
+  imports Import[]
+  exams   Exam[]
+
+  @@index([academyId])
+}
+
+model BookDay {
+  id        String @id @default(cuid())
+  bookId    String
+  dayNo     Int
+  label     String
+
+  book  VocabBook @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  words Word[]
+
+  @@unique([bookId, dayNo])
+}
+
+model Word {
+  id        String   @id @default(cuid())
+  bookId    String
+  dayId     String
+  english   String
+  pos       String?
+  meaning   String
+  synonyms  String?  // 콤마 구분, 보기 제외용
+  section   String?  // 원문 구획 (지문·PASSAGE·단원) — 지문별 DAY 나누기에 사용
+  approved  Boolean  @default(true)
+  excluded  Boolean  @default(false)
+  sortOrder Int      @default(0)
+  revision  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  book  VocabBook  @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  day   BookDay    @relation(fields: [dayId], references: [id], onDelete: Cascade)
+  items FormItem[]
+  revisions WordRevision[]
+
+  @@index([bookId, dayId])
+}
+
+model WordRevision {
+  id        String   @id @default(cuid())
+  wordId    String
+  revision  Int
+  english   String
+  pos       String?
+  meaning   String
+  changedBy String
+  createdAt DateTime @default(now())
+
+  word Word @relation(fields: [wordId], references: [id], onDelete: Cascade)
+}
+
+// ───────────── 파일 업로드 · 추출 · 검수 ─────────────
+
+model Import {
+  id          String   @id @default(cuid())
+  academyId   String
+  bookId      String?
+  createdById String
+  fileName    String
+  fileType    String   // hwpx | docx | pdf
+  filePath    String
+  fileSize    Int
+  sha256      String
+  status      String   @default("queued") // queued | processing | review | approved | failed | rejected
+  warnings    String   @default("[]")     // JSON string[]
+  meta        String   @default("{}")     // JSON
+  errorCode   String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  academy Academy     @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  book    VocabBook?  @relation(fields: [bookId], references: [id])
+  rows    ImportRow[]
+
+  @@index([academyId, status])
+}
+
+model ImportRow {
+  id        String @id @default(cuid())
+  importId  String
+  seq       Int
+  dayLabel  String?
+  dayNo     Int?
+  english   String
+  pos       String?
+  meaning   String
+  synonyms  String?
+  section   String?
+  source    String  @default("") // 원본 위치 (section/table/row 또는 page)
+  warning   String?
+  status    String  @default("pending") // pending | approved | excluded
+
+  import Import @relation(fields: [importId], references: [id], onDelete: Cascade)
+
+  @@index([importId])
+}
+
+// ───────────── 시험 · 출제 · 발행 ─────────────
+
+model Exam {
+  id               String   @id @default(cuid())
+  academyId        String
+  bookId           String
+  createdById      String
+  title            String
+  questionCount    Int      @default(40)
+  passScore        Int      @default(90)
+  timeLimitMin     Int?
+  scoreVisibility  String   @default("immediate") // immediate | after_release
+  answerVisibility String   @default("after_release") // immediate | after_release
+  answersReleased  Boolean  @default(false)
+  status           String   @default("draft") // draft | published | archived
+  isRetake         Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  academy Academy     @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  book    VocabBook   @relation(fields: [bookId], references: [id])
+  scopes  ExamScope[]
+  forms   ExamForm[]
+  assignments Assignment[]
+
+  @@index([academyId, status])
+}
+
+model ExamScope {
+  examId String
+  dayId  String
+
+  exam Exam @relation(fields: [examId], references: [id], onDelete: Cascade)
+
+  @@id([examId, dayId])
+}
+
+model ExamForm {
+  id          String    @id @default(cuid())
+  examId      String
+  version     Int
+  status      String    @default("draft") // draft | published
+  hash        String?
+  seed        String
+  warnings    String    @default("[]")
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  exam        Exam         @relation(fields: [examId], references: [id], onDelete: Cascade)
+  items       FormItem[]
+  assignments Assignment[]
+  prints      PrintInstance[]
+
+  @@unique([examId, version])
+}
+
+model FormItem {
+  id       String @id @default(cuid())
+  formId   String
+  position Int
+  wordId   String
+  prompt   String // 영어 단어 스냅샷
+  dayLabel String
+
+  form    ExamForm     @relation(fields: [formId], references: [id], onDelete: Cascade)
+  word    Word         @relation(fields: [wordId], references: [id])
+  options FormOption[]
+  answers AttemptAnswer[]
+
+  @@unique([formId, position])
+}
+
+model FormOption {
+  id        String  @id @default(cuid())
+  itemId    String
+  position  Int
+  text      String
+  isCorrect Boolean @default(false) // 학생 DTO에는 절대 포함하지 않음
+
+  item    FormItem        @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  answers AttemptAnswer[]
+
+  @@unique([itemId, position])
+}
+
+// ───────────── 배정 · 응시 · 답안 · 성적 ─────────────
+
+model Assignment {
+  id        String    @id @default(cuid())
+  examId    String
+  formId    String
+  studentId String
+  mode      String?   // null | online | paper  (첫 응시 방식 잠금)
+  startAt   DateTime?
+  dueAt     DateTime?
+  status    String    @default("assigned") // assigned | in_progress | completed | expired
+  createdAt DateTime  @default(now())
+
+  exam     Exam      @relation(fields: [examId], references: [id], onDelete: Cascade)
+  form     ExamForm  @relation(fields: [formId], references: [id])
+  student  Student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  attempts Attempt[]
+
+  @@unique([examId, studentId])
+  @@index([studentId, status])
+}
+
+model Attempt {
+  id           String    @id @default(cuid())
+  assignmentId String
+  attemptNo    Int       @default(1)
+  mode         String    // online | paper
+  status       String    @default("in_progress") // in_progress | submitted | graded | review | expired | void
+  revision     Int       @default(0)
+  startedAt    DateTime  @default(now())
+  deadlineAt   DateTime?
+  submittedAt  DateTime?
+
+  assignment Assignment      @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  answers    AttemptAnswer[]
+  grades     GradeRevision[]
+  prints     PrintInstance[]
+  retakeSource RetakeTask[]  @relation("RetakeSource")
+
+  @@index([assignmentId])
+}
+
+model AttemptAnswer {
+  attemptId String
+  itemId    String
+  optionId  String?
+  updatedAt DateTime @updatedAt
+
+  attempt Attempt     @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  item    FormItem    @relation(fields: [itemId], references: [id])
+  option  FormOption? @relation(fields: [optionId], references: [id])
+
+  @@id([attemptId, itemId])
+}
+
+model GradeRevision {
+  id           String   @id @default(cuid())
+  attemptId    String
+  revisionNo   Int
+  correctCount Int
+  totalCount   Int
+  score        Float
+  passed       Boolean
+  reason       String   @default("initial")
+  itemResults  String   // JSON [{itemId, optionId, correct}]
+  createdBy    String?
+  current      Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  attempt Attempt @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, revisionNo])
+}
+
+// ───────────── 종이 시험 · OMR ─────────────
+
+model PrintInstance {
+  id         String   @id @default(cuid())
+  attemptId  String
+  formId     String
+  pdfPath    String
+  manifest   String   // JSON (페이지별 기준점·버블 좌표)
+  status     String   @default("active") // active | void
+  templateVersion String @default("v1")
+  createdAt  DateTime @default(now())
+
+  attempt Attempt     @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  form    ExamForm    @relation(fields: [formId], references: [id])
+  pages   PrintPage[]
+}
+
+model PrintPage {
+  id              String @id @default(cuid())
+  printInstanceId String
+  pageNo          Int
+  token           String @unique // QR에 인쇄되는 불투명 토큰
+
+  print PrintInstance @relation(fields: [printInstanceId], references: [id], onDelete: Cascade)
+  scans ScanUpload[]
+
+  @@unique([printInstanceId, pageNo])
+}
+
+model ScanUpload {
+  id           String    @id @default(cuid())
+  academyId    String
+  uploadedById String
+  filePath     String
+  fileName     String
+  sha256       String
+  status       String    @default("queued") // queued | processing | needs_review | unrecognized | accepted | failed
+  pageId       String?
+  detections   String    @default("[]") // JSON [{itemId, position, status, optionPosition, fills[]}]
+  reviewed     String    @default("{}") // JSON {position: optionPosition|null}
+  correctedPath String?
+  errorCode    String?
+  reviewNotes  String?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  academy Academy    @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  page    PrintPage? @relation(fields: [pageId], references: [id])
+
+  @@index([academyId, status])
+}
+
+// ───────────── 재시험 ─────────────
+
+model RetakeTask {
+  id              String    @id @default(cuid())
+  studentId       String
+  sourceAttemptId String
+  status          String    @default("pending") // pending | scheduled | completed | cancelled
+  dueAt           DateTime?
+  scheduledAt     DateTime? // 보강(재시험) 일정 — 학생 앱에 날짜·시간으로 표시
+  note            String?
+  retakeExamId    String?
+  createdAt       DateTime  @default(now())
+  completedAt     DateTime?
+
+  student       Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  sourceAttempt Attempt @relation("RetakeSource", fields: [sourceAttemptId], references: [id], onDelete: Cascade)
+
+  @@unique([sourceAttemptId])
+}
+
+// ───────────── 시스템 ─────────────
+
+model Job {
+  id             String    @id @default(cuid())
+  academyId      String?
+  type           String    // import | render_print | analyze_scan | render_wrong_note
+  resourceId     String
+  idempotencyKey String    @unique
+  status         String    @default("queued") // queued | running | done | failed
+  attempts       Int       @default(0)
+  payload        String    @default("{}")
+  result         String?
+  error          String?
+  availableAt    DateTime  @default(now())
+  leaseExpiresAt DateTime?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  academy Academy? @relation(fields: [academyId], references: [id])
+
+  @@index([status, availableAt])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  academyId String?
+  userId    String?
+  action    String
+  target    String?
+  detail    String?
+  createdAt DateTime @default(now())
+
+  academy Academy? @relation(fields: [academyId], references: [id])
+  user    User?    @relation(fields: [userId], references: [id])
+
+  @@index([academyId, createdAt])
+}
+
+model DeviceToken {
+  id        String   @id @default(cuid())
+  userId    String
+  token     String   @unique
+  platform  String   // android | ios | web
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  title     String
+  body      String
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read])
+}
+
+model UsageEvent {
+  id        String   @id @default(cuid())
+  academyId String
+  kind      String   // import_page | scan_page | pdf_render | attempt
+  amount    Int      @default(1)
+  createdAt DateTime @default(now())
+
+  @@index([academyId, kind, createdAt])
+}
