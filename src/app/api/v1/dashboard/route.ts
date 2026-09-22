@@ -17,7 +17,7 @@ export async function GET(req: Request) {
       prisma.student.count({ where: { ...scope, status: "active" } }),
       prisma.assignment.findMany({ where: { exam: { academyId }, student: scope, OR: [{ dueAt: { gte: dayStart } }, { createdAt: { gte: dayStart } }] }, select: { status: true } }),
       prisma.assignment.count({ where: { exam: { academyId }, student: scope, status: { in: ["assigned", "in_progress"] }, dueAt: { lt: now } } }),
-      prisma.retakeTask.count({ where: { student: scope, status: { in: ["pending", "scheduled"] }, OR: [{ dueAt: null }, { dueAt: { gte: week.start, lt: week.end } }] } }),
+      prisma.retakeTask.count({ where: { student: scope, status: { in: ["pending", "issued"] }, OR: [{ dueAt: null }, { dueAt: { gte: week.start, lt: week.end } }] } }),
       prisma.scanUpload.count({ where: { academyId, status: { in: ["needs_review", "unrecognized"] } } }),
       prisma.gradeRevision.findMany({ where: { current: true, attempt: { assignment: { exam: { academyId }, student: scope } } }, include: { attempt: { include: { assignment: { include: { student: { select: { id: true, name: true } }, exam: { select: { id: true, title: true } } } } } } }, orderBy: { createdAt: "desc" }, take: 10 }),
     ]);

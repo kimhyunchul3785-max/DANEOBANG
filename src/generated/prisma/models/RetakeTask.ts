@@ -27,12 +27,14 @@ export type AggregateRetakeTask = {
 export type RetakeTaskMinAggregateOutputType = {
   id: string | null
   studentId: string | null
+  kind: string | null
   sourceAttemptId: string | null
   status: string | null
+  mode: string | null
+  wordIds: string | null
   dueAt: Date | null
-  scheduledAt: Date | null
-  note: string | null
   retakeExamId: string | null
+  issuedAt: Date | null
   createdAt: Date | null
   completedAt: Date | null
 }
@@ -40,12 +42,14 @@ export type RetakeTaskMinAggregateOutputType = {
 export type RetakeTaskMaxAggregateOutputType = {
   id: string | null
   studentId: string | null
+  kind: string | null
   sourceAttemptId: string | null
   status: string | null
+  mode: string | null
+  wordIds: string | null
   dueAt: Date | null
-  scheduledAt: Date | null
-  note: string | null
   retakeExamId: string | null
+  issuedAt: Date | null
   createdAt: Date | null
   completedAt: Date | null
 }
@@ -53,12 +57,14 @@ export type RetakeTaskMaxAggregateOutputType = {
 export type RetakeTaskCountAggregateOutputType = {
   id: number
   studentId: number
+  kind: number
   sourceAttemptId: number
   status: number
+  mode: number
+  wordIds: number
   dueAt: number
-  scheduledAt: number
-  note: number
   retakeExamId: number
+  issuedAt: number
   createdAt: number
   completedAt: number
   _all: number
@@ -68,12 +74,14 @@ export type RetakeTaskCountAggregateOutputType = {
 export type RetakeTaskMinAggregateInputType = {
   id?: true
   studentId?: true
+  kind?: true
   sourceAttemptId?: true
   status?: true
+  mode?: true
+  wordIds?: true
   dueAt?: true
-  scheduledAt?: true
-  note?: true
   retakeExamId?: true
+  issuedAt?: true
   createdAt?: true
   completedAt?: true
 }
@@ -81,12 +89,14 @@ export type RetakeTaskMinAggregateInputType = {
 export type RetakeTaskMaxAggregateInputType = {
   id?: true
   studentId?: true
+  kind?: true
   sourceAttemptId?: true
   status?: true
+  mode?: true
+  wordIds?: true
   dueAt?: true
-  scheduledAt?: true
-  note?: true
   retakeExamId?: true
+  issuedAt?: true
   createdAt?: true
   completedAt?: true
 }
@@ -94,12 +104,14 @@ export type RetakeTaskMaxAggregateInputType = {
 export type RetakeTaskCountAggregateInputType = {
   id?: true
   studentId?: true
+  kind?: true
   sourceAttemptId?: true
   status?: true
+  mode?: true
+  wordIds?: true
   dueAt?: true
-  scheduledAt?: true
-  note?: true
   retakeExamId?: true
+  issuedAt?: true
   createdAt?: true
   completedAt?: true
   _all?: true
@@ -180,12 +192,14 @@ export type RetakeTaskGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inter
 export type RetakeTaskGroupByOutputType = {
   id: string
   studentId: string
-  sourceAttemptId: string
+  kind: string
+  sourceAttemptId: string | null
   status: string
+  mode: string | null
+  wordIds: string | null
   dueAt: Date | null
-  scheduledAt: Date | null
-  note: string | null
   retakeExamId: string | null
+  issuedAt: Date | null
   createdAt: Date
   completedAt: Date | null
   _count: RetakeTaskCountAggregateOutputType | null
@@ -214,27 +228,31 @@ export type RetakeTaskWhereInput = {
   NOT?: Prisma.RetakeTaskWhereInput | Prisma.RetakeTaskWhereInput[]
   id?: Prisma.StringFilter<"RetakeTask"> | string
   studentId?: Prisma.StringFilter<"RetakeTask"> | string
-  sourceAttemptId?: Prisma.StringFilter<"RetakeTask"> | string
+  kind?: Prisma.StringFilter<"RetakeTask"> | string
+  sourceAttemptId?: Prisma.StringNullableFilter<"RetakeTask"> | string | null
   status?: Prisma.StringFilter<"RetakeTask"> | string
+  mode?: Prisma.StringNullableFilter<"RetakeTask"> | string | null
+  wordIds?: Prisma.StringNullableFilter<"RetakeTask"> | string | null
   dueAt?: Prisma.DateTimeNullableFilter<"RetakeTask"> | Date | string | null
-  scheduledAt?: Prisma.DateTimeNullableFilter<"RetakeTask"> | Date | string | null
-  note?: Prisma.StringNullableFilter<"RetakeTask"> | string | null
   retakeExamId?: Prisma.StringNullableFilter<"RetakeTask"> | string | null
+  issuedAt?: Prisma.DateTimeNullableFilter<"RetakeTask"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"RetakeTask"> | Date | string
   completedAt?: Prisma.DateTimeNullableFilter<"RetakeTask"> | Date | string | null
   student?: Prisma.XOR<Prisma.StudentScalarRelationFilter, Prisma.StudentWhereInput>
-  sourceAttempt?: Prisma.XOR<Prisma.AttemptScalarRelationFilter, Prisma.AttemptWhereInput>
+  sourceAttempt?: Prisma.XOR<Prisma.AttemptNullableScalarRelationFilter, Prisma.AttemptWhereInput> | null
 }
 
 export type RetakeTaskOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
-  sourceAttemptId?: Prisma.SortOrder
+  kind?: Prisma.SortOrder
+  sourceAttemptId?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  mode?: Prisma.SortOrderInput | Prisma.SortOrder
+  wordIds?: Prisma.SortOrderInput | Prisma.SortOrder
   dueAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  scheduledAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  note?: Prisma.SortOrderInput | Prisma.SortOrder
   retakeExamId?: Prisma.SortOrderInput | Prisma.SortOrder
+  issuedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   student?: Prisma.StudentOrderByWithRelationInput
@@ -248,26 +266,30 @@ export type RetakeTaskWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.RetakeTaskWhereInput[]
   NOT?: Prisma.RetakeTaskWhereInput | Prisma.RetakeTaskWhereInput[]
   studentId?: Prisma.StringFilter<"RetakeTask"> | string
+  kind?: Prisma.StringFilter<"RetakeTask"> | string
   status?: Prisma.StringFilter<"RetakeTask"> | string
+  mode?: Prisma.StringNullableFilter<"RetakeTask"> | string | null
+  wordIds?: Prisma.StringNullableFilter<"RetakeTask"> | string | null
   dueAt?: Prisma.DateTimeNullableFilter<"RetakeTask"> | Date | string | null
-  scheduledAt?: Prisma.DateTimeNullableFilter<"RetakeTask"> | Date | string | null
-  note?: Prisma.StringNullableFilter<"RetakeTask"> | string | null
   retakeExamId?: Prisma.StringNullableFilter<"RetakeTask"> | string | null
+  issuedAt?: Prisma.DateTimeNullableFilter<"RetakeTask"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"RetakeTask"> | Date | string
   completedAt?: Prisma.DateTimeNullableFilter<"RetakeTask"> | Date | string | null
   student?: Prisma.XOR<Prisma.StudentScalarRelationFilter, Prisma.StudentWhereInput>
-  sourceAttempt?: Prisma.XOR<Prisma.AttemptScalarRelationFilter, Prisma.AttemptWhereInput>
+  sourceAttempt?: Prisma.XOR<Prisma.AttemptNullableScalarRelationFilter, Prisma.AttemptWhereInput> | null
 }, "id" | "sourceAttemptId">
 
 export type RetakeTaskOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
-  sourceAttemptId?: Prisma.SortOrder
+  kind?: Prisma.SortOrder
+  sourceAttemptId?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  mode?: Prisma.SortOrderInput | Prisma.SortOrder
+  wordIds?: Prisma.SortOrderInput | Prisma.SortOrder
   dueAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  scheduledAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  note?: Prisma.SortOrderInput | Prisma.SortOrder
   retakeExamId?: Prisma.SortOrderInput | Prisma.SortOrder
+  issuedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.RetakeTaskCountOrderByAggregateInput
@@ -281,64 +303,74 @@ export type RetakeTaskScalarWhereWithAggregatesInput = {
   NOT?: Prisma.RetakeTaskScalarWhereWithAggregatesInput | Prisma.RetakeTaskScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"RetakeTask"> | string
   studentId?: Prisma.StringWithAggregatesFilter<"RetakeTask"> | string
-  sourceAttemptId?: Prisma.StringWithAggregatesFilter<"RetakeTask"> | string
+  kind?: Prisma.StringWithAggregatesFilter<"RetakeTask"> | string
+  sourceAttemptId?: Prisma.StringNullableWithAggregatesFilter<"RetakeTask"> | string | null
   status?: Prisma.StringWithAggregatesFilter<"RetakeTask"> | string
+  mode?: Prisma.StringNullableWithAggregatesFilter<"RetakeTask"> | string | null
+  wordIds?: Prisma.StringNullableWithAggregatesFilter<"RetakeTask"> | string | null
   dueAt?: Prisma.DateTimeNullableWithAggregatesFilter<"RetakeTask"> | Date | string | null
-  scheduledAt?: Prisma.DateTimeNullableWithAggregatesFilter<"RetakeTask"> | Date | string | null
-  note?: Prisma.StringNullableWithAggregatesFilter<"RetakeTask"> | string | null
   retakeExamId?: Prisma.StringNullableWithAggregatesFilter<"RetakeTask"> | string | null
+  issuedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"RetakeTask"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"RetakeTask"> | Date | string
   completedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"RetakeTask"> | Date | string | null
 }
 
 export type RetakeTaskCreateInput = {
   id?: string
+  kind?: string
   status?: string
+  mode?: string | null
+  wordIds?: string | null
   dueAt?: Date | string | null
-  scheduledAt?: Date | string | null
-  note?: string | null
   retakeExamId?: string | null
+  issuedAt?: Date | string | null
   createdAt?: Date | string
   completedAt?: Date | string | null
   student: Prisma.StudentCreateNestedOneWithoutRetakesInput
-  sourceAttempt: Prisma.AttemptCreateNestedOneWithoutRetakeSourceInput
+  sourceAttempt?: Prisma.AttemptCreateNestedOneWithoutRetakeSourceInput
 }
 
 export type RetakeTaskUncheckedCreateInput = {
   id?: string
   studentId: string
-  sourceAttemptId: string
+  kind?: string
+  sourceAttemptId?: string | null
   status?: string
+  mode?: string | null
+  wordIds?: string | null
   dueAt?: Date | string | null
-  scheduledAt?: Date | string | null
-  note?: string | null
   retakeExamId?: string | null
+  issuedAt?: Date | string | null
   createdAt?: Date | string
   completedAt?: Date | string | null
 }
 
 export type RetakeTaskUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  mode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wordIds?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   retakeExamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   student?: Prisma.StudentUpdateOneRequiredWithoutRetakesNestedInput
-  sourceAttempt?: Prisma.AttemptUpdateOneRequiredWithoutRetakeSourceNestedInput
+  sourceAttempt?: Prisma.AttemptUpdateOneWithoutRetakeSourceNestedInput
 }
 
 export type RetakeTaskUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
-  sourceAttemptId?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  mode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wordIds?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   retakeExamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -346,23 +378,27 @@ export type RetakeTaskUncheckedUpdateInput = {
 export type RetakeTaskCreateManyInput = {
   id?: string
   studentId: string
-  sourceAttemptId: string
+  kind?: string
+  sourceAttemptId?: string | null
   status?: string
+  mode?: string | null
+  wordIds?: string | null
   dueAt?: Date | string | null
-  scheduledAt?: Date | string | null
-  note?: string | null
   retakeExamId?: string | null
+  issuedAt?: Date | string | null
   createdAt?: Date | string
   completedAt?: Date | string | null
 }
 
 export type RetakeTaskUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  mode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wordIds?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   retakeExamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -370,12 +406,14 @@ export type RetakeTaskUpdateManyMutationInput = {
 export type RetakeTaskUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
-  sourceAttemptId?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  mode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wordIds?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   retakeExamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -393,12 +431,14 @@ export type RetakeTaskOrderByRelationAggregateInput = {
 export type RetakeTaskCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
+  kind?: Prisma.SortOrder
   sourceAttemptId?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  mode?: Prisma.SortOrder
+  wordIds?: Prisma.SortOrder
   dueAt?: Prisma.SortOrder
-  scheduledAt?: Prisma.SortOrder
-  note?: Prisma.SortOrder
   retakeExamId?: Prisma.SortOrder
+  issuedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
 }
@@ -406,12 +446,14 @@ export type RetakeTaskCountOrderByAggregateInput = {
 export type RetakeTaskMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
+  kind?: Prisma.SortOrder
   sourceAttemptId?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  mode?: Prisma.SortOrder
+  wordIds?: Prisma.SortOrder
   dueAt?: Prisma.SortOrder
-  scheduledAt?: Prisma.SortOrder
-  note?: Prisma.SortOrder
   retakeExamId?: Prisma.SortOrder
+  issuedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
 }
@@ -419,12 +461,14 @@ export type RetakeTaskMaxOrderByAggregateInput = {
 export type RetakeTaskMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
+  kind?: Prisma.SortOrder
   sourceAttemptId?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  mode?: Prisma.SortOrder
+  wordIds?: Prisma.SortOrder
   dueAt?: Prisma.SortOrder
-  scheduledAt?: Prisma.SortOrder
-  note?: Prisma.SortOrder
   retakeExamId?: Prisma.SortOrder
+  issuedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
 }
@@ -515,24 +559,28 @@ export type RetakeTaskUncheckedUpdateManyWithoutSourceAttemptNestedInput = {
 
 export type RetakeTaskCreateWithoutStudentInput = {
   id?: string
+  kind?: string
   status?: string
+  mode?: string | null
+  wordIds?: string | null
   dueAt?: Date | string | null
-  scheduledAt?: Date | string | null
-  note?: string | null
   retakeExamId?: string | null
+  issuedAt?: Date | string | null
   createdAt?: Date | string
   completedAt?: Date | string | null
-  sourceAttempt: Prisma.AttemptCreateNestedOneWithoutRetakeSourceInput
+  sourceAttempt?: Prisma.AttemptCreateNestedOneWithoutRetakeSourceInput
 }
 
 export type RetakeTaskUncheckedCreateWithoutStudentInput = {
   id?: string
-  sourceAttemptId: string
+  kind?: string
+  sourceAttemptId?: string | null
   status?: string
+  mode?: string | null
+  wordIds?: string | null
   dueAt?: Date | string | null
-  scheduledAt?: Date | string | null
-  note?: string | null
   retakeExamId?: string | null
+  issuedAt?: Date | string | null
   createdAt?: Date | string
   completedAt?: Date | string | null
 }
@@ -568,23 +616,27 @@ export type RetakeTaskScalarWhereInput = {
   NOT?: Prisma.RetakeTaskScalarWhereInput | Prisma.RetakeTaskScalarWhereInput[]
   id?: Prisma.StringFilter<"RetakeTask"> | string
   studentId?: Prisma.StringFilter<"RetakeTask"> | string
-  sourceAttemptId?: Prisma.StringFilter<"RetakeTask"> | string
+  kind?: Prisma.StringFilter<"RetakeTask"> | string
+  sourceAttemptId?: Prisma.StringNullableFilter<"RetakeTask"> | string | null
   status?: Prisma.StringFilter<"RetakeTask"> | string
+  mode?: Prisma.StringNullableFilter<"RetakeTask"> | string | null
+  wordIds?: Prisma.StringNullableFilter<"RetakeTask"> | string | null
   dueAt?: Prisma.DateTimeNullableFilter<"RetakeTask"> | Date | string | null
-  scheduledAt?: Prisma.DateTimeNullableFilter<"RetakeTask"> | Date | string | null
-  note?: Prisma.StringNullableFilter<"RetakeTask"> | string | null
   retakeExamId?: Prisma.StringNullableFilter<"RetakeTask"> | string | null
+  issuedAt?: Prisma.DateTimeNullableFilter<"RetakeTask"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"RetakeTask"> | Date | string
   completedAt?: Prisma.DateTimeNullableFilter<"RetakeTask"> | Date | string | null
 }
 
 export type RetakeTaskCreateWithoutSourceAttemptInput = {
   id?: string
+  kind?: string
   status?: string
+  mode?: string | null
+  wordIds?: string | null
   dueAt?: Date | string | null
-  scheduledAt?: Date | string | null
-  note?: string | null
   retakeExamId?: string | null
+  issuedAt?: Date | string | null
   createdAt?: Date | string
   completedAt?: Date | string | null
   student: Prisma.StudentCreateNestedOneWithoutRetakesInput
@@ -593,11 +645,13 @@ export type RetakeTaskCreateWithoutSourceAttemptInput = {
 export type RetakeTaskUncheckedCreateWithoutSourceAttemptInput = {
   id?: string
   studentId: string
+  kind?: string
   status?: string
+  mode?: string | null
+  wordIds?: string | null
   dueAt?: Date | string | null
-  scheduledAt?: Date | string | null
-  note?: string | null
   retakeExamId?: string | null
+  issuedAt?: Date | string | null
   createdAt?: Date | string
   completedAt?: Date | string | null
 }
@@ -629,48 +683,56 @@ export type RetakeTaskUpdateManyWithWhereWithoutSourceAttemptInput = {
 
 export type RetakeTaskCreateManyStudentInput = {
   id?: string
-  sourceAttemptId: string
+  kind?: string
+  sourceAttemptId?: string | null
   status?: string
+  mode?: string | null
+  wordIds?: string | null
   dueAt?: Date | string | null
-  scheduledAt?: Date | string | null
-  note?: string | null
   retakeExamId?: string | null
+  issuedAt?: Date | string | null
   createdAt?: Date | string
   completedAt?: Date | string | null
 }
 
 export type RetakeTaskUpdateWithoutStudentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  mode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wordIds?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   retakeExamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  sourceAttempt?: Prisma.AttemptUpdateOneRequiredWithoutRetakeSourceNestedInput
+  sourceAttempt?: Prisma.AttemptUpdateOneWithoutRetakeSourceNestedInput
 }
 
 export type RetakeTaskUncheckedUpdateWithoutStudentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  sourceAttemptId?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  mode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wordIds?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   retakeExamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type RetakeTaskUncheckedUpdateManyWithoutStudentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  sourceAttemptId?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
+  sourceAttemptId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  mode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wordIds?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   retakeExamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -678,22 +740,26 @@ export type RetakeTaskUncheckedUpdateManyWithoutStudentInput = {
 export type RetakeTaskCreateManySourceAttemptInput = {
   id?: string
   studentId: string
+  kind?: string
   status?: string
+  mode?: string | null
+  wordIds?: string | null
   dueAt?: Date | string | null
-  scheduledAt?: Date | string | null
-  note?: string | null
   retakeExamId?: string | null
+  issuedAt?: Date | string | null
   createdAt?: Date | string
   completedAt?: Date | string | null
 }
 
 export type RetakeTaskUpdateWithoutSourceAttemptInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  mode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wordIds?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   retakeExamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   student?: Prisma.StudentUpdateOneRequiredWithoutRetakesNestedInput
@@ -702,11 +768,13 @@ export type RetakeTaskUpdateWithoutSourceAttemptInput = {
 export type RetakeTaskUncheckedUpdateWithoutSourceAttemptInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  mode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wordIds?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   retakeExamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -714,11 +782,13 @@ export type RetakeTaskUncheckedUpdateWithoutSourceAttemptInput = {
 export type RetakeTaskUncheckedUpdateManyWithoutSourceAttemptInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.StringFieldUpdateOperationsInput | string
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  mode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wordIds?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  scheduledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   retakeExamId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  issuedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
@@ -728,90 +798,100 @@ export type RetakeTaskUncheckedUpdateManyWithoutSourceAttemptInput = {
 export type RetakeTaskSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   studentId?: boolean
+  kind?: boolean
   sourceAttemptId?: boolean
   status?: boolean
+  mode?: boolean
+  wordIds?: boolean
   dueAt?: boolean
-  scheduledAt?: boolean
-  note?: boolean
   retakeExamId?: boolean
+  issuedAt?: boolean
   createdAt?: boolean
   completedAt?: boolean
   student?: boolean | Prisma.StudentDefaultArgs<ExtArgs>
-  sourceAttempt?: boolean | Prisma.AttemptDefaultArgs<ExtArgs>
+  sourceAttempt?: boolean | Prisma.RetakeTask$sourceAttemptArgs<ExtArgs>
 }, ExtArgs["result"]["retakeTask"]>
 
 export type RetakeTaskSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   studentId?: boolean
+  kind?: boolean
   sourceAttemptId?: boolean
   status?: boolean
+  mode?: boolean
+  wordIds?: boolean
   dueAt?: boolean
-  scheduledAt?: boolean
-  note?: boolean
   retakeExamId?: boolean
+  issuedAt?: boolean
   createdAt?: boolean
   completedAt?: boolean
   student?: boolean | Prisma.StudentDefaultArgs<ExtArgs>
-  sourceAttempt?: boolean | Prisma.AttemptDefaultArgs<ExtArgs>
+  sourceAttempt?: boolean | Prisma.RetakeTask$sourceAttemptArgs<ExtArgs>
 }, ExtArgs["result"]["retakeTask"]>
 
 export type RetakeTaskSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   studentId?: boolean
+  kind?: boolean
   sourceAttemptId?: boolean
   status?: boolean
+  mode?: boolean
+  wordIds?: boolean
   dueAt?: boolean
-  scheduledAt?: boolean
-  note?: boolean
   retakeExamId?: boolean
+  issuedAt?: boolean
   createdAt?: boolean
   completedAt?: boolean
   student?: boolean | Prisma.StudentDefaultArgs<ExtArgs>
-  sourceAttempt?: boolean | Prisma.AttemptDefaultArgs<ExtArgs>
+  sourceAttempt?: boolean | Prisma.RetakeTask$sourceAttemptArgs<ExtArgs>
 }, ExtArgs["result"]["retakeTask"]>
 
 export type RetakeTaskSelectScalar = {
   id?: boolean
   studentId?: boolean
+  kind?: boolean
   sourceAttemptId?: boolean
   status?: boolean
+  mode?: boolean
+  wordIds?: boolean
   dueAt?: boolean
-  scheduledAt?: boolean
-  note?: boolean
   retakeExamId?: boolean
+  issuedAt?: boolean
   createdAt?: boolean
   completedAt?: boolean
 }
 
-export type RetakeTaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "sourceAttemptId" | "status" | "dueAt" | "scheduledAt" | "note" | "retakeExamId" | "createdAt" | "completedAt", ExtArgs["result"]["retakeTask"]>
+export type RetakeTaskOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "kind" | "sourceAttemptId" | "status" | "mode" | "wordIds" | "dueAt" | "retakeExamId" | "issuedAt" | "createdAt" | "completedAt", ExtArgs["result"]["retakeTask"]>
 export type RetakeTaskInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.StudentDefaultArgs<ExtArgs>
-  sourceAttempt?: boolean | Prisma.AttemptDefaultArgs<ExtArgs>
+  sourceAttempt?: boolean | Prisma.RetakeTask$sourceAttemptArgs<ExtArgs>
 }
 export type RetakeTaskIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.StudentDefaultArgs<ExtArgs>
-  sourceAttempt?: boolean | Prisma.AttemptDefaultArgs<ExtArgs>
+  sourceAttempt?: boolean | Prisma.RetakeTask$sourceAttemptArgs<ExtArgs>
 }
 export type RetakeTaskIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.StudentDefaultArgs<ExtArgs>
-  sourceAttempt?: boolean | Prisma.AttemptDefaultArgs<ExtArgs>
+  sourceAttempt?: boolean | Prisma.RetakeTask$sourceAttemptArgs<ExtArgs>
 }
 
 export type $RetakeTaskPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "RetakeTask"
   objects: {
     student: Prisma.$StudentPayload<ExtArgs>
-    sourceAttempt: Prisma.$AttemptPayload<ExtArgs>
+    sourceAttempt: Prisma.$AttemptPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     studentId: string
-    sourceAttemptId: string
+    kind: string
+    sourceAttemptId: string | null
     status: string
+    mode: string | null
+    wordIds: string | null
     dueAt: Date | null
-    scheduledAt: Date | null
-    note: string | null
     retakeExamId: string | null
+    issuedAt: Date | null
     createdAt: Date
     completedAt: Date | null
   }, ExtArgs["result"]["retakeTask"]>
@@ -1209,7 +1289,7 @@ readonly fields: RetakeTaskFieldRefs;
 export interface Prisma__RetakeTaskClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   student<T extends Prisma.StudentDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StudentDefaultArgs<ExtArgs>>): Prisma.Prisma__StudentClient<runtime.Types.Result.GetResult<Prisma.$StudentPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  sourceAttempt<T extends Prisma.AttemptDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AttemptDefaultArgs<ExtArgs>>): Prisma.Prisma__AttemptClient<runtime.Types.Result.GetResult<Prisma.$AttemptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  sourceAttempt<T extends Prisma.RetakeTask$sourceAttemptArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.RetakeTask$sourceAttemptArgs<ExtArgs>>): Prisma.Prisma__AttemptClient<runtime.Types.Result.GetResult<Prisma.$AttemptPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1241,12 +1321,14 @@ export interface Prisma__RetakeTaskClient<T, Null = never, ExtArgs extends runti
 export interface RetakeTaskFieldRefs {
   readonly id: Prisma.FieldRef<"RetakeTask", 'String'>
   readonly studentId: Prisma.FieldRef<"RetakeTask", 'String'>
+  readonly kind: Prisma.FieldRef<"RetakeTask", 'String'>
   readonly sourceAttemptId: Prisma.FieldRef<"RetakeTask", 'String'>
   readonly status: Prisma.FieldRef<"RetakeTask", 'String'>
+  readonly mode: Prisma.FieldRef<"RetakeTask", 'String'>
+  readonly wordIds: Prisma.FieldRef<"RetakeTask", 'String'>
   readonly dueAt: Prisma.FieldRef<"RetakeTask", 'DateTime'>
-  readonly scheduledAt: Prisma.FieldRef<"RetakeTask", 'DateTime'>
-  readonly note: Prisma.FieldRef<"RetakeTask", 'String'>
   readonly retakeExamId: Prisma.FieldRef<"RetakeTask", 'String'>
+  readonly issuedAt: Prisma.FieldRef<"RetakeTask", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"RetakeTask", 'DateTime'>
   readonly completedAt: Prisma.FieldRef<"RetakeTask", 'DateTime'>
 }
@@ -1645,6 +1727,25 @@ export type RetakeTaskDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Limit how many RetakeTasks to delete.
    */
   limit?: number
+}
+
+/**
+ * RetakeTask.sourceAttempt
+ */
+export type RetakeTask$sourceAttemptArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Attempt
+   */
+  select?: Prisma.AttemptSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Attempt
+   */
+  omit?: Prisma.AttemptOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AttemptInclude<ExtArgs> | null
+  where?: Prisma.AttemptWhereInput
 }
 
 /**

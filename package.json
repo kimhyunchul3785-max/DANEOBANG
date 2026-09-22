@@ -18,7 +18,8 @@
     "e2e:setup": "playwright install chromium",
     "e2e:signup": "tsx scripts/e2e-signup.ts",
     "test:ocr": "tsx scripts/test-ocr.ts",
-    "e2e:trial": "tsx scripts/e2e-trial.ts"
+    "e2e:trial": "tsx scripts/e2e-trial.ts",
+    "e2e:retake": "tsx scripts/e2e-retake.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.18.0",

@@ -28,7 +28,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
         ...(sp.classId === "none" ? { classId: null } : sp.classId ? { classId: sp.classId } : {}),
         ...(sp.teacher ? { teachers: { some: { memberId: sp.teacher } } } : {}),
       },
-      include: { classRoom: true, user: { select: { id: true } }, teachers: { include: { member: { include: { user: { select: { name: true } } } } } }, _count: { select: { linkRequests: { where: { status: "pending" } }, retakes: { where: { status: { in: ["pending", "scheduled"] } } } } } },
+      include: { classRoom: true, user: { select: { id: true } }, teachers: { include: { member: { include: { user: { select: { name: true } } } } } }, _count: { select: { linkRequests: { where: { status: "pending" } }, retakes: { where: { status: { in: ["pending", "issued"] } } } } } },
       orderBy: [{ status: "asc" }, { classId: "asc" }, { name: "asc" }],
     }),
     prisma.classRoom.findMany({ where: { academyId }, include: { _count: { select: { students: { where: { status: "active" } } } } }, orderBy: [{ archived: "asc" }, { name: "asc" }] }),

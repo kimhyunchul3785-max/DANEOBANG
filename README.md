@@ -33,7 +33,7 @@ src/app/         페이지·서버 액션·API (app=교사, learn=학생, admin=
 src/lib/         auth, scope(테넌트 경계), exam-gen, grading, attempts, parsers/, omr/, jobs
 assets/fonts/    PDF 용 Noto Sans KR 서브셋
 fixtures/        파서·OMR 테스트 파일
-scripts/         db-init, gen-sqlite-ddl, test-parsers, test-omr, test-ocr, e2e, e2e-linked, e2e-signup, e2e-trial, qa-shots
+scripts/         db-init, gen-sqlite-ddl, test-parsers, test-omr, test-ocr, e2e, e2e-linked, e2e-signup, e2e-trial, e2e-retake, qa-shots
 docs/            PRD.md, MVP.md, TECH_STACK.md
 storage/         업로드·PDF·사진 (자동 생성, git 제외)
 ```
@@ -49,6 +49,7 @@ npx tsx scripts/e2e.ts # 브라우저 E2E (서버 실행 + playwright 설치 필
 npm run e2e:linked     # 연동 계정(학원장·선생님1·학생01) E2E → ../log 에 로그·스크린샷
 npm run e2e:trial      # 체험 가입 → 선생님 초대 → 학생 휴대폰 인증번호 가입 → 시험 상세 3단계
 npm run test:ocr       # OCR 파이프라인(모의 OpenAI) 테스트
+npm run e2e:retake     # 재시험(오답만/같은 범위·마감·알림·2차) · 반복 오답 출제 · 성적 위젯 보드 · 종이 QR 규칙
 node scripts/gen-sqlite-ddl.cjs   # schema.prisma 변경 후 init.sql 재생성 (@prisma/internals 필요)
 ```
 
@@ -58,6 +59,7 @@ node scripts/gen-sqlite-ddl.cjs   # schema.prisma 변경 후 init.sql 재생성 
 
 ## 문서
 
+- `docs/IA_REVIEW_v4.md` §6 — v4.4 출제 흐름 IA/UX(동작 바)·재시험 개편(보강 제거, 오답만/같은 범위·마감·알림·2차)·성적 가변 위젯·종이 QR 채점 규칙·반응형 중단점
 - `docs/IA_REVIEW_v4.md` §5 — v4.3 결제 분리(체험)·휴대폰 인증번호 가입·OCR 단어장·시험 상세 3단계·출제 화면 정리
 - `docs/PRD_B2B_SIGNUP.md` — v4.2 B2B 가입·Seat 과금 (학원 단위 결제, 선생님 초대 기반 가입, 학생 계정 설정 링크, 요금제 화면, 모의 결제·메일 개발 모드)
 - `docs/IA_REVIEW_v4.md` — v4 계정별 IA 검수 (소셜 로그인, 엑셀 등록, 학생/성적 탭 재정의, 게임형 응시, 종이 시험 학생 제출·QR)

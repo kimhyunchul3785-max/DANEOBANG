@@ -26,7 +26,10 @@ export default async function LearnHome() {
   const [primary, ...rest] = todo;
   const doneThisWeek = list.filter((a) => a.status === "completed" && a.dueAt && new Date(a.dueAt) >= week.start && new Date(a.dueAt) < week.end).length;
   const dday = (d: Date | null) => (d ? Math.max(0, Math.ceil((new Date(d).getTime() - Date.now()) / 86400e3)) : null);
-  const nextRetake = retakes.find((r) => (r.status === "pending" || r.status === "scheduled") && r.scheduledAt) ?? retakes.find((r) => r.status === "pending" || r.status === "scheduled");
+  // 재시험: 출제된 것(응시 대기) 중 마감이 가장 가까운 것, 없으면 준비 중인 것
+  const openRetakes = retakes.filter((r) => r.status === "pending" || r.status === "issued");
+  const nextRetake = openRetakes.find((r) => r.retakeAssignment && r.retakeAssignment.status !== "completed") ?? openRetakes[0] ?? null;
+  const retakeIssued = !!nextRetake?.retakeAssignment && nextRetake.retakeAssignment.status !== "completed";
   const weeks = recentWeeks(6);
   const first = grades.filter((g) => !g.isRetake);
   const series = weeklySeries(first, weeks);
@@ -107,16 +110,16 @@ export default async function LearnHome() {
       </div>
 
       <div className="col">
-      {/* 보강 일정 필 */}
-      <Link href="/learn/retake" className="card-dark flex w-full items-center justify-between gap-3 rounded-full px-5 py-3">
+      {/* 재시험 필: 출제된 재시험의 마감 · 없으면 준비 중/없음 */}
+      <Link href="/learn/retake" className="card-dark flex w-full items-center justify-between gap-3 rounded-full px-5 py-3" data-testid="retake-pill">
         <span className="flex items-center gap-3">
           <span className="lbl" style={{ color: "rgba(236,233,227,0.55)" }}>
             Retake
           </span>
-          <span className="digital-lg">{nextRetake?.scheduledAt ? fmtMD(nextRetake.scheduledAt) : nextRetake ? "TBD" : "--"}</span>
+          <span className="digital-lg">{retakeIssued ? (nextRetake!.dueAt ? fmtMD(nextRetake!.dueAt) : "OPEN") : nextRetake ? "SOON" : "--"}</span>
         </span>
         <span className="truncate text-[12px]" style={{ color: "rgba(236,233,227,0.75)" }}>
-          {nextRetake ? `${nextRetake.wrongCount}문항 · ${nextRetake.sourceExam.title}` : "예정된 보강 없음"}
+          {retakeIssued ? `${nextRetake!.retakeExam?.questionCount ?? nextRetake!.wrongCount}문항 · ${nextRetake!.dueAt ? "까지" : "마감 없음"} · ${nextRetake!.retakeExam?.title ?? nextRetake!.sourceExam.title}` : nextRetake ? `선생님이 준비 중 · ${nextRetake.sourceExam.title}` : "치를 재시험 없음"}
         </span>
       </Link>
 

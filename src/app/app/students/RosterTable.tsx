@@ -156,19 +156,18 @@ export function RosterTable({ rows, classes, members, isOwner }: { rows: RosterR
               <input type="checkbox" checked={allOn} onChange={() => setSel(allOn ? [] : all)} aria-label="전체 선택" />
             </th>
             <th>이름 · 학교</th>
-            <th>반 · 담당</th>
+            <th>반</th>
             <th>휴대폰</th>
             <th>
               <SortHeader target="#roster-body" attr="avg">4주 평균</SortHeader>
             </th>
             <th>재시험</th>
-            <th>계정</th>
           </tr>
         </thead>
         <tbody id="roster-body">
           {rows.length === 0 && (
             <tr>
-              <td colSpan={7} className="text-center" style={{ color: "var(--ink-3)" }}>
+              <td colSpan={6} className="text-center" style={{ color: "var(--ink-3)" }}>
                 학생이 없습니다. 오른쪽에서 양식을 내려받아 올리거나 한 명씩 등록하세요.
               </td>
             </tr>
@@ -186,32 +185,19 @@ export function RosterTable({ rows, classes, members, isOwner }: { rows: RosterR
                   {r.school || r.grade ? `${r.school ?? ""} ${r.grade ?? ""}`.trim() : "학교 미입력"}
                 </div>
               </td>
-              <td className="whitespace-nowrap">
-                {r.className ?? <span className="muted">반 없음</span>}
-                <div className="max-w-[150px] truncate text-[12px]" style={{ color: "var(--ink-3)" }} title={r.teachers}>
-                  {r.teachers || "담당 없음"}
-                </div>
-              </td>
-              <td className="whitespace-nowrap text-[12.5px]" style={{ color: "var(--ink-2)" }}>
+              <td className="whitespace-nowrap">{r.className ?? <span className="muted">반 없음</span>}</td>
+              <td className="whitespace-nowrap text-[12.5px]" style={{ color: "var(--ink-2)" }} title={r.teachers ? `담당 ${r.teachers}` : undefined}>
                 {r.phone ? fmtPhone(r.phone) : <span className="muted">-</span>}
+                {!r.linked && r.status === "active" && (
+                  <div className="text-[11px]" style={{ color: "var(--ink-3)" }}>
+                    {r.pending ? `승인 대기 ${r.pending}` : r.invited ? "인증번호 보냄 · 가입 전" : "가입 전"}
+                  </div>
+                )}
               </td>
               <td className="num-md" style={{ fontSize: 18, color: r.avg !== null && r.avg < 70 ? "var(--accent)" : undefined }}>
                 {r.avg ?? "–"}
               </td>
               <td>{r.retake ? <span className="badge-red">{r.retake}</span> : <span className="muted">-</span>}</td>
-              <td className="whitespace-nowrap">
-                {r.status !== "active" ? (
-                  <span className="badge-amber" title="비활성 학생">OFF</span>
-                ) : r.linked ? (
-                  <span className="badge-green" title="학생이 가입해 앱을 쓰는 중">ACTIVE</span>
-                ) : r.pending ? (
-                  <span className="badge-amber">승인 대기 {r.pending}</span>
-                ) : r.invited ? (
-                  <span className="badge-amber" title="인증번호·초대 발송됨, 아직 미가입">INVITED</span>
-                ) : (
-                  <span className="badge-gray" title="등록만 됨 · 인증번호를 보내세요">REGISTERED</span>
-                )}
-              </td>
             </tr>
           ))}
         </tbody>

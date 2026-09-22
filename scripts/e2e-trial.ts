@@ -106,7 +106,7 @@ async function main() {
   if (!code) fail("dev code should be shown: " + codeText);
   await shot(p, "04-codes");
   await p.reload();
-  if (!(await p.locator("#roster-body tr", { hasText: "김철수" }).innerText()).includes("INVITED")) fail("student should be INVITED after code");
+  if (!(await p.locator("#roster-body tr", { hasText: "김철수" }).innerText()).includes("인증번호 보냄")) fail("student should show '인증번호 보냄 · 가입 전' after code");
   log(`학생 등록(휴대폰) → 인증번호 ${code} 화면 표시 · INVITED`);
 
   const s1 = await newPage(browser, 420);

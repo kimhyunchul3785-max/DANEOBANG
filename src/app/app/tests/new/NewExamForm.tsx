@@ -1,5 +1,6 @@
 "use client";
 import { useActionState, useEffect, useMemo, useState, useTransition } from "react";
+import { ActionBar, StepHead } from "@/components/ActionBar";
 import { createExamAction, previewItemsAction } from "../actions";
 
 type Book = { id: string; title: string; days: { id: string; dayNo: number; label: string; count: number }[] };
@@ -92,10 +93,7 @@ export function NewExamForm({ books, defaultBookId, defaultDays, classes }: { bo
       <div className="space-y-5 lg:col-span-3">
         {/* 1. 범위 */}
         <section className="card card-body">
-          <div className="flex items-center justify-between">
-            <div className="lbl">1 · Range · 범위</div>
-            <span className="digital">{available} WORDS</span>
-          </div>
+          <StepHead n={1} title="범위" hint="어느 단어장, 어느 DAY를 낼까요" right={<span className="digital">{available} WORDS</span>} />
           {books.length > 1 && (
             <div className="mt-3 flex flex-wrap gap-2">
               {books.map((b) => (
@@ -136,10 +134,7 @@ export function NewExamForm({ books, defaultBookId, defaultDays, classes }: { bo
 
         {/* 2. 응시 대상 */}
         <section className="card card-body">
-          <div className="flex items-center justify-between">
-            <div className="lbl">2 · Targets · 응시 대상 (반)</div>
-            <span className="digital">{targets} STUDENTS</span>
-          </div>
+          <StepHead n={2} title="대상" hint="누가 칠까요 (반 단위)" right={<span className="digital">{targets} STUDENTS</span>} />
           <div className="mt-3 flex flex-wrap gap-2" role="group" aria-label="반 선택">
             {classes.map((c) => (
               <label key={c.id} data-class={c.name} className={`chip${cls.includes(c.id) ? " on" : ""}`}>
@@ -148,14 +143,14 @@ export function NewExamForm({ books, defaultBookId, defaultDays, classes }: { bo
                 <span className="chip-sub">{c.count}</span>
               </label>
             ))}
-            {classes.length === 0 && <span className="muted">반이 없습니다. 출제 후 시험 상세 2단계(응시 대상)에서 학생을 추가할 수 있습니다.</span>}
+            {classes.length === 0 && <span className="muted">반이 없어요. 출제 뒤 시험 상세에서 학생을 더할 수 있어요.</span>}
           </div>
-          <p className="muted mt-2">고른 반의 학생 전원에게 출제됩니다. 대상은 출제 뒤 시험 상세 → <b>응시 대상</b> 단계에서 추가·제외할 수 있습니다.</p>
+          <p className="muted mt-2">고른 반 전원에게 나갑니다. 사람 단위 조정은 출제 뒤 <b>시험 상세 → 응시 대상</b>에서.</p>
         </section>
 
         {/* 3. 조건 */}
         <section className="card card-body">
-          <div className="lbl">3 · Rules · 문항 · 통과 · 타이머 · 마감</div>
+          <StepHead n={3} title="조건" hint="몇 문항 · 몇 점이면 통과 · 단어당 몇 초 · 언제까지" />
           <div className="mt-3 grid gap-5 sm:grid-cols-2">
             <div>
               <div className="label">문항 수</div>
@@ -212,7 +207,7 @@ export function NewExamForm({ books, defaultBookId, defaultDays, classes }: { bo
                   )}
                 </div>
               </div>
-              <p className="muted mt-2">온라인 응시에서 단어마다 주는 시간. 종이 시험은 제한 없음.</p>
+              <p className="muted mt-2">온라인만 적용. 종이 시험은 제한 없음.</p>
             </div>
             <div>
               <div className="label">마감</div>
@@ -237,7 +232,7 @@ export function NewExamForm({ books, defaultBookId, defaultDays, classes }: { bo
 
         {/* 4. 세부 설정 (항상 펼침) */}
         <section className="card card-body" data-testid="options">
-          <div className="lbl">4 · Options · 이름 · 공개 · 전체 시간</div>
+          <StepHead n={4} title="이름 · 공개" hint="비워 두면 범위 이름으로. 점수·정답은 기본으로 바로 공개" />
           <div className="mt-3 grid gap-5 sm:grid-cols-3">
             <div className="sm:col-span-3">
               <div className="label">시험 이름</div>
@@ -260,7 +255,7 @@ export function NewExamForm({ books, defaultBookId, defaultDays, classes }: { bo
             <div>
               <div className="label">전체 시간 제한 (분 · 0 = 없음)</div>
               <input className="input" type="number" min={0} max={600} value={timeLimit} onChange={(e) => setTimeLimit(Number(e.target.value) || 0)} aria-label="전체 시간 제한" />
-              <p className="muted mt-1">단어당 시간과 별개로 시험 전체에 거는 상한.</p>
+              <p className="muted mt-1">시험 전체 상한. 보통 0.</p>
             </div>
           </div>
         </section>
@@ -354,17 +349,28 @@ export function NewExamForm({ books, defaultBookId, defaultDays, classes }: { bo
             <b>{range}</b> · {count}문항 · 통과 {pass}점 · 단어당 {perWord}초{timeLimit ? ` · 전체 ${timeLimit}분` : ""} · {due ? `마감 ${due.slice(5, 10).replace("-", "/")} ${due.slice(11)}` : "마감 없음"} · 대상 {targets}명
             {available > 0 && available < count && <span style={{ color: "#ffd9cc" }}> · 범위 단어 {available}개라 {available}문항으로 출제</span>}
             <span className="block" style={{ color: "rgba(236,233,227,0.55)" }}>
-              ✓ 정답 표시는 선생님 미리보기에만 보입니다.
+              ✓ 정답 표시는 선생님에게만 보여요.
             </span>
           </div>
         </div>
         {state?.error && <p className="text-[13px]" style={{ color: "var(--accent)" }}>{state.error}</p>}
-        <button className="btn-primary w-full py-3" disabled={pending || sel.length === 0} name="publishNow" value="on">
-          {pending ? "출제 중…" : cls.length ? `출제 · ${targets}명에게 · 학생 앱에 바로 표시` : "발행만 (대상은 시험 상세에서 추가)"}
-        </button>
-        <button className="btn-ghost w-full" disabled={pending || sel.length === 0} name="publishNow" value="off">
-          초안만 저장
-        </button>
+      </div>
+
+      {/* 다음 동작: 시험 상세와 같은 자리·같은 크기 */}
+      <div className="lg:col-span-5">
+        <ActionBar
+          testId="compose-bar"
+          note={
+            sel.length === 0 ? "1 · 범위에서 DAY를 고르세요" : `${range} · ${Math.min(count, available || count)}문항 · 통과 ${pass} · ${perWord}초 · ${due ? `마감 ${due.slice(5, 10).replace("-", "/")}` : "마감 없음"} · 대상 ${targets}명`
+          }
+        >
+          <button className="btn-ghost" disabled={pending || sel.length === 0} name="publishNow" value="off" data-testid="compose-draft">
+            초안만 저장
+          </button>
+          <button className="btn-primary" disabled={pending || sel.length === 0} name="publishNow" value="on" data-testid="compose-submit">
+            {pending ? "출제 중…" : cls.length ? `출제 · ${targets}명에게 →` : "발행만 · 대상은 나중에 →"}
+          </button>
+        </ActionBar>
       </div>
     </form>
   );

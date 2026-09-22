@@ -75,7 +75,8 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
     orderBy: { createdAt: "desc" },
     take: 300,
   });
-  const initial = grades.filter((g) => g.attempt.attemptNo === 1);
+  // 첫 응시 = 재시험이 아닌 시험의 1차 응시. 재시험 = 재시험 시험(isRetake) 또는 2차 이상 응시
+  const initial = grades.filter((g) => g.attempt.attemptNo === 1 && !g.attempt.assignment.exam.isRetake);
   const retakes = grades.filter((g) => g.attempt.attemptNo > 1 || g.attempt.assignment.exam.isRetake);
   const avg = initial.length ? Math.round(initial.reduce((s, g) => s + g.score, 0) / initial.length) : null;
   const passRate = initial.length ? Math.round((initial.filter((g) => g.passed).length / initial.length) * 100) : null;
@@ -143,10 +144,10 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
           <div className="muted mt-1">확정 응시</div>
         </div>
       </div>
-      <div className="card">
+      <div className="card overflow-x-auto">
         <table className="tbl">
           <thead>
-            <tr>
+            <tr className="[&>th]:whitespace-nowrap">
               <th>학생</th>
               <th>반(현재)</th>
               <th>시험</th>

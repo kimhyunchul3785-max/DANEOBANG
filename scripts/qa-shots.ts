@@ -88,7 +88,7 @@ const shot = async (page: Page, name: string) => {
     check("sidebar active follows client navigation", activeAfterNav === "/app/results", `active=${activeAfterNav}`);
     await p.waitForLoadState("networkidle");
     await shot(p, "11-owner-results-dashboard");
-    check("results tab = at-a-glance dashboard + detail list", (await p.locator("text=Group ·").count()) > 0 && (await p.locator("#results-body").count()) === 1);
+    check("results tab = widget board (9 widgets, no 선생님별/계정) + detail list", (await p.locator("[data-testid='widget-board']").count()) === 1 && (await p.locator("[data-testid^='widget-'][data-w]").count()) >= 8 && (await p.locator("#results-body").count()) === 1 && !(await p.locator("[role='tablist'][aria-label='그룹 기준']").innerText()).includes("선생님별"));
     check("heatmap cells link to results", (await p.locator("a[href^='/app/results/'][aria-label*='결과 보기']").count()) > 0);
     check("KPI numbers are rolling counters", (await p.locator("[data-value]").count()) >= 4);
     // 정렬: 평균 헤더 클릭 → 오름차순
@@ -259,7 +259,7 @@ const shot = async (page: Page, name: string) => {
     check("retake queue rows", (await p.locator("[data-testid='retake-row']").count()) > 0);
     await p.locator("button.sort-h", { hasText: "점수순" }).click();
     await p.waitForTimeout(300);
-    const sc = await p.locator("#retake-queue > li").evaluateAll((rows) => rows.map((r) => Number(r.getAttribute("data-score"))).filter((n) => !Number.isNaN(n)));
+    const sc = await p.locator("#retake-queue > li").evaluateAll((rows) => rows.map((r) => r.getAttribute("data-score")).filter((v) => v !== "" && v !== null).map(Number));
     check("retake queue sorts ascending by score", sc.every((v, i) => i === 0 || v >= sc[i - 1]), sc.slice(0, 8).join(","));
     await p.goto(`${BASE}/app/results`);
     await p.waitForLoadState("networkidle");
@@ -288,7 +288,7 @@ const shot = async (page: Page, name: string) => {
     await p.waitForLoadState("networkidle");
     await shot(p, "32-student-retake");
     const txt = await p.locator("main").innerText();
-    check("student retake shows scheduled date or pending", /scheduled|pending|예정된 재시험이 없습니다/i.test(txt));
+    check("student retake shows next retake (due·D-day) or preparing/none — no 보강", /재시험 시작|재시험 이어서|준비|치를 재시험이 없어요/.test(txt) && !/보강/.test(txt));
     await p.click("nav[aria-label='학생 메뉴'] a:visible[href='/learn/paper']");
     await p.waitForURL(/\/learn\/paper/);
     await p.waitForLoadState("networkidle");

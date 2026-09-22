@@ -9,12 +9,13 @@ import { Ring } from "@/components/Viz";
 import { CountUp } from "@/components/Motion";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { PasswordGate } from "./PasswordGate";
-import { SubmitPhoto } from "./SubmitPhoto";
+import { SubmitPhoto, TeacherSubmit } from "./SubmitPhoto";
 import { qrCookieName, qrCookieValue } from "./actions";
 
 /**
- * 시험지 QR 을 찍으면 오는 화면.
- * 비밀번호(학생 계정) 확인 → 채점 전이면 사진 제출, 채점 중이면 대기, 끝났으면 점수·통과 여부·틀린 문항.
+ * 시험지 QR(우측 상단)을 찍으면 오는 화면.
+ *  - 제출 전: 본인 학생이면 카메라가 바로 열려 사진 제출 → OMR 채점 → 결과. 담당 선생님은 대신 제출. 다른 계정은 차단. 로그인 전이면 비밀번호(=본인 로그인).
+ *  - 채점 후: 본인·담당 선생님은 결과 바로, 그 외(다른 사람)는 비밀번호 확인 후.
  */
 export default async function QrPage({ params }: { params: Promise<{ token: string }> }) {
   const { token } = await params;
@@ -42,24 +43,87 @@ export default async function QrPage({ params }: { params: Promise<{ token: stri
   const attempt = page.print.attempt;
   const student = attempt.assignment.student;
   const exam = attempt.assignment.exam;
-  // 본인 확인: 로그인한 본인이거나, 비밀번호 확인 쿠키
+  // 누가 찍었나: 본인 학생 / 담당 선생님(또는 학원장) / 비밀번호로 확인한 사람 / 그 외
   const user = await getCurrentUser();
   const c = await cookies();
   const cookieOk = c.get(await qrCookieName(token))?.value === (await qrCookieValue(token));
   const isSelf = !!user && user.id === student.userId;
-  if (!isSelf && !cookieOk) {
+  let isTeacher = false;
+  if (user && !isSelf) {
+    const m = await prisma.academyMember.findFirst({ where: { userId: user.id, academyId: exam.academyId, status: "active" }, select: { role: true, students: { where: { studentId: student.id }, select: { studentId: true } } } });
+    isTeacher = !!m && (m.role === "OWNER" || m.students.length > 0);
+  }
+  const masked = student.name.length > 2 ? `${student.name[0]}○${student.name.slice(-1)}` : student.name;
+  const grade0 = attempt.grades[0];
+  const header = (
+    <div className="card-dark card-body mb-3">
+      <div className="lbl" style={{ color: "rgba(236,233,227,0.55)" }}>
+        Paper test{isTeacher ? ` · ${student.name}` : ""}
+      </div>
+      <div className="mt-1 text-[17px] font-semibold">{exam.title}</div>
+      <div className="mt-1 text-[12px]" style={{ color: "rgba(236,233,227,0.7)" }}>
+        {page.pageNo}/{page.print.pages.length} 페이지 · 통과 {exam.passScore}점
+      </div>
+    </div>
+  );
+
+  // ── 제출 전: 본인만 제출(카메라 바로). 담당 선생님은 대신 제출 가능. 다른 계정은 막는다. 로그인 안 했으면 비밀번호(=본인 로그인).
+  if (!grade0 && !isSelf) {
+    if (isTeacher) {
+      return shell(
+        <>
+          {header}
+          <div className="card card-body anim-fade-up" data-testid="teacher-submit">
+            <div className="lbl">Teacher · 선생님 채점</div>
+            <div className="mt-1 text-[15px] font-semibold">{student.name} 학생 시험지 · 아직 제출 전</div>
+            <p className="muted mt-1">학생 대신 사진을 찍어 올리면 바로 채점됩니다. 결과는 사진 채점 화면과 성적에 들어갑니다.</p>
+            <div className="mt-3">
+              <TeacherSubmit />
+            </div>
+            <Link href={`/app/tests/${exam.id}?step=3`} className="lbl-ink mt-3 inline-block">
+              시험 상세 →
+            </Link>
+          </div>
+        </>,
+      );
+    }
+    if (user) {
+      return shell(
+        <>
+          {header}
+          <div className="card card-body anim-fade-up" data-testid="qr-blocked">
+            <div className="lbl" style={{ color: "var(--accent)" }}>
+              Not yours
+            </div>
+            <div className="mt-2 text-[16px] font-semibold">{masked} 학생의 시험지입니다</div>
+            <p className="muted mt-1">시험지 주인 학생 본인 계정으로만 제출할 수 있습니다. 지금은 <b>{user.name}</b> 계정으로 로그인되어 있습니다.</p>
+            <form action="/api/auth/logout" method="post" className="mt-4">
+              <input type="hidden" name="next" value={`/q/${token}`} />
+              <button className="btn-primary w-full py-3">다른 계정으로 로그인</button>
+            </form>
+          </div>
+        </>,
+      );
+    }
     return shell(
       <>
-        <div className="card-dark card-body mb-3">
-          <div className="lbl" style={{ color: "rgba(236,233,227,0.55)" }}>
-            Paper test
-          </div>
-          <div className="mt-1 text-[17px] font-semibold">{exam.title}</div>
-          <div className="mt-1 text-[12px]" style={{ color: "rgba(236,233,227,0.7)" }}>
-            {page.pageNo}/{page.print.pages.length} 페이지 · 통과 {exam.passScore}점
-          </div>
-        </div>
-        <PasswordGate token={token} studentName={student.name.length > 2 ? `${student.name[0]}○${student.name.slice(-1)}` : student.name} />
+        {header}
+        <PasswordGate token={token} studentName={masked} mode="submit" />
+        <p className="muted mt-3 text-center">
+          <Link href={`/login?next=/q/${token}`} className="underline">
+            휴대폰 번호·이메일로 로그인
+          </Link>
+          해도 됩니다.
+        </p>
+      </>,
+    );
+  }
+  // ── 채점 후: 본인·담당 선생님은 바로, 그 외는 비밀번호
+  if (grade0 && !isSelf && !isTeacher && !cookieOk) {
+    return shell(
+      <>
+        {header}
+        <PasswordGate token={token} studentName={masked} mode="result" />
         {!user && (
           <p className="muted mt-3 text-center">
             <Link href={`/login?next=/q/${token}`} className="underline">
@@ -138,6 +202,10 @@ export default async function QrPage({ params }: { params: Promise<{ token: stri
           <Link href={`/learn/results/${attempt.id}`} className="btn-primary mt-3 w-full py-3">
             학생 앱에서 자세히 보기
           </Link>
+        ) : isTeacher ? (
+          <Link href={`/app/results/${attempt.id}`} className="btn-primary mt-3 w-full py-3" data-testid="qr-teacher-result">
+            선생님 화면에서 정정·자세히 보기
+          </Link>
         ) : (
           <Link href={`/login?next=/learn/results/${attempt.id}`} className="btn-secondary mt-3 w-full py-3">
             로그인해서 내 성적 보기
@@ -177,7 +245,7 @@ export default async function QrPage({ params }: { params: Promise<{ token: stri
             </p>
           )}
           <div className="mt-3">
-            <SubmitPhoto token={token} />
+            <SubmitPhoto token={token} autoOpen={missing.length === page.print.pages.length && !lastFail} />
           </div>
         </div>
       )}

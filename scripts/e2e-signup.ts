@@ -223,7 +223,7 @@ async function main() {
   await p.fill('form:has(input[name="school"]) input[name="email"]', STU);
   await p.click('form:has(input[name="school"]) button:has-text("등록")');
   await p.waitForSelector("#roster-body tr:has-text('김철수')", { timeout: 15000 });
-  if (!(await p.locator("#roster-body tr", { hasText: "김철수" }).innerText()).includes("REGISTERED")) fail("new student should be REGISTERED");
+  if (!(await p.locator("#roster-body tr", { hasText: "김철수" }).innerText()).includes("가입 전")) fail("new student should be 가입 전");
   await p.locator("#roster-body a", { hasText: "김철수" }).first().click();
   await p.waitForURL(/\/app\/students\/[a-z0-9]+/);
   await p.click("button:has-text('계정 설정 링크 보내기')");

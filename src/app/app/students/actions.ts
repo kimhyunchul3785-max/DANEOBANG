@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
 import { requireAcademy, audit } from "@/lib/auth";
 import { canAccessStudent } from "@/lib/scope";
-import { hashToken, randomToken } from "@/lib/util";
+import { hashToken, randomToken, fmtMDHM } from "@/lib/util";
 import { appUrl } from "@/lib/oauth";
 import { sendMail, studentActivateMail } from "@/lib/mail";
 import { sendSms, studentCodeText, normalizePhone, isPhone } from "@/lib/sms";
@@ -238,44 +238,14 @@ export async function createWeakWordsExamAction(form: FormData): Promise<ActionR
   const wordIds = [...new Set(form.getAll("wordIds").map(String).filter(Boolean))];
   if (!(await canAccessStudent(ctx, studentId))) return { ok: false, message: "권한이 없습니다." };
   if (!wordIds.length) return { ok: false, message: "단어를 선택하세요." };
-  const words = await prisma.word.findMany({ where: { id: { in: wordIds }, book: { academyId: ctx.member.academyId } }, include: { day: true } });
-  if (!words.length) return { ok: false, message: "단어를 찾을 수 없습니다." };
-  // 단어장이 여러 개면 가장 많은 단어장 하나로
-  const byBook = new Map<string, typeof words>();
-  for (const w of words) byBook.set(w.bookId, [...(byBook.get(w.bookId) ?? []), w]);
-  const [bookId, picked] = [...byBook.entries()].sort((a, b) => b[1].length - a[1].length)[0];
-  const student = await prisma.student.findUniqueOrThrow({ where: { id: studentId } });
-  const dayIds = [...new Set(picked.map((w) => w.dayId))];
-  const now = new Date(Date.now() + 9 * 3600e3);
-  const exam = await prisma.exam.create({
-    data: {
-      academyId: ctx.member.academyId,
-      bookId,
-      createdById: ctx.user.id,
-      title: `${student.name} 반복 오답 재시험 (${now.getUTCMonth() + 1}/${now.getUTCDate()})`,
-      questionCount: picked.length,
-      passScore: 90,
-      isRetake: true,
-      scopes: { create: dayIds.map((dayId) => ({ dayId })) },
-    },
-  });
-  const { createFormForExam } = await import("@/lib/exam-gen");
-  let formId: string;
-  try {
-    const { form: f } = await createFormForExam(exam.id, { onlyWordIds: picked.map((w) => w.id) });
-    formId = f.id;
-  } catch (e) {
-    await prisma.exam.delete({ where: { id: exam.id } });
-    return { ok: false, message: `문항 생성 실패: ${e instanceof Error ? e.message : String(e)}` };
-  }
-  const { publishFormAction } = await import("../tests/actions");
-  const pub = await publishFormAction(formId);
-  if (!pub.ok) return { ok: false, message: pub.message };
   const dueAt = parseSeoulLocalOpt(form.get("dueAt"));
-  await prisma.assignment.create({ data: { examId: exam.id, formId, studentId, dueAt } });
-  await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "retake.weak_words", target: studentId, detail: `${picked.length} words` });
+  const { issueWeakWordsRetake } = await import("@/lib/retake");
+  const r = await issueWeakWordsRetake(ctx, studentId, wordIds, dueAt);
+  if (!r.ok) return { ok: false, message: r.message };
   revalidatePath(`/app/students/${studentId}`);
-  return { ok: true, message: `${picked.length}문항 재시험을 발행하고 배정했습니다. 학생 앱에 바로 보입니다.`, data: { examId: exam.id } };
+  revalidatePath("/app/retakes");
+  revalidatePath("/app");
+  return { ok: true, message: `${r.questionCount}문항 재시험을 냈습니다${dueAt ? ` (마감 ${fmtMDHM(dueAt)})` : ""}. 재시험 화면과 학생 앱에 바로 보입니다.`, data: { examId: r.examId } };
 }
 
 function parseSeoulLocalOpt(v: FormDataEntryValue | null) {

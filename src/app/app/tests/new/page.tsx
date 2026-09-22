@@ -23,7 +23,7 @@ export default async function NewExamPage({ searchParams }: { searchParams: Prom
           ← Tests · 시험
         </Link>
         <h1 className="h1 mt-1">시험 출제</h1>
-        <p className="muted mt-1">범위 → 대상 → 조건. 한 화면에서 발행과 배정까지 끝납니다. 발행 후에도 문항 미리보기·정답 정정이 가능합니다.</p>
+        <p className="muted mt-1">범위 → 대상 → 조건 → 오른쪽 아래 <b>출제</b>. 문항·정답은 나중에 고칠 수 있어요.</p>
       </header>
       {books.length === 0 ? (
         <div className="card card-body">

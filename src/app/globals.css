@@ -102,11 +102,13 @@ body {
   table.tbl th { font-family: var(--font-ui); font-size: 10.5px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--ink-3); font-weight: 500; text-align: left; padding: 8px 12px 10px; }
   table.tbl td { padding: 11px 12px; vertical-align: top; border-top: 1px solid var(--line); }
   table.tbl tbody tr:hover td { background: rgba(255, 255, 255, 0.4); }
-  /* 휴대폰: 표는 카드 안에서 가로로 스크롤 (글자가 한 자씩 꺾여 세로로 늘어지지 않게) */
-  @media (max-width: 767px) {
-    .card:has(> table.tbl), .card-body:has(> table.tbl), .card-body:has(> form > table.tbl) { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  /* 휴대폰·태블릿(<1024): 표는 카드 안에서 가로로 스크롤 (글자가 한 자씩 꺾여 세로로 늘어지지 않게) */
+  @media (max-width: 1023px) {
+    .card:has(> table.tbl), .card-body:has(> table.tbl), .card-body:has(> form > table.tbl), .card-body:has(> div > table.tbl) { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     table.tbl { width: max-content; min-width: 100%; }
     table.tbl th, table.tbl td { white-space: nowrap; }
+  }
+  @media (max-width: 767px) {
     .card-body { padding: 16px 16px; }
   }
 
@@ -124,6 +126,25 @@ body {
   .seg-item:hover { color: var(--ink); }
   .seg-item.on { background: var(--ink); color: var(--surface-2); }
   .seg-item.on-accent { background: var(--accent); color: var(--accent-ink); }
+
+  /* 흐름 동작 바: 내용 하단에 붙어 따라오는 검은 알약. 주 동작은 항상 맨 오른쪽·같은 폭 */
+  .action-bar { position: sticky; bottom: 12px; z-index: 20; margin-top: 20px; display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 20px; background: var(--charcoal); color: #ece9e3; border-radius: 999px; box-shadow: 0 10px 30px rgba(27, 26, 24, 0.22); }
+  .action-bar-note { min-width: 0; flex: 1; font-size: 12.5px; color: rgba(236, 233, 227, 0.75); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .action-bar-actions { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+  .action-bar .btn-primary { background: var(--accent); color: var(--accent-ink); min-width: 200px; padding-block: 11px; }
+  .action-bar .btn-primary:hover { background: #ff5a2e; }
+  .action-bar .btn-secondary { background: rgba(236, 233, 227, 0.12); color: #ece9e3; }
+  .action-bar .btn-secondary:hover { background: rgba(236, 233, 227, 0.2); }
+  .action-bar .btn-ghost { color: rgba(236, 233, 227, 0.75); }
+  .action-bar .btn-ghost:hover { color: #fff; background: rgba(236, 233, 227, 0.1); }
+  @media (max-width: 639px) {
+    .action-bar { padding-left: 14px; }
+    .action-bar-note { display: none; }
+    .action-bar-actions { flex: 1; justify-content: flex-end; }
+    .action-bar .btn-primary { min-width: 0; flex: 1; }
+  }
+  /* 섹션 번호 */
+  .step-no { display: inline-flex; width: 26px; height: 26px; align-items: center; justify-content: center; border-radius: 999px; background: var(--ink); color: var(--surface-2); font-family: var(--font-ui); font-size: 12px; font-weight: 600; flex-shrink: 0; margin-top: 1px; }
 
   /* 선택 칩 (DAY · 반) */
   .chip { display: inline-flex; align-items: center; gap: 6px; border-radius: 999px; padding: 7px 14px; font-size: 13px; background: var(--surface-2); color: var(--ink); cursor: pointer; user-select: none; box-shadow: inset 0 0 0 1px transparent; transition: background-color 120ms ease, color 120ms ease; }
@@ -145,8 +166,8 @@ body {
   .nav-item.on .lbl { color: rgba(250, 249, 246, 0.6); }
   .nav-item .nav-ko { font-size: 13.5px; font-weight: 500; }
   .nav-item.on .nav-ko { font-weight: 600; }
-  /* 휴대폰: 가로 칩 메뉴 — 한글만, 촘촘하게 (영문 라벨은 숨김) */
-  @media (max-width: 767px) {
+  /* 휴대폰·태블릿(<1024): 가로 칩 메뉴 — 한글만, 촘촘하게 (영문 라벨은 숨김) */
+  @media (max-width: 1023px) {
     .nav-item { gap: 0; padding: 8px 13px; }
     .nav-item .lbl { display: none; min-width: 0; }
     .nav-item .nav-ko { font-size: 13px; }

@@ -105,7 +105,10 @@ async function main() {
     await shot(owner, "owner-teachers");
     await owner.goto(`${BASE}/app/students`);
     const st = await owner.locator("#roster-body tr", { hasText: "테스터 학생01" }).first().innerText();
-    expect(st.includes("ACTIVE") && st.includes("테스터 선생님1"), "학생01 연결/담당 표시 이상: " + st);
+    // v4.4: 명단 표에서 담당·계정·상태 열 제거 — 가입한 학생은 '가입 전' 표시가 없고, 담당은 학생 상세에서 확인
+    expect(!st.includes("가입 전"), "학생01은 가입한 학생이라 '가입 전' 표시가 없어야: " + st);
+    await owner.goto(`${BASE}/app/students/${(await prisma.student.findFirstOrThrow({ where: { name: "테스터 학생01", academy: { members: { some: { user: { email: "tester.t1@daneobang.dev" } } } } } })).id}`);
+    expect((await owner.locator("main").innerText()).includes("테스터 선생님1"), "학생 상세에 담당 선생님1 표시 없음");
     await shot(owner, "owner-students-roster");
   });
 
@@ -327,38 +330,30 @@ async function main() {
   });
 
   // ── 8. 재시험 메커니즘: 오답 → 재출제(오답만) → 보강 일정 → 학생 앱 표시
-  await check("선생님1: 학생05 재시험(오답만) 생성 + 보강 일정 → 학생05 앱에 날짜 표시", async () => {
+  await check("선생님1: 학생05 재시험(오답만 · 마감) 출제 → 학생05 앱에 마감(D-day) 표시", async () => {
     const s05 = await prisma.student.findFirst({ where: { name: "테스터 학생05", academy: { slug: "tester" } } });
     expect(!!s05, "학생05 없음");
-    let task = await prisma.retakeTask.findFirst({ where: { studentId: s05!.id, status: { in: ["pending", "scheduled"] }, retakeExamId: null }, orderBy: { createdAt: "desc" } });
-    if (!task) task = await prisma.retakeTask.findFirst({ where: { studentId: s05!.id, status: { in: ["pending", "scheduled"] } }, orderBy: { createdAt: "desc" } });
-    expect(!!task, "학생05 재시험 대상 없음 (seed history 필요)");
+    const task = await prisma.retakeTask.findFirst({ where: { studentId: s05!.id, status: "pending", retakeExamId: null }, orderBy: { createdAt: "desc" } });
+    expect(!!task, "학생05 출제 전 재시험 없음 (seed history 필요)");
     await t1.goto(`${BASE}/app/retakes`);
     const row = t1.locator(`[data-testid='retake-row'][data-task="${task!.id}"]`);
     expect((await row.count()) === 1, "재시험 큐에 학생05 행 없음");
-    if (await row.locator('button:has-text("오답만 재시험")').count()) {
-      await row.locator('button:has-text("오답만 재시험")').click();
-      await t1.waitForSelector("text=학생에게 배정했습니다", { timeout: 20000 });
-    }
-    const row2 = t1.locator(`[data-testid='retake-row'][data-task="${task!.id}"]`);
-    await row2.locator('button:has-text("일정")').first().click();
     const when = new Date(Date.now() + 2 * 86400e3 + 9 * 3600e3);
     const local = `${when.toISOString().slice(0, 10)}T19:00`;
-    await row2.locator('input[name="scheduledAt"]').fill(local);
-    await row2.locator('input[name="note"]').fill("E2E 보강실");
-    await row2.locator('button:has-text("저장")').click();
-    await t1.waitForSelector("text=보강 일정을 잡았습니다", { timeout: 10000 });
-    await shot(t1, "t1-retake-scheduled");
+    await row.locator("[data-testid='issue-due']").fill(local);
+    await row.locator("[data-testid='issue-submit']").click();
+    await t1.waitForSelector(`[data-task="${task!.id}"] [data-testid='retake-status']:has-text('응시 대기')`, { timeout: 20000 });
+    await shot(t1, "t1-retake-issued");
     const s5 = await login(s5Ctx, "tester.s05@daneobang.dev", "test1234", { width: 390, height: 800 });
     await s5.goto(`${BASE}/learn/retake`);
     const txt = await s5.locator("main").innerText();
     const mmdd = `${when.getUTCMonth() + 1}/${when.getUTCDate()}`;
-    expect(txt.includes(mmdd) && txt.includes("E2E 보강실"), `학생05 재시험 화면에 보강 일정(${mmdd}) 없음: ` + txt.slice(0, 200));
-    await shot(s5, "s05-retake-scheduled");
+    expect(txt.includes(mmdd) && /D-\d|D-DAY/.test(txt) && !txt.includes("보강"), `학생05 재시험 화면에 마감(${mmdd})·D-day 없음: ` + txt.slice(0, 200));
+    await shot(s5, "s05-retake-issued");
     await s5.goto(`${BASE}/learn/grades`);
     expect((await s5.locator("text=History").count()) === 1, "학생 성적 탭 없음");
     await shot(s5, "s05-grades");
-    return `보강 ${mmdd} 19:00`;
+    return `마감 ${mmdd} 19:00`;
   });
 
   // ── 9. 조작 로그 파일 확인

@@ -4,6 +4,8 @@ node_modules
 storage/
 prisma/*.db
 prisma/*.db-journal
+prisma/*.db-wal
+prisma/*.db-shm
 *.log
 
 fixtures/e2e/

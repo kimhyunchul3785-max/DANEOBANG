@@ -32,7 +32,7 @@ export default async function LearnLayout({ children }: { children: React.ReactN
       </aside>
 
       <div className="min-w-0 flex-1">
-        <div className="mx-auto w-full max-w-[420px] lg:max-w-[1080px]">
+        <div className="mx-auto w-full max-w-[420px] sm:max-w-[600px] lg:max-w-[1080px]">
           {/* 헤더: 휴대폰은 로고·이름·알림·전환, 데스크톱은 알림만 오른쪽에 */}
           <header className="flex items-center justify-between px-5 pt-5 pb-2 lg:justify-end lg:px-8 lg:pt-5 lg:pb-0">
             <span className="lg:hidden">

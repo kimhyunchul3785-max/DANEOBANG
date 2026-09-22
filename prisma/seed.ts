@@ -323,10 +323,6 @@ async function seedHistory(academyId: string, createdById: string) {
       await prisma.gradeRevision.updateMany({ where: { attemptId: attempt.id }, data: { createdAt: submittedAt } });
     }
   }
-  // 재시험 일부에 보강 일정
-  const tasks = await prisma.retakeTask.findMany({ where: { student: { academyId }, status: "pending" }, orderBy: { createdAt: "desc" }, take: 4 });
-  const nextThu = new Date(thisWeekStart + 3 * 86400e3 + 19 * 3600e3 - offset + 9 * 3600e3);
-  for (const [i, t] of tasks.entries()) await prisma.retakeTask.update({ where: { id: t.id }, data: { scheduledAt: new Date(nextThu.getTime() + (i % 2) * 86400e3), note: i % 2 ? "2층 자습실" : "3층 강의실" } });
   console.log("history seeded: 8 weeks");
 }
 

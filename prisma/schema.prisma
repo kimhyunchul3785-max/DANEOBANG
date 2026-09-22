@@ -69,6 +69,7 @@ model AcademyMember {
   role      String   // OWNER | ADMIN | TEACHER
   isTeacher Boolean  @default(true) // 선생님 기능 사용 = Teacher Seat 1개 소비. 관리만 하는 원장·실장은 false
   status    String   @default("active") // active | disabled (접근 중지)
+  dashboardLayout String? // 성적 대시보드 위젯 배치 JSON (사용자별)
   createdAt DateTime @default(now())
 
   academy  Academy @relation(fields: [academyId], references: [id], onDelete: Cascade)
@@ -565,19 +566,22 @@ model ScanUpload {
 model RetakeTask {
   id              String    @id @default(cuid())
   studentId       String
-  sourceAttemptId String
-  status          String    @default("pending") // pending | scheduled | completed | cancelled
-  dueAt           DateTime?
-  scheduledAt     DateTime? // 보강(재시험) 일정 — 학생 앱에 날짜·시간으로 표시
-  note            String?
+  kind            String    @default("failed") // failed (통과 미달 자동) | weak_words (학생 상세에서 반복 오답으로 직접)
+  sourceAttemptId String?   // failed 일 때 원 응시. weak_words 는 null
+  status          String    @default("pending") // pending (출제 전) | issued (출제됨·응시 대기) | completed (통과) | cancelled
+  mode            String?   // 출제 범위: wrong (오답만) | same (같은 범위) | words (선택 단어)
+  wordIds         String?   // weak_words: 선택한 단어 id JSON
+  dueAt           DateTime? // 재시험 마감 (배정 기한과 같음)
   retakeExamId    String?
+  issuedAt        DateTime?
   createdAt       DateTime  @default(now())
   completedAt     DateTime?
 
-  student       Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  sourceAttempt Attempt @relation("RetakeSource", fields: [sourceAttemptId], references: [id], onDelete: Cascade)
+  student       Student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  sourceAttempt Attempt? @relation("RetakeSource", fields: [sourceAttemptId], references: [id], onDelete: Cascade)
 
   @@unique([sourceAttemptId])
+  @@index([studentId, status])
 }
 
 // ───────────── 시스템 ─────────────

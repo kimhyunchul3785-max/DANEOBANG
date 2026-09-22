@@ -28,7 +28,7 @@ export function SideNav({ isOwner, billing = false }: { isOwner: boolean; billin
     return pathname === href || pathname.startsWith(href + "/");
   };
   return (
-    <nav aria-label="주 메뉴" className="flex gap-1 overflow-x-auto px-3 pb-3 md:mt-6 md:flex-col md:gap-0.5 md:px-3">
+    <nav aria-label="주 메뉴" className="flex gap-1 overflow-x-auto px-3 pb-3 lg:mt-6 lg:flex-col lg:gap-0.5 lg:px-3">
       {items.map((n) => {
         const on = active(n.href);
         return (
@@ -38,7 +38,7 @@ export function SideNav({ isOwner, billing = false }: { isOwner: boolean; billin
           </Link>
         );
       })}
-      <form action="/api/auth/logout" method="post" className="md:hidden">
+      <form action="/api/auth/logout" method="post" className="lg:hidden">
         <button className="nav-item lbl">Sign out</button>
       </form>
     </nav>

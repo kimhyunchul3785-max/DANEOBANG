@@ -38,6 +38,7 @@ CREATE TABLE IF NOT EXISTS "AcademyMember" (
   "role" TEXT NOT NULL,
   "isTeacher" BOOLEAN NOT NULL DEFAULT true,
   "status" TEXT NOT NULL DEFAULT 'active',
+  "dashboardLayout" TEXT,
   "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "AcademyMember_academyId_fkey" FOREIGN KEY ("academyId") REFERENCES "Academy" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "AcademyMember_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
@@ -417,12 +418,14 @@ CREATE INDEX IF NOT EXISTS "ScanUpload_academyId_status_idx" ON "ScanUpload"("ac
 CREATE TABLE IF NOT EXISTS "RetakeTask" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "studentId" TEXT NOT NULL,
-  "sourceAttemptId" TEXT NOT NULL,
+  "kind" TEXT NOT NULL DEFAULT 'failed',
+  "sourceAttemptId" TEXT,
   "status" TEXT NOT NULL DEFAULT 'pending',
+  "mode" TEXT,
+  "wordIds" TEXT,
   "dueAt" DATETIME,
-  "scheduledAt" DATETIME,
-  "note" TEXT,
   "retakeExamId" TEXT,
+  "issuedAt" DATETIME,
   "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "completedAt" DATETIME,
   CONSTRAINT "RetakeTask_studentId_fkey" FOREIGN KEY ("studentId") REFERENCES "Student" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
@@ -430,6 +433,7 @@ CREATE TABLE IF NOT EXISTS "RetakeTask" (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS "RetakeTask_sourceAttemptId_key" ON "RetakeTask"("sourceAttemptId");
 CREATE UNIQUE INDEX IF NOT EXISTS "RetakeTask_sourceAttemptId_key" ON "RetakeTask"("sourceAttemptId");
+CREATE INDEX IF NOT EXISTS "RetakeTask_studentId_status_idx" ON "RetakeTask"("studentId", "status");
 CREATE TABLE IF NOT EXISTS "Job" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "academyId" TEXT,

@@ -3121,6 +3121,7 @@ export const AcademyMemberScalarFieldEnum = {
   role: 'role',
   isTeacher: 'isTeacher',
   status: 'status',
+  dashboardLayout: 'dashboardLayout',
   createdAt: 'createdAt'
 } as const
 
@@ -3536,12 +3537,14 @@ export type ScanUploadScalarFieldEnum = (typeof ScanUploadScalarFieldEnum)[keyof
 export const RetakeTaskScalarFieldEnum = {
   id: 'id',
   studentId: 'studentId',
+  kind: 'kind',
   sourceAttemptId: 'sourceAttemptId',
   status: 'status',
+  mode: 'mode',
+  wordIds: 'wordIds',
   dueAt: 'dueAt',
-  scheduledAt: 'scheduledAt',
-  note: 'note',
   retakeExamId: 'retakeExamId',
+  issuedAt: 'issuedAt',
   createdAt: 'createdAt',
   completedAt: 'completedAt'
 } as const

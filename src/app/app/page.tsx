@@ -24,7 +24,7 @@ async function OwnerOverview({ ctx }: { ctx: AcademyContext }) {
     loadGrades(academyId, { academyId }, weeks8[0]),
     prisma.student.findMany({ where: { academyId, status: "active" }, include: { classRoom: true, teachers: { select: { memberId: true } } } }),
     prisma.academyMember.findMany({ where: { academyId, status: "active" }, include: { user: { select: { name: true } }, students: { select: { studentId: true } } } }),
-    prisma.retakeTask.count({ where: { student: { academyId }, status: { in: ["pending", "scheduled"] } } }),
+    prisma.retakeTask.count({ where: { student: { academyId }, status: { in: ["pending", "issued"] } } }),
     prisma.assignment.count({ where: { exam: { academyId }, status: { in: ["assigned", "in_progress"] }, dueAt: { lt: now, gte: week.start } } }),
     prisma.vocabBook.count({ where: { academyId, status: "active" } }),
     prisma.word.count({ where: { book: { academyId, status: "active" } } }),
@@ -226,7 +226,7 @@ async function TeacherToday({ ctx }: { ctx: AcademyContext }) {
     prisma.assignment.findMany({ where: { exam: { academyId }, student: scope, OR: [{ dueAt: { gte: dayStart, lt: dayEnd } }, { createdAt: { gte: dayStart, lt: dayEnd } }] }, include: { exam: true, student: true }, take: 50 }),
     prisma.assignment.findMany({ where: { exam: { academyId, isRetake: false }, student: scope, OR: [{ dueAt: { gte: week.start, lt: week.end } }, { createdAt: { gte: week.start } }] }, include: { exam: { select: { id: true, title: true } } } }),
     prisma.assignment.count({ where: { exam: { academyId }, student: scope, status: { in: ["assigned", "in_progress"] }, dueAt: { lt: now } } }),
-    prisma.retakeTask.findMany({ where: { student: scope, status: { in: ["pending", "scheduled"] } }, include: { student: true, sourceAttempt: { include: { assignment: { include: { exam: true } } } } }, orderBy: [{ scheduledAt: "asc" }], take: 20 }),
+    prisma.retakeTask.findMany({ where: { student: scope, status: { in: ["pending", "issued"] } }, include: { student: true, sourceAttempt: { include: { assignment: { include: { exam: true } } } } }, orderBy: [{ dueAt: { sort: "asc", nulls: "last" } }, { createdAt: "desc" }], take: 60 }),
     prisma.scanUpload.count({ where: { academyId, status: { in: ["needs_review", "queued", "processing", "unrecognized"] } } }),
   ]);
   const first = grades.filter((g) => !g.isRetake);
@@ -266,8 +266,17 @@ async function TeacherToday({ ctx }: { ctx: AcademyContext }) {
       return { s, a: avg(gs.map((g) => g.score)), delta: trendDelta(series), last: gs.length ? Math.round(gs[gs.length - 1].score) : null };
     })
     .sort((x, y) => (x.a ?? 101) - (y.a ?? 101));
-  const unscheduled = retakes.filter((r) => !r.scheduledAt).length;
-  const nextRetake = retakes.find((r) => r.scheduledAt);
+  // 재시험: 출제 전 / 출제됨(마감일별 묶음)
+  const retakeNotIssued = retakes.filter((r) => !r.retakeExamId);
+  const retakeIssued = retakes.filter((r) => !!r.retakeExamId);
+  const retakeByDue = new Map<string, { label: string; at: number; names: string[]; overdue: boolean }>();
+  for (const r of retakeIssued) {
+    const key = r.dueAt ? fmtMD(r.dueAt) : "마감 없음";
+    const e = retakeByDue.get(key) ?? { label: key, at: r.dueAt?.getTime() ?? Infinity, names: [], overdue: !!r.dueAt && r.dueAt < now };
+    if (!e.names.includes(r.student.name)) e.names.push(r.student.name);
+    retakeByDue.set(key, e);
+  }
+  const retakeGroups = [...retakeByDue.values()].sort((a, b) => a.at - b.at);
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -358,27 +367,37 @@ async function TeacherToday({ ctx }: { ctx: AcademyContext }) {
           <StudentRotator rows={rows.map((r) => ({ id: r.s.id, name: r.s.name, className: r.s.classRoom?.name ?? null, a: r.a, delta: r.delta, last: r.last }))} pageSize={6} />
         </section>
 
-        <section className="card span-3 card-body">
+        <section className="card span-3 card-body" data-testid="retake-today">
           <div className="mb-2 flex items-center justify-between">
-            <div className="lbl">Retake queue</div>
+            <div className="lbl">Retake · 재시험 · 마감일별</div>
             <span className={retakes.length ? "badge-red" : "badge-gray"}>{retakes.length}</span>
           </div>
           {retakes.length === 0 ? (
             <p className="muted">재시험 대상이 없습니다.</p>
           ) : (
             <ul>
-              {retakes.slice(0, 6).map((r) => (
-                <li key={r.id} className="row">
+              {retakeNotIssued.length > 0 && (
+                <li className="row">
                   <span className="min-w-0 truncate text-[14px]">
-                    {r.student.name} <span className="muted">· {r.sourceAttempt.assignment.exam.title}</span>
+                    <b>출제 전</b> <span className="muted">· {[...new Set(retakeNotIssued.map((r) => r.student.name))].slice(0, 4).join(", ")}{new Set(retakeNotIssued.map((r) => r.student.name)).size > 4 ? ` 외 ${new Set(retakeNotIssued.map((r) => r.student.name)).size - 4}명` : ""}</span>
                   </span>
-                  {r.scheduledAt ? <span className="badge-blue">{fmtMDHM(r.scheduledAt)}</span> : r.retakeExamId ? <span className="badge-amber">일정 미정</span> : <span className="badge-red">재출제 필요</span>}
+                  <Link href="/app/retakes" className="badge-amber">
+                    {retakeNotIssued.length}건 내기
+                  </Link>
+                </li>
+              )}
+              {retakeGroups.slice(0, 5).map((g) => (
+                <li key={g.label} className="row">
+                  <span className="min-w-0 truncate text-[14px]">
+                    <b style={g.overdue ? { color: "var(--accent)" } : undefined}>{g.at === Infinity ? "마감 없음" : `${g.label}${g.overdue ? " 지남" : " 마감"}`}</b> <span className="muted">· {g.names.slice(0, 4).join(", ")}{g.names.length > 4 ? ` 외 ${g.names.length - 4}명` : ""}</span>
+                  </span>
+                  <span className={g.overdue ? "badge-red" : "badge-blue"}>{g.names.length}명</span>
                 </li>
               ))}
             </ul>
           )}
           <Link href="/app/retakes" className="lbl-ink mt-2 inline-block">
-            {unscheduled ? `일정 미정 ${unscheduled} · 큐로 →` : "큐로 →"}
+            재시험 화면 →
           </Link>
         </section>
 
@@ -400,11 +419,11 @@ async function TeacherToday({ ctx }: { ctx: AcademyContext }) {
         </Link>
         <div className="card-dark span-2 card-body">
           <div className="lbl" style={{ color: "rgba(236,233,227,0.55)" }}>
-            Next retake
+            Next retake due
           </div>
-          <div className="digital-lg mt-3">{nextRetake?.scheduledAt ? fmtMDHM(nextRetake.scheduledAt) : "--"}</div>
+          <div className="digital-lg mt-3">{retakeGroups[0]?.at !== undefined && retakeGroups[0].at !== Infinity ? retakeGroups[0].label : "--"}</div>
           <div className="mt-1 text-[12px]" style={{ color: "rgba(236,233,227,0.7)" }}>
-            {nextRetake ? `${nextRetake.student.name} · ${nextRetake.sourceAttempt.assignment.exam.title}` : "예정된 보강 없음"}
+            {retakeGroups[0] ? `${retakeGroups[0].names.length}명 · ${retakeGroups[0].names.slice(0, 3).join(", ")}` : retakeNotIssued.length ? `출제 전 ${retakeNotIssued.length}명` : "가까운 재시험 마감 없음"}
           </div>
         </div>
 

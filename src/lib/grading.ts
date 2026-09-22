@@ -53,18 +53,20 @@ export async function gradeAttempt(attemptId: string, opts: { reason?: string; b
 
 async function syncRetakeState(tx: Prisma.TransactionClient, p: { attemptId: string; studentId: string; examId: string; isRetakeExam: boolean; passed: boolean }) {
   if (!p.passed) {
-    await tx.retakeTask.upsert({
-      where: { sourceAttemptId: p.attemptId },
-      update: { status: "pending", completedAt: null },
-      create: { studentId: p.studentId, sourceAttemptId: p.attemptId },
-    });
+    // 미달 → 출제 전(pending) task. 재채점으로 다시 미달이 되어도 같은 task 를 되살린다
+    const existing = await tx.retakeTask.findUnique({ where: { sourceAttemptId: p.attemptId } });
+    if (existing) {
+      if (existing.status === "cancelled" || existing.status === "completed") await tx.retakeTask.update({ where: { id: existing.id }, data: { status: existing.retakeExamId ? "issued" : "pending", completedAt: null } });
+    } else {
+      await tx.retakeTask.create({ data: { studentId: p.studentId, sourceAttemptId: p.attemptId, kind: "failed" } });
+    }
   } else {
     // 재채점으로 통과가 되면 미완료 task 취소
-    await tx.retakeTask.updateMany({ where: { sourceAttemptId: p.attemptId, status: { in: ["pending", "scheduled"] } }, data: { status: "cancelled" } });
+    await tx.retakeTask.updateMany({ where: { sourceAttemptId: p.attemptId, status: { in: ["pending", "issued"] } }, data: { status: "cancelled" } });
   }
   if (p.isRetakeExam) {
-    // 이 재시험을 배정한 task 완료 (통과 시). 미달이면 위에서 새 task 생성됨.
-    if (p.passed) await tx.retakeTask.updateMany({ where: { studentId: p.studentId, retakeExamId: p.examId, status: { in: ["pending", "scheduled"] } }, data: { status: "completed", completedAt: new Date() } });
+    // 이 재시험을 낸 task: 통과면 완료. 미달이면 위에서 이 응시를 원 응시로 하는 새 task(다음 차수)가 생겼으므로 이 task 도 완료 처리해 큐에 한 줄만 남긴다
+    await tx.retakeTask.updateMany({ where: { studentId: p.studentId, retakeExamId: p.examId, status: { in: ["pending", "issued"] } }, data: { status: "completed", completedAt: new Date() } });
   }
 }
 

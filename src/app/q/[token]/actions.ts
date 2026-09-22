@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import { findPrintPage } from "@/lib/paper";
-import { audit, createWebSession } from "@/lib/auth";
+import { audit, createWebSession, getCurrentUser } from "@/lib/auth";
 
 const secret = () => process.env.SESSION_SECRET || "dev-insecure-secret-change-me-please-32chars";
 export async function qrCookieName(token: string) {
@@ -28,8 +28,8 @@ export async function verifyQrPasswordAction(token: string, _prev: { error?: str
   }
   const c = await cookies();
   c.set(await qrCookieName(token), await qrCookieValue(token), { httpOnly: true, sameSite: "lax", path: `/q/${token}`, maxAge: 2 * 3600 });
-  // 계정 비밀번호가 맞았으므로 학생 앱 세션도 연다 (사진 제출·알림에 필요)
-  await createWebSession(page.print.attempt.assignment.student.userId!);
+  // 로그인 전이면 (비밀번호가 맞았으므로) 학생 본인으로 로그인시킨다 — 사진 제출·알림에 필요. 다른 계정으로 로그인 중이면 열람 쿠키만.
+  if (!(await getCurrentUser())) await createWebSession(page.print.attempt.assignment.student.userId!);
   await audit({ userId: page.print.attempt.assignment.student.userId, action: "qr.open", target: page.print.attempt.id });
   return { ok: true };
 }

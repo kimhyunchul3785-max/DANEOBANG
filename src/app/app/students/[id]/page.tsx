@@ -12,9 +12,9 @@ import { loadGrades, avg, rate, recentWeeks, weeklySeries, weekLabel } from "@/l
 import { updateStudentAction } from "../actions";
 import { StudentTools } from "./StudentTools";
 import { WeakWords } from "./WeakWords";
-import { ScheduleBox } from "../../retakes/RetakeCreate";
+import { DueBox } from "../../retakes/RetakeCreate";
 
-/** 학생 상세: 12주 추이 · 반복 오답 → 재시험 · 보강 일정 · 시험 이력 · 계정/담당 */
+/** 학생 상세: 12주 추이 · 반복 오답 → 재시험 즉시 출제 · 재시험 현황(마감) · 시험 이력 · 계정/담당 */
 export default async function StudentDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const ctx = await requireAcademy();
   const { id } = await params;
@@ -26,7 +26,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
       teachers: { include: { member: { include: { user: { select: { name: true } } } } } },
       linkRequests: { where: { status: "pending" }, orderBy: { createdAt: "desc" } },
       assignments: { include: { exam: true, attempts: { include: { grades: { where: { current: true } } }, orderBy: { attemptNo: "asc" } } }, orderBy: { createdAt: "desc" } },
-      retakes: { include: { sourceAttempt: { include: { assignment: { include: { exam: true } } } } }, orderBy: [{ status: "asc" }, { scheduledAt: "asc" }, { createdAt: "desc" }] },
+      retakes: { include: { sourceAttempt: { include: { assignment: { include: { exam: true } } } } }, orderBy: [{ status: "asc" }, { dueAt: { sort: "asc", nulls: "last" } }, { createdAt: "desc" }] },
     },
   });
   if (!student) notFound();
@@ -42,7 +42,8 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   const recent = first.filter((g) => g.at >= weeks[0]);
   const series = weeklySeries(recent, weeks);
   const passLine = student.assignments.length ? Math.round(student.assignments.reduce((s, a) => s + a.exam.passScore, 0) / student.assignments.length) : 90;
-  const stat = { avg: avg(recent.map((g) => g.score)), pass: rate(recent.filter((g) => g.passed).length, recent.length), retake: student.retakes.filter((r) => r.status === "pending" || r.status === "scheduled").length };
+  const openRetakes = student.retakes.filter((r) => r.status === "pending" || r.status === "issued");
+  const stat = { avg: avg(recent.map((g) => g.score)), pass: rate(recent.filter((g) => g.passed).length, recent.length), retake: openRetakes.length };
 
   // 반복 오답: 채점 결과의 오답 문항 → 단어
   const gradedAttemptIds = grades.map((g) => g.attemptId);
@@ -58,7 +59,16 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
     weakMap.set(it.wordId, e);
   }
   const weak = [...weakMap.values()].filter((w) => !wrongItems.find((x) => x.wordId === w.wordId)?.word.excluded).sort((a, b) => b.count - a.count || a.english.localeCompare(b.english)).slice(0, 12);
-  const nextRetake = student.retakes.find((r) => (r.status === "pending" || r.status === "scheduled") && r.scheduledAt) ?? student.retakes.find((r) => r.status === "pending" || r.status === "scheduled");
+  // 재시험 현황: 출제된 것(마감 순) 먼저, 그다음 출제 전
+  const retakeExamIds = openRetakes.map((r) => r.retakeExamId).filter((x): x is string => !!x);
+  const retakeAsg = retakeExamIds.length ? await prisma.assignment.findMany({ where: { examId: { in: retakeExamIds }, studentId: student.id }, select: { examId: true, status: true, dueAt: true, attempts: { orderBy: { attemptNo: "desc" }, take: 1, select: { id: true, status: true, grades: { where: { current: true }, select: { score: true, passed: true } } } } } }) : [];
+  const retakeRows = openRetakes
+    .map((r) => {
+      const a = retakeAsg.find((x) => x.examId === r.retakeExamId);
+      const g = a?.attempts[0]?.grades[0];
+      return { r, a, g, title: r.sourceAttempt?.assignment.exam.title ?? "반복 오답 재시험", due: a?.dueAt ?? r.dueAt ?? null };
+    })
+    .sort((x, y) => Number(!x.a) - Number(!y.a) || (x.due?.getTime() ?? Infinity) - (y.due?.getTime() ?? Infinity));
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -127,33 +137,40 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
           <WeakWords studentId={student.id} words={weak} />
         </section>
 
-        {/* 보강 일정 */}
-        <section className={`${nextRetake ? "card-accent" : "card"} span-2 card-body flex flex-col justify-between`}>
+        {/* 재시험 현황 */}
+        <section className={`${retakeRows.length ? "card-accent" : "card"} span-2 card-body flex flex-col`} data-testid="student-retakes">
           <div className="flex items-center justify-between">
-            <div className={nextRetake ? "lbl-on" : "lbl"}>Retake · 보강 일정</div>
-            {nextRetake && <span className="badge-gray" style={{ background: "rgba(255,244,240,0.2)", color: "#fff4f0" }}>{nextRetake.scheduledAt ? "SCHEDULED" : "PENDING"}</span>}
+            <div className={retakeRows.length ? "lbl-on" : "lbl"}>Retake · 재시험 {retakeRows.length ? `${retakeRows.length}건` : ""}</div>
+            <Link href="/app/retakes" className={`${retakeRows.length ? "lbl-on" : "lbl-ink"} hover:underline`}>
+              재시험 화면 →
+            </Link>
           </div>
-          {nextRetake ? (
-            <>
-              <div>
-                <div className="num-xl mt-3" style={{ fontSize: 56 }}>
-                  {nextRetake.scheduledAt ? fmtMD(nextRetake.scheduledAt) : "--"}
-                </div>
-                <div className="mt-2 text-[13px]" style={{ color: "rgba(255,244,240,0.9)" }}>
-                  {nextRetake.scheduledAt ? `${fmtMDHM(nextRetake.scheduledAt)} · ` : "날짜 미정 · "}
-                  {nextRetake.sourceAttempt.assignment.exam.title}
-                  {nextRetake.note ? ` · ${nextRetake.note}` : ""}
-                </div>
-              </div>
-              <div className="mt-4 flex flex-wrap items-center gap-2 [&_.btn-secondary]:bg-[#fff4f0] [&_.btn-secondary]:text-[var(--accent)]">
-                <ScheduleBox taskId={nextRetake.id} scheduledAt={nextRetake.scheduledAt?.toISOString() ?? null} note={nextRetake.note} />
-                <Link href="/app/retakes" className="lbl-on hover:underline">
-                  재시험 큐 →
-                </Link>
-              </div>
-            </>
+          {retakeRows.length === 0 ? (
+            <p className="muted mt-3">진행 중인 재시험이 없습니다. 통과 기준에 못 미치면 자동으로 생기고, 위 반복 오답으로 직접 낼 수도 있습니다.</p>
           ) : (
-            <p className="muted mt-3">예정된 재시험이 없습니다.</p>
+            <ul className="mt-2 flex-1">
+              {retakeRows.slice(0, 5).map(({ r, a, g, title, due }) => (
+                <li key={r.id} className="py-2" style={{ borderTop: "1px solid rgba(255,244,240,0.25)" }}>
+                  <div className="truncate text-[14px] font-semibold">{title}</div>
+                  <div className="mt-1 flex flex-wrap items-center gap-2 text-[12.5px]" style={{ color: "rgba(255,244,240,0.9)" }}>
+                    {!a ? (
+                      <span className="badge-amber">출제 전 · 재시험 화면에서 범위·마감을 정해 내세요</span>
+                    ) : g ? (
+                      <span className={g.passed ? "badge-green" : "badge-red"}>
+                        {g.passed ? "통과" : "미달"} · {Math.round(g.score)}점
+                      </span>
+                    ) : (
+                      <>
+                        <span>{due ? `${fmtMDHM(due)}까지` : "마감 없음"} · {a.status === "in_progress" ? "응시 중" : "응시 대기"}</span>
+                        <span className="[&_.btn-secondary]:bg-[#fff4f0] [&_.btn-secondary]:text-[var(--accent)]">
+                          <DueBox taskId={r.id} dueAt={due?.toISOString() ?? null} />
+                        </span>
+                      </>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
           )}
         </section>
 

@@ -488,6 +488,11 @@ export type AttemptScalarRelationFilter = {
   isNot?: Prisma.AttemptWhereInput
 }
 
+export type AttemptNullableScalarRelationFilter = {
+  is?: Prisma.AttemptWhereInput | null
+  isNot?: Prisma.AttemptWhereInput | null
+}
+
 export type AttemptCreateNestedManyWithoutAssignmentInput = {
   create?: Prisma.XOR<Prisma.AttemptCreateWithoutAssignmentInput, Prisma.AttemptUncheckedCreateWithoutAssignmentInput> | Prisma.AttemptCreateWithoutAssignmentInput[] | Prisma.AttemptUncheckedCreateWithoutAssignmentInput[]
   connectOrCreate?: Prisma.AttemptCreateOrConnectWithoutAssignmentInput | Prisma.AttemptCreateOrConnectWithoutAssignmentInput[]
@@ -578,10 +583,12 @@ export type AttemptCreateNestedOneWithoutRetakeSourceInput = {
   connect?: Prisma.AttemptWhereUniqueInput
 }
 
-export type AttemptUpdateOneRequiredWithoutRetakeSourceNestedInput = {
+export type AttemptUpdateOneWithoutRetakeSourceNestedInput = {
   create?: Prisma.XOR<Prisma.AttemptCreateWithoutRetakeSourceInput, Prisma.AttemptUncheckedCreateWithoutRetakeSourceInput>
   connectOrCreate?: Prisma.AttemptCreateOrConnectWithoutRetakeSourceInput
   upsert?: Prisma.AttemptUpsertWithoutRetakeSourceInput
+  disconnect?: Prisma.AttemptWhereInput | boolean
+  delete?: Prisma.AttemptWhereInput | boolean
   connect?: Prisma.AttemptWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.AttemptUpdateToOneWithWhereWithoutRetakeSourceInput, Prisma.AttemptUpdateWithoutRetakeSourceInput>, Prisma.AttemptUncheckedUpdateWithoutRetakeSourceInput>
 }

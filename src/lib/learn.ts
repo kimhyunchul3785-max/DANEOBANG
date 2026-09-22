@@ -2,7 +2,7 @@ import { prisma } from "./db";
 import { parseJSON } from "./util";
 import { listStudentAssignments } from "./attempts";
 
-/** 학생 본인의 재시험·보강 목록 (연결된 모든 명단) */
+/** 학생 본인의 재시험 목록 (연결된 모든 명단). 출제된 것은 마감 빠른 순 */
 export async function studentRetakes(userId: string) {
   const tasks = await prisma.retakeTask.findMany({
     where: { student: { userId, status: "active" } },
@@ -10,32 +10,45 @@ export async function studentRetakes(userId: string) {
       student: { select: { id: true, name: true, academy: { select: { name: true } } } },
       sourceAttempt: { include: { grades: { where: { current: true } }, assignment: { include: { exam: { select: { id: true, title: true, passScore: true, answersReleased: true, answerVisibility: true } }, form: { select: { id: true } } } } } },
     },
-    orderBy: [{ status: "asc" }, { scheduledAt: "asc" }, { createdAt: "desc" }],
+    orderBy: [{ status: "asc" }, { dueAt: { sort: "asc", nulls: "last" } }, { createdAt: "desc" }],
   });
   const assignments = await listStudentAssignments(userId);
+  const retakeExamIds = tasks.map((t) => t.retakeExamId).filter((x): x is string => !!x);
+  const retakeExams = retakeExamIds.length ? await prisma.exam.findMany({ where: { id: { in: retakeExamIds } }, select: { id: true, title: true, questionCount: true, passScore: true } }) : [];
   return Promise.all(
     tasks.map(async (t) => {
-      const g = t.sourceAttempt.grades[0];
-      const exam = t.sourceAttempt.assignment.exam;
+      const g = t.sourceAttempt?.grades[0];
+      const exam = t.sourceAttempt?.assignment.exam ?? null;
       const results = g ? parseJSON<{ itemId: string; correct: boolean }[]>(g.itemResults, []) : [];
       const wrongIds = results.filter((r) => !r.correct).map((r) => r.itemId);
-      const showAnswers = exam.answerVisibility === "immediate" || exam.answersReleased;
-      const wrongWords = showAnswers && wrongIds.length ? (await prisma.formItem.findMany({ where: { id: { in: wrongIds } }, include: { word: { select: { english: true, meaning: true } } }, orderBy: { position: "asc" } })).map((it) => ({ english: it.prompt, meaning: it.word.meaning })) : [];
+      const showAnswers = !exam || exam.answerVisibility === "immediate" || exam.answersReleased;
+      let wrongWords: { english: string; meaning: string }[] = [];
+      if (showAnswers && wrongIds.length) {
+        wrongWords = (await prisma.formItem.findMany({ where: { id: { in: wrongIds } }, include: { word: { select: { meaning: true } } }, orderBy: { position: "asc" } })).map((it) => ({ english: it.prompt, meaning: it.word.meaning }));
+      } else if (t.kind === "weak_words") {
+        const ids = parseJSON<string[]>(t.wordIds, []);
+        wrongWords = ids.length ? (await prisma.word.findMany({ where: { id: { in: ids } }, select: { english: true, meaning: true } })).map((w) => ({ english: w.english, meaning: w.meaning })) : [];
+      }
       const retakeAssignment = t.retakeExamId ? assignments.find((a) => a.exam.id === t.retakeExamId) ?? null : null;
+      const rex = retakeExams.find((e) => e.id === t.retakeExamId) ?? null;
+      const rg = retakeAssignment?.score && "score" in retakeAssignment.score ? retakeAssignment.score : null;
       return {
         id: t.id,
+        kind: t.kind,
+        mode: t.mode,
         sourceAttemptId: t.sourceAttemptId,
         status: t.status,
-        scheduledAt: t.scheduledAt,
-        dueAt: t.dueAt,
-        note: t.note,
+        dueAt: retakeAssignment?.dueAt ?? t.dueAt,
+        issuedAt: t.issuedAt,
         studentName: t.student.name,
         academyName: t.student.academy.name,
-        sourceExam: { id: exam.id, title: exam.title, passScore: exam.passScore },
+        sourceExam: exam ? { id: exam.id, title: exam.title, passScore: exam.passScore } : { id: null, title: "반복 오답 재시험", passScore: rex?.passScore ?? 90 },
         sourceScore: g ? Math.round(g.score) : null,
-        wrongCount: wrongIds.length,
+        wrongCount: wrongIds.length || wrongWords.length,
         wrongWords,
+        retakeExam: rex,
         retakeAssignment,
+        retakeScore: rg ? { score: rg.score, passed: rg.passed } : null,
       };
     }),
   );

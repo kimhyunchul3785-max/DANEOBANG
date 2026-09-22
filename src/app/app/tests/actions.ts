@@ -140,7 +140,7 @@ export async function publishFormAction(formId: string): Promise<ActionResult> {
   ]);
   // 재시험이면 대상 학생에게 자동 배정 (기한 = task 기한)
   if (form.exam.isRetake) {
-    const tasks = await prisma.retakeTask.findMany({ where: { retakeExamId: form.examId, status: { in: ["pending", "scheduled"] } } });
+    const tasks = await prisma.retakeTask.findMany({ where: { retakeExamId: form.examId, status: { in: ["pending", "issued"] } } });
     for (const t of tasks) {
       const exists = await prisma.assignment.findUnique({ where: { examId_studentId: { examId: form.examId, studentId: t.studentId } } });
       if (!exists) await prisma.assignment.create({ data: { examId: form.examId, formId, studentId: t.studentId, dueAt: t.dueAt } });

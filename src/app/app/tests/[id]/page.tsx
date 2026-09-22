@@ -5,6 +5,7 @@ import { requireAcademy } from "@/lib/auth";
 import { studentScope } from "@/lib/scope";
 import { fmtDate, parseJSON } from "@/lib/util";
 import { ActionButton, ActionForm } from "@/components/ActionForm";
+import { ActionBar, StepHead } from "@/components/ActionBar";
 import { StatusBadge } from "@/components/StatusBadge";
 import { AutoRefresh } from "@/components/AutoRefresh";
 import { regenerateFormAction, publishFormAction, releaseAnswersAction, genErrorMessage, updateAssignmentAction, updateExamDueAction } from "../actions";
@@ -127,10 +128,7 @@ export default async function ExamDetailPage({ params, searchParams }: { params:
       {step === 1 && (
         <section className="card card-body" data-testid="step-items">
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-            <div>
-              <div className="lbl">1 · Items · 단어 목록 점검</div>
-              <p className="muted mt-1">문항·보기·정답을 확인합니다. 발행된 버전은 바뀌지 않고, 정답 정정은 아래 미리보기에서 합니다 (관련 응시는 재채점).</p>
-            </div>
+            <StepHead n={1} title="단어 목록 점검" hint="문항·보기·정답을 훑어보세요. 정답은 아래 미리보기에서 바로 고칠 수 있어요" />
             <ActionButton action={regenerateFormAction.bind(null, exam.id)} className="btn-secondary btn-sm">
               {draft ? "초안 다시 생성" : "새 버전 초안 생성"}
             </ActionButton>
@@ -185,13 +183,10 @@ export default async function ExamDetailPage({ params, searchParams }: { params:
         <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_340px]" data-testid="step-targets">
           <section className="card card-body">
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-              <div>
-                <div className="lbl">2 · Targets · 현재 응시 대상 {exam.assignments.length}명</div>
-                <p className="muted mt-1">출제할 때 정한 대상입니다. 잘못 들어간 학생은 <b>제외</b>하고, 빠진 학생은 오른쪽에서 <b>추가</b>하세요. 이미 시작·완료한 학생은 제외할 수 없습니다.</p>
-              </div>
+              <StepHead n={2} title={`응시 대상 · ${exam.assignments.length}명`} hint="잘못 들어간 학생은 제외, 빠진 학생은 오른쪽에서 추가. 이미 시작한 학생은 못 뺍니다" />
             </div>
             {exam.assignments.length === 0 ? (
-              <p className="muted">아직 응시 대상이 없습니다. 오른쪽에서 추가하세요.</p>
+              <p className="muted mt-3">아직 없어요. 오른쪽에서 추가하세요.</p>
             ) : (
               <table className="tbl">
                 <thead>
@@ -259,12 +254,13 @@ export default async function ExamDetailPage({ params, searchParams }: { params:
         <div className="space-y-4" data-testid="step-run">
           <div className="bento">
             <section className={`${published.length ? "card-dark" : "card-accent"} span-2 card-body`}>
-              <div className="lbl" style={{ color: "rgba(236,233,227,0.6)" }}>
-                3 · Publish · 출제 상태
+              <div className="flex items-center gap-2">
+                <span className="step-no" style={{ background: "#ece9e3", color: "var(--charcoal)" }}>3</span>
+                <span className="text-[15px] font-semibold">출제 상태</span>
               </div>
               <div className="mt-2 text-[18px] font-semibold">{published.length ? `v${published[0].version} 발행됨 · ${exam.assignments.length}명에게 출제` : "아직 발행 전"}</div>
               <p className="mt-1 text-[12.5px]" style={{ color: "rgba(236,233,227,0.75)" }}>
-                {published.length ? `${done}명 완료 · ${exam.assignments.length - done}명 남음${overdue ? ` · 기한 경과 ${overdue}명` : ""}` : "1단계에서 검토 완료 · 발행을 누르세요."}
+                {published.length ? `${done}명 완료 · ${exam.assignments.length - done}명 남음${overdue ? ` · 기한 경과 ${overdue}명` : ""}` : "아래 발행을 누르면 학생 앱에 나갑니다."}
               </p>
               <div className="mt-4 flex flex-wrap gap-2">
                 {draft && (
@@ -296,7 +292,7 @@ export default async function ExamDetailPage({ params, searchParams }: { params:
                   마감 변경
                 </button>
               </ActionForm>
-              <p className="muted mt-2">비워 두고 변경하면 마감이 없어집니다. 기한 경과(MISSED) 학생도 새 마감으로 다시 칠 수 있습니다.</p>
+              <p className="muted mt-2">비우면 마감 없음. 기한이 지난 학생도 새 마감으로 다시 칠 수 있어요.</p>
             </section>
 
             <section className="card span-2 card-body">
@@ -304,7 +300,7 @@ export default async function ExamDetailPage({ params, searchParams }: { params:
                 <div className="lbl">Paper · 종이 시험지</div>
                 <span className="digital">{prints} PDF</span>
               </div>
-              <p className="muted mt-1">학생마다 QR 이 다른 시험지입니다. 발급 후 아래 표의 <b>PDF</b> 로 한 명씩, 또는 전체를 zip 으로 받으세요.</p>
+              <p className="muted mt-1">학생마다 QR이 달라요. 학생이 QR을 찍으면 카메라로 바로 제출·채점. 아래 표에서 <b>PDF</b> 한 명씩, 또는 전체 zip.</p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <PrintBatchForm examId={exam.id} assignments={exam.assignments.map((a) => ({ id: a.id, name: a.student.name, mode: a.mode, status: a.status }))} />
               </div>
@@ -319,32 +315,31 @@ export default async function ExamDetailPage({ params, searchParams }: { params:
 
           <section className="card card-body">
             <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
-              <div className="lbl">Progress · 응시 현황 · 학생을 누르면 학생 상세, 점수를 누르면 결과</div>
+              <div className="lbl">Progress · 응시 현황 · 이름 → 학생 상세 · 점수 → 결과</div>
               <span className="muted">최초 응시 평균 {avg ?? "-"}점 · 확정 {graded.length}명</span>
             </div>
-            {exam.assignments.length === 0 ? <p className="muted">응시 대상이 없습니다. 2단계에서 추가하세요.</p> : <ProgressTable exam={exam} />}
+            {exam.assignments.length === 0 ? <p className="muted">응시 대상이 없어요. 2단계에서 추가하세요.</p> : <ProgressTable exam={exam} />}
           </section>
         </div>
       )}
 
-      {/* 이전 / 다음 */}
-      <div className="mt-5 flex items-center justify-between">
-        <span className="muted">
-          {step} / 3 · {STEPS[step - 1][1]}
-        </span>
-        <div className="flex gap-2">
-          {step > 1 && (
-            <Link href={href(step - 1)} className="btn-secondary" data-testid="step-prev">
-              ← 이전 · {STEPS[step - 2][1]}
-            </Link>
-          )}
-          {step < 3 && (
-            <Link href={href(step + 1)} className="btn-primary" data-testid="step-next">
-              다음 · {STEPS[step][1]} →
-            </Link>
-          )}
-        </div>
-      </div>
+      {/* 이전 / 다음 — 출제 화면과 같은 자리·같은 크기 */}
+      <ActionBar testId="detail-bar" note={`${step} / 3 · ${STEPS[step - 1][1]}${step === 2 ? ` · ${exam.assignments.length}명` : ""}${step === 3 ? ` · ${done}/${exam.assignments.length} 완료` : ""}`}>
+        {step > 1 && (
+          <Link href={href(step - 1)} className="btn-ghost" data-testid="step-prev">
+            ← {STEPS[step - 2][1]}
+          </Link>
+        )}
+        {step < 3 ? (
+          <Link href={href(step + 1)} className="btn-primary" data-testid="step-next">
+            다음 · {STEPS[step][1]} →
+          </Link>
+        ) : (
+          <Link href={`/app/results?examId=${exam.id}#detail`} className="btn-primary" data-testid="step-done">
+            성적 보기 →
+          </Link>
+        )}
+      </ActionBar>
     </div>
   );
 }
