@@ -33,12 +33,12 @@ export default async function WorkspacesPage() {
         <div className="card-body">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="h2">Academies · 선생님 · 학원장</h2>
-            <Link href="/workspaces/new" className="btn-primary btn-sm">
-              + 학원 개설
+            <Link href="/start" className="btn-primary btn-sm">
+              + 학원 시작하기
             </Link>
           </div>
           {memberships.length === 0 ? (
-            <p className="muted">참여 중인 학원이 없습니다. 학원을 개설하거나 초대 링크를 받으세요.</p>
+            <p className="muted">참여 중인 학원이 없습니다. 학원을 시작하거나(원장), 원장의 초대 링크로 참여하세요(선생님).</p>
           ) : (
             <ul className="divide-y divide-slate-100">
               {memberships.map((m) => (
@@ -47,12 +47,13 @@ export default async function WorkspacesPage() {
                     <div className="font-medium">{m.academy.name}</div>
                     <div className="text-xs text-slate-500">
                       /{m.academy.slug} · {m.role === "OWNER" ? "학원장" : "선생님"}
-                      {m.academy.status !== "active" && <span className="badge-red ml-2">정지됨</span>}
+                      {m.academy.status === "pending_payment" && <span className="badge-amber ml-2">결제 필요</span>}
+                      {m.academy.status === "suspended" && <span className="badge-red ml-2">정지됨</span>}
                     </div>
                   </div>
                   <form action={selectAcademyAction}>
                     <input type="hidden" name="academyId" value={m.academyId} />
-                    <button className="btn-secondary btn-sm" disabled={m.academy.status !== "active"}>
+                    <button className="btn-secondary btn-sm" disabled={m.academy.status === "suspended"}>
                       들어가기
                     </button>
                   </form>

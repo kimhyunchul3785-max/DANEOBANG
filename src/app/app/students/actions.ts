@@ -7,6 +7,7 @@ import { requireAcademy, audit } from "@/lib/auth";
 import { canAccessStudent } from "@/lib/scope";
 import { hashToken, randomToken } from "@/lib/util";
 import { appUrl } from "@/lib/oauth";
+import { sendMail, studentActivateMail } from "@/lib/mail";
 
 export type ActionResult = { ok: boolean; message?: string; data?: unknown };
 
@@ -18,10 +19,12 @@ export async function createStudentAction(form: FormData): Promise<ActionResult>
       school: z.string().max(40).optional(),
       grade: z.string().max(20).optional(),
       classId: z.string().optional(),
+      email: z.string().trim().email().optional().or(z.literal("")),
+      phone: z.string().max(30).optional(),
     })
     .safeParse(Object.fromEntries(form));
-  if (!parsed.success) return { ok: false, message: "이름을 확인하세요." };
-  const { name, school, grade, classId } = parsed.data;
+  if (!parsed.success) return { ok: false, message: "이름(과 이메일 형식)을 확인하세요." };
+  const { name, school, grade, classId, email, phone } = parsed.data;
   if (classId) {
     const c = await prisma.classRoom.findFirst({ where: { id: classId, academyId: ctx.member.academyId } });
     if (!c) return { ok: false, message: "반을 찾을 수 없습니다." };
@@ -33,6 +36,8 @@ export async function createStudentAction(form: FormData): Promise<ActionResult>
       school: school || null,
       grade: grade || null,
       classId: classId || null,
+      email: email ? email.toLowerCase() : null,
+      phone: phone || null,
       teachers: { create: { memberId: ctx.member.id } },
     },
   });
@@ -53,34 +58,45 @@ export async function updateStudentAction(form: FormData): Promise<ActionResult>
       classId: z.string().optional(),
       memo: z.string().max(500).optional(),
       status: z.enum(["active", "inactive"]).optional(),
+      email: z.string().trim().email().optional().or(z.literal("")),
+      phone: z.string().max(30).optional(),
     })
     .safeParse(Object.fromEntries(form));
-  if (!parsed.success) return { ok: false, message: "입력을 확인하세요." };
+  if (!parsed.success) return { ok: false, message: "입력(이메일 형식)을 확인하세요." };
   const d = parsed.data;
   await prisma.student.update({
     where: { id },
-    data: { name: d.name, school: d.school || null, grade: d.grade || null, classId: d.classId || null, memo: d.memo || null, status: d.status ?? "active" },
+    data: { name: d.name, school: d.school || null, grade: d.grade || null, classId: d.classId || null, memo: d.memo || null, status: d.status ?? "active", email: d.email ? d.email.toLowerCase() : null, phone: d.phone || null },
   });
   revalidatePath(`/app/students/${id}`);
   revalidatePath("/app/students");
   return { ok: true, message: "저장했습니다." };
 }
 
-/** 학생 초대 링크 발급 (7일, 일회용) */
+/**
+ * 학생 계정 설정 링크 발급 (7일, 일회용). 학생은 링크에서 비밀번호만 정하면 바로 연결된다 (선생님 승인 불필요).
+ * 학생 이메일이 있으면 메일도 보낸다 (메일 서버 없으면 링크만 돌려준다).
+ */
 export async function issueStudentInviteAction(studentId: string): Promise<ActionResult> {
   const ctx = await requireAcademy();
   if (!(await canAccessStudent(ctx, studentId))) return { ok: false, message: "권한이 없습니다." };
-  const s = await prisma.student.findUnique({ where: { id: studentId } });
+  const s = await prisma.student.findUnique({ where: { id: studentId }, include: { academy: { select: { name: true } } } });
   if (!s) return { ok: false };
   if (s.userId) return { ok: false, message: "이미 계정이 연결된 학생입니다." };
   const token = randomToken(24);
+  const url = `${appUrl()}/join/${token}`;
+  let mailed = false;
+  if (s.email) {
+    const r = await sendMail({ to: s.email, ...studentActivateMail(url, s.academy.name, s.name) });
+    mailed = r.sent;
+  }
   await prisma.student.update({
     where: { id: studentId },
-    data: { inviteTokenHash: hashToken(token), inviteExpiresAt: new Date(Date.now() + 7 * 86400e3) },
+    data: { inviteTokenHash: hashToken(token), inviteExpiresAt: new Date(Date.now() + 7 * 86400e3), inviteSentAt: mailed ? new Date() : null },
   });
-  await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "student.invite", target: studentId });
+  await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "student.invite", target: studentId, detail: mailed ? `mail ${s.email}` : "link" });
   revalidatePath(`/app/students/${studentId}`);
-  return { ok: true, data: { url: `${appUrl()}/join/${token}` } };
+  return { ok: true, message: mailed ? `${s.email} 로 계정 설정 메일을 보냈습니다.` : "계정 설정 링크를 만들었습니다. 학생에게 전달하세요.", data: { url, mailed } };
 }
 
 export async function revokeStudentInviteAction(studentId: string): Promise<ActionResult> {
@@ -246,15 +262,16 @@ export async function uploadRosterAction(form: FormData): Promise<ActionResult> 
   const perClass: string[] = [];
   for (const ws of wb.worksheets) {
     const className = ws.name.trim();
-    const rows: { name: string; school: string; grade: string }[] = [];
+    const rows: { name: string; school: string; grade: string; email: string }[] = [];
     ws.eachRow((row, idx) => {
       const name = cell(row.getCell(1).value);
       const school = cell(row.getCell(2).value);
       const grade = cell(row.getCell(3).value);
+      const email = cell(row.getCell(4).value).toLowerCase();
       if (!name) return;
       if (idx === 1 && /^(이름|name)$/i.test(name)) return; // 머리글
       if (/^예시\)/.test(name)) return; // 양식의 예시 행
-      rows.push({ name: name.slice(0, 30), school: school.slice(0, 40), grade: grade.slice(0, 20) });
+      rows.push({ name: name.slice(0, 30), school: school.slice(0, 40), grade: grade.slice(0, 20), email: /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) ? email : "" });
     });
     if (!rows.length) continue;
     const noClass = /^(sheet\d*|시트\d*|반 없음|없음)$/i.test(className);
@@ -275,7 +292,7 @@ export async function uploadRosterAction(form: FormData): Promise<ActionResult> 
         continue;
       }
       seen.add(key);
-      await prisma.student.create({ data: { academyId: ctx.member.academyId, name: r.name, school: r.school || null, grade: r.grade || null, classId, teachers: { create: { memberId: ctx.member.id } } } });
+      await prisma.student.create({ data: { academyId: ctx.member.academyId, name: r.name, school: r.school || null, grade: r.grade || null, email: r.email || null, classId, teachers: { create: { memberId: ctx.member.id } } } });
       created++;
       n++;
     }

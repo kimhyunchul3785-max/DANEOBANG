@@ -19,6 +19,31 @@ const MIGRATIONS: { table: string; column: string; ddl: string }[] = [
   { table: "Exam", column: "secondsPerItem", ddl: 'ALTER TABLE "Exam" ADD COLUMN "secondsPerItem" INTEGER NOT NULL DEFAULT 7' },
   { table: "ScanUpload", column: "source", ddl: 'ALTER TABLE "ScanUpload" ADD COLUMN "source" TEXT NOT NULL DEFAULT \'teacher\'' },
   { table: "Notification", column: "link", ddl: 'ALTER TABLE "Notification" ADD COLUMN "link" TEXT' },
+  // v4.2 — B2B 가입·Seat 과금
+  { table: "User", column: "emailVerifiedAt", ddl: 'ALTER TABLE "User" ADD COLUMN "emailVerifiedAt" DATETIME' },
+  { table: "User", column: "phone", ddl: 'ALTER TABLE "User" ADD COLUMN "phone" TEXT' },
+  { table: "Academy", column: "representativeName", ddl: 'ALTER TABLE "Academy" ADD COLUMN "representativeName" TEXT' },
+  { table: "Academy", column: "phone", ddl: 'ALTER TABLE "Academy" ADD COLUMN "phone" TEXT' },
+  { table: "Academy", column: "region", ddl: 'ALTER TABLE "Academy" ADD COLUMN "region" TEXT' },
+  { table: "AcademyMember", column: "isTeacher", ddl: 'ALTER TABLE "AcademyMember" ADD COLUMN "isTeacher" BOOLEAN NOT NULL DEFAULT true' },
+  { table: "Invitation", column: "isTeacher", ddl: 'ALTER TABLE "Invitation" ADD COLUMN "isTeacher" BOOLEAN NOT NULL DEFAULT true' },
+  { table: "Invitation", column: "name", ddl: 'ALTER TABLE "Invitation" ADD COLUMN "name" TEXT' },
+  { table: "Invitation", column: "revokedAt", ddl: 'ALTER TABLE "Invitation" ADD COLUMN "revokedAt" DATETIME' },
+  { table: "Student", column: "email", ddl: 'ALTER TABLE "Student" ADD COLUMN "email" TEXT' },
+  { table: "Student", column: "phone", ddl: 'ALTER TABLE "Student" ADD COLUMN "phone" TEXT' },
+  { table: "Student", column: "inviteSentAt", ddl: 'ALTER TABLE "Student" ADD COLUMN "inviteSentAt" DATETIME' },
+  { table: "SignupSession", column: "verifyTokenDev", ddl: 'ALTER TABLE "SignupSession" ADD COLUMN "verifyTokenDev" TEXT' },
+];
+
+// 데이터 보정 (멱등): 상태값 통일, 기존 사용자 이메일 인증 처리, 기존 학원에 기본 구독(활성 선생님 수만큼) 생성
+const DATA_FIXES: string[] = [
+  `UPDATE "AcademyMember" SET "status" = 'disabled' WHERE "status" = 'inactive'`,
+  `UPDATE "User" SET "emailVerifiedAt" = "createdAt" WHERE "emailVerifiedAt" IS NULL`,
+  `INSERT INTO "Subscription" ("id", "academyId", "provider", "seatQuantity", "unitPrice", "status", "currentPeriodStart", "currentPeriodEnd", "createdAt", "updatedAt")
+     SELECT 'sub_' || lower(hex(randomblob(10))), a."id", 'legacy',
+       MAX(1, (SELECT count(*) FROM "AcademyMember" m WHERE m."academyId" = a."id" AND m."status" = 'active' AND m."isTeacher" = 1)),
+       9900, 'active', CURRENT_TIMESTAMP, datetime(CURRENT_TIMESTAMP, '+1 month'), CURRENT_TIMESTAMP, CURRENT_TIMESTAMP
+     FROM "Academy" a WHERE NOT EXISTS (SELECT 1 FROM "Subscription" s WHERE s."academyId" = a."id")`,
 ];
 
 async function main() {
@@ -30,6 +55,10 @@ async function main() {
       await client.execute(m.ddl);
       console.log(`migrated: ${m.table}.${m.column}`);
     }
+  }
+  for (const q of DATA_FIXES) {
+    const r = await client.execute(q);
+    if (r.rowsAffected) console.log(`data fix: ${r.rowsAffected} rows — ${q.trim().slice(0, 40)}…`);
   }
   const t = await client.execute("SELECT count(*) as n FROM sqlite_master WHERE type='table'");
   console.log(`db ready: ${url} (${t.rows[0].n} tables)`);

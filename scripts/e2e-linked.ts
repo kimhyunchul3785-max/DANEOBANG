@@ -105,7 +105,7 @@ async function main() {
     await shot(owner, "owner-teachers");
     await owner.goto(`${BASE}/app/students`);
     const st = await owner.locator("#roster-body tr", { hasText: "테스터 학생01" }).first().innerText();
-    expect(st.includes("LINKED") && st.includes("테스터 선생님1"), "학생01 연결/담당 표시 이상: " + st);
+    expect(st.includes("ACTIVE") && st.includes("테스터 선생님1"), "학생01 연결/담당 표시 이상: " + st);
     await shot(owner, "owner-students-roster");
   });
 
@@ -268,7 +268,7 @@ async function main() {
     const noti = await prisma.notification.findFirst({ where: { user: { email: "tester.s02@daneobang.dev" }, title: { contains: "채점 완료" } }, orderBy: { createdAt: "desc" } });
     expect(!!noti && noti.title.includes("80") && noti.title.includes("재시험"), "채점 완료 알림 없음: " + noti?.title);
     await s2.goto(`${BASE}/learn/paper`);
-    await s2.waitForSelector("text=RETAKE", { timeout: 10000 });
+    await s2.waitForSelector(".badge-red:has-text(\"RETAKE\")", { timeout: 10000 });
     await shot(s2, "s02-paper-graded");
     // QR 페이지: 로그인 없는 새 컨텍스트에서 비밀번호로 열람
     const qctx = await browser.newContext({ viewport: { width: 390, height: 800 } });

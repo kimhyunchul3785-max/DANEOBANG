@@ -154,6 +154,15 @@ body {
   }
 
   /* bento 그리드 */
+  /* 학생 앱: 휴대폰은 한 열, 데스크톱(≥1024px)은 넓은 열 + 360px 보조 열 */
+  .learn-grid { display: flex; flex-direction: column; gap: 12px; }
+  .learn-grid > .col { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+  @media (min-width: 1024px) {
+    .learn-grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
+    .learn-grid.wide { grid-template-columns: minmax(0, 1fr) 420px; }
+    .learn-grid > .col { gap: 16px; }
+    .learn-grid > .col.sticky { position: sticky; top: 24px; }
+  }
   /* 열 지정이 없는 grid 는 1열 minmax(0,1fr): 긴 파일명 같은 안 끊기는 글자가 열을 화면 밖으로 밀지 못하게. (grid-cols-* 유틸리티가 우선) */
   .grid { grid-template-columns: minmax(0, 1fr); }
   /* 휴대폰: 한 줄에 카드 하나. 태블릿: 2열(넓은 카드는 꽉 차게). 데스크톱: 6열 벤토 */

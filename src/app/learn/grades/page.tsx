@@ -21,7 +21,8 @@ export default async function GradesPage() {
   const passLine = first.length ? Math.round(first.reduce((s, g) => s + g.passScore, 0) / first.length) : 90;
 
   return (
-    <div className="space-y-3">
+    <div className="learn-grid">
+      <div className="col">
       <div className="flex items-end justify-between px-1">
         <div>
           <div className="lbl">Grades</div>
@@ -60,6 +61,15 @@ export default async function GradesPage() {
         </div>
       </div>
 
+      {first.length > 0 && (
+        <div className="card card-body">
+          <div className="lbl mb-3">Distribution · 점수 분포</div>
+          <Columns bins={scoreBins(first.map((g) => g.score))} accentIndexBelow={3} height={84} />
+        </div>
+      )}
+      </div>
+
+      <div className="col">
       <div className="grid grid-cols-2 gap-3">
         <div className="card-sm card-body">
           <div className="lbl">Best</div>
@@ -74,13 +84,6 @@ export default async function GradesPage() {
           </div>
         </div>
       </div>
-
-      {first.length > 0 && (
-        <div className="card card-body">
-          <div className="lbl mb-3">Distribution · 점수 분포</div>
-          <Columns bins={scoreBins(first.map((g) => g.score))} accentIndexBelow={3} height={84} />
-        </div>
-      )}
 
       {grades.length > 0 && (
         <Link href="/learn/practice" className="card-dark flex w-full items-center justify-between gap-3 rounded-full px-5 py-3" data-testid="practice-all">
@@ -118,6 +121,7 @@ export default async function GradesPage() {
           ))}
         </ul>
       </section>
+      </div>
     </div>
   );
 }

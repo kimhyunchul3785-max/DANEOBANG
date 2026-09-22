@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getAcademyContext } from "@/lib/auth";
 
-/** 학생 등록 양식(.xlsx): 시트 = 반, 열 = 이름 · 학교 · 학년. 현재 반이 있으면 시트로 미리 만들어 준다 */
+/** 학생 등록 양식(.xlsx): 시트 = 반, 열 = 이름 · 학교 · 학년 · 이메일(선택). 현재 반이 있으면 시트로 미리 만들어 준다 */
 export async function GET() {
   const ctx = await getAcademyContext();
   if (!ctx) return NextResponse.json({ error: "forbidden" }, { status: 403 });
@@ -17,10 +17,11 @@ export async function GET() {
       { header: "이름", key: "name", width: 14 },
       { header: "학교", key: "school", width: 16 },
       { header: "학년(예: 고1)", key: "grade", width: 14 },
+      { header: "이메일(선택 · 계정 설정 링크 발송)", key: "email", width: 34 },
     ];
     ws.getRow(1).font = { bold: true };
     if (i === 0) {
-      ws.addRow({ name: "예시) 김민준", school: "한빛고", grade: "고1" });
+      ws.addRow({ name: "예시) 김민준", school: "한빛고", grade: "고1", email: "minjun@example.com" });
       ws.getRow(2).font = { color: { argb: "FF8B8780" } };
     }
   }

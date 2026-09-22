@@ -31,6 +31,9 @@ export type AcademyMinAggregateOutputType = {
   intro: string | null
   color: string | null
   logoPath: string | null
+  representativeName: string | null
+  phone: string | null
+  region: string | null
   status: string | null
   plan: string | null
   createdAt: Date | null
@@ -44,6 +47,9 @@ export type AcademyMaxAggregateOutputType = {
   intro: string | null
   color: string | null
   logoPath: string | null
+  representativeName: string | null
+  phone: string | null
+  region: string | null
   status: string | null
   plan: string | null
   createdAt: Date | null
@@ -57,6 +63,9 @@ export type AcademyCountAggregateOutputType = {
   intro: number
   color: number
   logoPath: number
+  representativeName: number
+  phone: number
+  region: number
   status: number
   plan: number
   createdAt: number
@@ -72,6 +81,9 @@ export type AcademyMinAggregateInputType = {
   intro?: true
   color?: true
   logoPath?: true
+  representativeName?: true
+  phone?: true
+  region?: true
   status?: true
   plan?: true
   createdAt?: true
@@ -85,6 +97,9 @@ export type AcademyMaxAggregateInputType = {
   intro?: true
   color?: true
   logoPath?: true
+  representativeName?: true
+  phone?: true
+  region?: true
   status?: true
   plan?: true
   createdAt?: true
@@ -98,6 +113,9 @@ export type AcademyCountAggregateInputType = {
   intro?: true
   color?: true
   logoPath?: true
+  representativeName?: true
+  phone?: true
+  region?: true
   status?: true
   plan?: true
   createdAt?: true
@@ -184,6 +202,9 @@ export type AcademyGroupByOutputType = {
   intro: string | null
   color: string
   logoPath: string | null
+  representativeName: string | null
+  phone: string | null
+  region: string | null
   status: string
   plan: string
   createdAt: Date
@@ -218,12 +239,16 @@ export type AcademyWhereInput = {
   intro?: Prisma.StringNullableFilter<"Academy"> | string | null
   color?: Prisma.StringFilter<"Academy"> | string
   logoPath?: Prisma.StringNullableFilter<"Academy"> | string | null
+  representativeName?: Prisma.StringNullableFilter<"Academy"> | string | null
+  phone?: Prisma.StringNullableFilter<"Academy"> | string | null
+  region?: Prisma.StringNullableFilter<"Academy"> | string | null
   status?: Prisma.StringFilter<"Academy"> | string
   plan?: Prisma.StringFilter<"Academy"> | string
   createdAt?: Prisma.DateTimeFilter<"Academy"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Academy"> | Date | string
   members?: Prisma.AcademyMemberListRelationFilter
   invitations?: Prisma.InvitationListRelationFilter
+  subscription?: Prisma.XOR<Prisma.SubscriptionNullableScalarRelationFilter, Prisma.SubscriptionWhereInput> | null
   classes?: Prisma.ClassRoomListRelationFilter
   students?: Prisma.StudentListRelationFilter
   books?: Prisma.VocabBookListRelationFilter
@@ -241,12 +266,16 @@ export type AcademyOrderByWithRelationInput = {
   intro?: Prisma.SortOrderInput | Prisma.SortOrder
   color?: Prisma.SortOrder
   logoPath?: Prisma.SortOrderInput | Prisma.SortOrder
+  representativeName?: Prisma.SortOrderInput | Prisma.SortOrder
+  phone?: Prisma.SortOrderInput | Prisma.SortOrder
+  region?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   plan?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   members?: Prisma.AcademyMemberOrderByRelationAggregateInput
   invitations?: Prisma.InvitationOrderByRelationAggregateInput
+  subscription?: Prisma.SubscriptionOrderByWithRelationInput
   classes?: Prisma.ClassRoomOrderByRelationAggregateInput
   students?: Prisma.StudentOrderByRelationAggregateInput
   books?: Prisma.VocabBookOrderByRelationAggregateInput
@@ -267,12 +296,16 @@ export type AcademyWhereUniqueInput = Prisma.AtLeast<{
   intro?: Prisma.StringNullableFilter<"Academy"> | string | null
   color?: Prisma.StringFilter<"Academy"> | string
   logoPath?: Prisma.StringNullableFilter<"Academy"> | string | null
+  representativeName?: Prisma.StringNullableFilter<"Academy"> | string | null
+  phone?: Prisma.StringNullableFilter<"Academy"> | string | null
+  region?: Prisma.StringNullableFilter<"Academy"> | string | null
   status?: Prisma.StringFilter<"Academy"> | string
   plan?: Prisma.StringFilter<"Academy"> | string
   createdAt?: Prisma.DateTimeFilter<"Academy"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Academy"> | Date | string
   members?: Prisma.AcademyMemberListRelationFilter
   invitations?: Prisma.InvitationListRelationFilter
+  subscription?: Prisma.XOR<Prisma.SubscriptionNullableScalarRelationFilter, Prisma.SubscriptionWhereInput> | null
   classes?: Prisma.ClassRoomListRelationFilter
   students?: Prisma.StudentListRelationFilter
   books?: Prisma.VocabBookListRelationFilter
@@ -290,6 +323,9 @@ export type AcademyOrderByWithAggregationInput = {
   intro?: Prisma.SortOrderInput | Prisma.SortOrder
   color?: Prisma.SortOrder
   logoPath?: Prisma.SortOrderInput | Prisma.SortOrder
+  representativeName?: Prisma.SortOrderInput | Prisma.SortOrder
+  phone?: Prisma.SortOrderInput | Prisma.SortOrder
+  region?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   plan?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -309,6 +345,9 @@ export type AcademyScalarWhereWithAggregatesInput = {
   intro?: Prisma.StringNullableWithAggregatesFilter<"Academy"> | string | null
   color?: Prisma.StringWithAggregatesFilter<"Academy"> | string
   logoPath?: Prisma.StringNullableWithAggregatesFilter<"Academy"> | string | null
+  representativeName?: Prisma.StringNullableWithAggregatesFilter<"Academy"> | string | null
+  phone?: Prisma.StringNullableWithAggregatesFilter<"Academy"> | string | null
+  region?: Prisma.StringNullableWithAggregatesFilter<"Academy"> | string | null
   status?: Prisma.StringWithAggregatesFilter<"Academy"> | string
   plan?: Prisma.StringWithAggregatesFilter<"Academy"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Academy"> | Date | string
@@ -322,12 +361,16 @@ export type AcademyCreateInput = {
   intro?: string | null
   color?: string
   logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
   status?: string
   plan?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.AcademyMemberCreateNestedManyWithoutAcademyInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutAcademyInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutAcademyInput
   classes?: Prisma.ClassRoomCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookCreateNestedManyWithoutAcademyInput
@@ -345,12 +388,16 @@ export type AcademyUncheckedCreateInput = {
   intro?: string | null
   color?: string
   logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
   status?: string
   plan?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.AcademyMemberUncheckedCreateNestedManyWithoutAcademyInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutAcademyInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutAcademyInput
   classes?: Prisma.ClassRoomUncheckedCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookUncheckedCreateNestedManyWithoutAcademyInput
@@ -368,12 +415,16 @@ export type AcademyUpdateInput = {
   intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.StringFieldUpdateOperationsInput | string
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.AcademyMemberUpdateManyWithoutAcademyNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutAcademyNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutAcademyNestedInput
   classes?: Prisma.ClassRoomUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUpdateManyWithoutAcademyNestedInput
@@ -391,12 +442,16 @@ export type AcademyUncheckedUpdateInput = {
   intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.StringFieldUpdateOperationsInput | string
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.AcademyMemberUncheckedUpdateManyWithoutAcademyNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutAcademyNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutAcademyNestedInput
   classes?: Prisma.ClassRoomUncheckedUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUncheckedUpdateManyWithoutAcademyNestedInput
@@ -414,6 +469,9 @@ export type AcademyCreateManyInput = {
   intro?: string | null
   color?: string
   logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
   status?: string
   plan?: string
   createdAt?: Date | string
@@ -427,6 +485,9 @@ export type AcademyUpdateManyMutationInput = {
   intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.StringFieldUpdateOperationsInput | string
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -440,6 +501,9 @@ export type AcademyUncheckedUpdateManyInput = {
   intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.StringFieldUpdateOperationsInput | string
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -453,6 +517,9 @@ export type AcademyCountOrderByAggregateInput = {
   intro?: Prisma.SortOrder
   color?: Prisma.SortOrder
   logoPath?: Prisma.SortOrder
+  representativeName?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
+  region?: Prisma.SortOrder
   status?: Prisma.SortOrder
   plan?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -466,6 +533,9 @@ export type AcademyMaxOrderByAggregateInput = {
   intro?: Prisma.SortOrder
   color?: Prisma.SortOrder
   logoPath?: Prisma.SortOrder
+  representativeName?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
+  region?: Prisma.SortOrder
   status?: Prisma.SortOrder
   plan?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -479,6 +549,9 @@ export type AcademyMinOrderByAggregateInput = {
   intro?: Prisma.SortOrder
   color?: Prisma.SortOrder
   logoPath?: Prisma.SortOrder
+  representativeName?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
+  region?: Prisma.SortOrder
   status?: Prisma.SortOrder
   plan?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -521,6 +594,20 @@ export type AcademyUpdateOneRequiredWithoutInvitationsNestedInput = {
   upsert?: Prisma.AcademyUpsertWithoutInvitationsInput
   connect?: Prisma.AcademyWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.AcademyUpdateToOneWithWhereWithoutInvitationsInput, Prisma.AcademyUpdateWithoutInvitationsInput>, Prisma.AcademyUncheckedUpdateWithoutInvitationsInput>
+}
+
+export type AcademyCreateNestedOneWithoutSubscriptionInput = {
+  create?: Prisma.XOR<Prisma.AcademyCreateWithoutSubscriptionInput, Prisma.AcademyUncheckedCreateWithoutSubscriptionInput>
+  connectOrCreate?: Prisma.AcademyCreateOrConnectWithoutSubscriptionInput
+  connect?: Prisma.AcademyWhereUniqueInput
+}
+
+export type AcademyUpdateOneRequiredWithoutSubscriptionNestedInput = {
+  create?: Prisma.XOR<Prisma.AcademyCreateWithoutSubscriptionInput, Prisma.AcademyUncheckedCreateWithoutSubscriptionInput>
+  connectOrCreate?: Prisma.AcademyCreateOrConnectWithoutSubscriptionInput
+  upsert?: Prisma.AcademyUpsertWithoutSubscriptionInput
+  connect?: Prisma.AcademyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AcademyUpdateToOneWithWhereWithoutSubscriptionInput, Prisma.AcademyUpdateWithoutSubscriptionInput>, Prisma.AcademyUncheckedUpdateWithoutSubscriptionInput>
 }
 
 export type AcademyCreateNestedOneWithoutClassesInput = {
@@ -646,11 +733,15 @@ export type AcademyCreateWithoutMembersInput = {
   intro?: string | null
   color?: string
   logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
   status?: string
   plan?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   invitations?: Prisma.InvitationCreateNestedManyWithoutAcademyInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutAcademyInput
   classes?: Prisma.ClassRoomCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookCreateNestedManyWithoutAcademyInput
@@ -668,11 +759,15 @@ export type AcademyUncheckedCreateWithoutMembersInput = {
   intro?: string | null
   color?: string
   logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
   status?: string
   plan?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutAcademyInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutAcademyInput
   classes?: Prisma.ClassRoomUncheckedCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookUncheckedCreateNestedManyWithoutAcademyInput
@@ -706,11 +801,15 @@ export type AcademyUpdateWithoutMembersInput = {
   intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.StringFieldUpdateOperationsInput | string
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   invitations?: Prisma.InvitationUpdateManyWithoutAcademyNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutAcademyNestedInput
   classes?: Prisma.ClassRoomUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUpdateManyWithoutAcademyNestedInput
@@ -728,11 +827,15 @@ export type AcademyUncheckedUpdateWithoutMembersInput = {
   intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.StringFieldUpdateOperationsInput | string
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutAcademyNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutAcademyNestedInput
   classes?: Prisma.ClassRoomUncheckedUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUncheckedUpdateManyWithoutAcademyNestedInput
@@ -750,11 +853,15 @@ export type AcademyCreateWithoutInvitationsInput = {
   intro?: string | null
   color?: string
   logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
   status?: string
   plan?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.AcademyMemberCreateNestedManyWithoutAcademyInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutAcademyInput
   classes?: Prisma.ClassRoomCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookCreateNestedManyWithoutAcademyInput
@@ -772,11 +879,15 @@ export type AcademyUncheckedCreateWithoutInvitationsInput = {
   intro?: string | null
   color?: string
   logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
   status?: string
   plan?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.AcademyMemberUncheckedCreateNestedManyWithoutAcademyInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutAcademyInput
   classes?: Prisma.ClassRoomUncheckedCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookUncheckedCreateNestedManyWithoutAcademyInput
@@ -810,11 +921,15 @@ export type AcademyUpdateWithoutInvitationsInput = {
   intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.StringFieldUpdateOperationsInput | string
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.AcademyMemberUpdateManyWithoutAcademyNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutAcademyNestedInput
   classes?: Prisma.ClassRoomUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUpdateManyWithoutAcademyNestedInput
@@ -832,11 +947,135 @@ export type AcademyUncheckedUpdateWithoutInvitationsInput = {
   intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.StringFieldUpdateOperationsInput | string
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.AcademyMemberUncheckedUpdateManyWithoutAcademyNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutAcademyNestedInput
+  classes?: Prisma.ClassRoomUncheckedUpdateManyWithoutAcademyNestedInput
+  students?: Prisma.StudentUncheckedUpdateManyWithoutAcademyNestedInput
+  books?: Prisma.VocabBookUncheckedUpdateManyWithoutAcademyNestedInput
+  imports?: Prisma.ImportUncheckedUpdateManyWithoutAcademyNestedInput
+  exams?: Prisma.ExamUncheckedUpdateManyWithoutAcademyNestedInput
+  scans?: Prisma.ScanUploadUncheckedUpdateManyWithoutAcademyNestedInput
+  jobs?: Prisma.JobUncheckedUpdateManyWithoutAcademyNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutAcademyNestedInput
+}
+
+export type AcademyCreateWithoutSubscriptionInput = {
+  id?: string
+  name: string
+  slug: string
+  intro?: string | null
+  color?: string
+  logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
+  status?: string
+  plan?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  members?: Prisma.AcademyMemberCreateNestedManyWithoutAcademyInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutAcademyInput
+  classes?: Prisma.ClassRoomCreateNestedManyWithoutAcademyInput
+  students?: Prisma.StudentCreateNestedManyWithoutAcademyInput
+  books?: Prisma.VocabBookCreateNestedManyWithoutAcademyInput
+  imports?: Prisma.ImportCreateNestedManyWithoutAcademyInput
+  exams?: Prisma.ExamCreateNestedManyWithoutAcademyInput
+  scans?: Prisma.ScanUploadCreateNestedManyWithoutAcademyInput
+  jobs?: Prisma.JobCreateNestedManyWithoutAcademyInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutAcademyInput
+}
+
+export type AcademyUncheckedCreateWithoutSubscriptionInput = {
+  id?: string
+  name: string
+  slug: string
+  intro?: string | null
+  color?: string
+  logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
+  status?: string
+  plan?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  members?: Prisma.AcademyMemberUncheckedCreateNestedManyWithoutAcademyInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutAcademyInput
+  classes?: Prisma.ClassRoomUncheckedCreateNestedManyWithoutAcademyInput
+  students?: Prisma.StudentUncheckedCreateNestedManyWithoutAcademyInput
+  books?: Prisma.VocabBookUncheckedCreateNestedManyWithoutAcademyInput
+  imports?: Prisma.ImportUncheckedCreateNestedManyWithoutAcademyInput
+  exams?: Prisma.ExamUncheckedCreateNestedManyWithoutAcademyInput
+  scans?: Prisma.ScanUploadUncheckedCreateNestedManyWithoutAcademyInput
+  jobs?: Prisma.JobUncheckedCreateNestedManyWithoutAcademyInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutAcademyInput
+}
+
+export type AcademyCreateOrConnectWithoutSubscriptionInput = {
+  where: Prisma.AcademyWhereUniqueInput
+  create: Prisma.XOR<Prisma.AcademyCreateWithoutSubscriptionInput, Prisma.AcademyUncheckedCreateWithoutSubscriptionInput>
+}
+
+export type AcademyUpsertWithoutSubscriptionInput = {
+  update: Prisma.XOR<Prisma.AcademyUpdateWithoutSubscriptionInput, Prisma.AcademyUncheckedUpdateWithoutSubscriptionInput>
+  create: Prisma.XOR<Prisma.AcademyCreateWithoutSubscriptionInput, Prisma.AcademyUncheckedCreateWithoutSubscriptionInput>
+  where?: Prisma.AcademyWhereInput
+}
+
+export type AcademyUpdateToOneWithWhereWithoutSubscriptionInput = {
+  where?: Prisma.AcademyWhereInput
+  data: Prisma.XOR<Prisma.AcademyUpdateWithoutSubscriptionInput, Prisma.AcademyUncheckedUpdateWithoutSubscriptionInput>
+}
+
+export type AcademyUpdateWithoutSubscriptionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  plan?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.AcademyMemberUpdateManyWithoutAcademyNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutAcademyNestedInput
+  classes?: Prisma.ClassRoomUpdateManyWithoutAcademyNestedInput
+  students?: Prisma.StudentUpdateManyWithoutAcademyNestedInput
+  books?: Prisma.VocabBookUpdateManyWithoutAcademyNestedInput
+  imports?: Prisma.ImportUpdateManyWithoutAcademyNestedInput
+  exams?: Prisma.ExamUpdateManyWithoutAcademyNestedInput
+  scans?: Prisma.ScanUploadUpdateManyWithoutAcademyNestedInput
+  jobs?: Prisma.JobUpdateManyWithoutAcademyNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutAcademyNestedInput
+}
+
+export type AcademyUncheckedUpdateWithoutSubscriptionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  plan?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.AcademyMemberUncheckedUpdateManyWithoutAcademyNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutAcademyNestedInput
   classes?: Prisma.ClassRoomUncheckedUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUncheckedUpdateManyWithoutAcademyNestedInput
@@ -854,12 +1093,16 @@ export type AcademyCreateWithoutClassesInput = {
   intro?: string | null
   color?: string
   logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
   status?: string
   plan?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.AcademyMemberCreateNestedManyWithoutAcademyInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutAcademyInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutAcademyInput
   students?: Prisma.StudentCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportCreateNestedManyWithoutAcademyInput
@@ -876,12 +1119,16 @@ export type AcademyUncheckedCreateWithoutClassesInput = {
   intro?: string | null
   color?: string
   logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
   status?: string
   plan?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.AcademyMemberUncheckedCreateNestedManyWithoutAcademyInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutAcademyInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutAcademyInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookUncheckedCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportUncheckedCreateNestedManyWithoutAcademyInput
@@ -914,12 +1161,16 @@ export type AcademyUpdateWithoutClassesInput = {
   intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.StringFieldUpdateOperationsInput | string
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.AcademyMemberUpdateManyWithoutAcademyNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutAcademyNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutAcademyNestedInput
   students?: Prisma.StudentUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUpdateManyWithoutAcademyNestedInput
@@ -936,12 +1187,16 @@ export type AcademyUncheckedUpdateWithoutClassesInput = {
   intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.StringFieldUpdateOperationsInput | string
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.AcademyMemberUncheckedUpdateManyWithoutAcademyNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutAcademyNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutAcademyNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUncheckedUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUncheckedUpdateManyWithoutAcademyNestedInput
@@ -958,12 +1213,16 @@ export type AcademyCreateWithoutStudentsInput = {
   intro?: string | null
   color?: string
   logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
   status?: string
   plan?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.AcademyMemberCreateNestedManyWithoutAcademyInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutAcademyInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutAcademyInput
   classes?: Prisma.ClassRoomCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportCreateNestedManyWithoutAcademyInput
@@ -980,12 +1239,16 @@ export type AcademyUncheckedCreateWithoutStudentsInput = {
   intro?: string | null
   color?: string
   logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
   status?: string
   plan?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.AcademyMemberUncheckedCreateNestedManyWithoutAcademyInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutAcademyInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutAcademyInput
   classes?: Prisma.ClassRoomUncheckedCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookUncheckedCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportUncheckedCreateNestedManyWithoutAcademyInput
@@ -1018,12 +1281,16 @@ export type AcademyUpdateWithoutStudentsInput = {
   intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.StringFieldUpdateOperationsInput | string
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.AcademyMemberUpdateManyWithoutAcademyNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutAcademyNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutAcademyNestedInput
   classes?: Prisma.ClassRoomUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUpdateManyWithoutAcademyNestedInput
@@ -1040,12 +1307,16 @@ export type AcademyUncheckedUpdateWithoutStudentsInput = {
   intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.StringFieldUpdateOperationsInput | string
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.AcademyMemberUncheckedUpdateManyWithoutAcademyNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutAcademyNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutAcademyNestedInput
   classes?: Prisma.ClassRoomUncheckedUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUncheckedUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUncheckedUpdateManyWithoutAcademyNestedInput
@@ -1062,12 +1333,16 @@ export type AcademyCreateWithoutBooksInput = {
   intro?: string | null
   color?: string
   logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
   status?: string
   plan?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.AcademyMemberCreateNestedManyWithoutAcademyInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutAcademyInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutAcademyInput
   classes?: Prisma.ClassRoomCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportCreateNestedManyWithoutAcademyInput
@@ -1084,12 +1359,16 @@ export type AcademyUncheckedCreateWithoutBooksInput = {
   intro?: string | null
   color?: string
   logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
   status?: string
   plan?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.AcademyMemberUncheckedCreateNestedManyWithoutAcademyInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutAcademyInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutAcademyInput
   classes?: Prisma.ClassRoomUncheckedCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportUncheckedCreateNestedManyWithoutAcademyInput
@@ -1122,12 +1401,16 @@ export type AcademyUpdateWithoutBooksInput = {
   intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.StringFieldUpdateOperationsInput | string
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.AcademyMemberUpdateManyWithoutAcademyNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutAcademyNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutAcademyNestedInput
   classes?: Prisma.ClassRoomUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUpdateManyWithoutAcademyNestedInput
@@ -1144,12 +1427,16 @@ export type AcademyUncheckedUpdateWithoutBooksInput = {
   intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.StringFieldUpdateOperationsInput | string
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.AcademyMemberUncheckedUpdateManyWithoutAcademyNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutAcademyNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutAcademyNestedInput
   classes?: Prisma.ClassRoomUncheckedUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUncheckedUpdateManyWithoutAcademyNestedInput
@@ -1166,12 +1453,16 @@ export type AcademyCreateWithoutImportsInput = {
   intro?: string | null
   color?: string
   logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
   status?: string
   plan?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.AcademyMemberCreateNestedManyWithoutAcademyInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutAcademyInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutAcademyInput
   classes?: Prisma.ClassRoomCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookCreateNestedManyWithoutAcademyInput
@@ -1188,12 +1479,16 @@ export type AcademyUncheckedCreateWithoutImportsInput = {
   intro?: string | null
   color?: string
   logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
   status?: string
   plan?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.AcademyMemberUncheckedCreateNestedManyWithoutAcademyInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutAcademyInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutAcademyInput
   classes?: Prisma.ClassRoomUncheckedCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookUncheckedCreateNestedManyWithoutAcademyInput
@@ -1226,12 +1521,16 @@ export type AcademyUpdateWithoutImportsInput = {
   intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.StringFieldUpdateOperationsInput | string
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.AcademyMemberUpdateManyWithoutAcademyNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutAcademyNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutAcademyNestedInput
   classes?: Prisma.ClassRoomUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUpdateManyWithoutAcademyNestedInput
@@ -1248,12 +1547,16 @@ export type AcademyUncheckedUpdateWithoutImportsInput = {
   intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.StringFieldUpdateOperationsInput | string
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.AcademyMemberUncheckedUpdateManyWithoutAcademyNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutAcademyNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutAcademyNestedInput
   classes?: Prisma.ClassRoomUncheckedUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUncheckedUpdateManyWithoutAcademyNestedInput
@@ -1270,12 +1573,16 @@ export type AcademyCreateWithoutExamsInput = {
   intro?: string | null
   color?: string
   logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
   status?: string
   plan?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.AcademyMemberCreateNestedManyWithoutAcademyInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutAcademyInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutAcademyInput
   classes?: Prisma.ClassRoomCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookCreateNestedManyWithoutAcademyInput
@@ -1292,12 +1599,16 @@ export type AcademyUncheckedCreateWithoutExamsInput = {
   intro?: string | null
   color?: string
   logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
   status?: string
   plan?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.AcademyMemberUncheckedCreateNestedManyWithoutAcademyInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutAcademyInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutAcademyInput
   classes?: Prisma.ClassRoomUncheckedCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookUncheckedCreateNestedManyWithoutAcademyInput
@@ -1330,12 +1641,16 @@ export type AcademyUpdateWithoutExamsInput = {
   intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.StringFieldUpdateOperationsInput | string
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.AcademyMemberUpdateManyWithoutAcademyNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutAcademyNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutAcademyNestedInput
   classes?: Prisma.ClassRoomUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUpdateManyWithoutAcademyNestedInput
@@ -1352,12 +1667,16 @@ export type AcademyUncheckedUpdateWithoutExamsInput = {
   intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.StringFieldUpdateOperationsInput | string
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.AcademyMemberUncheckedUpdateManyWithoutAcademyNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutAcademyNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutAcademyNestedInput
   classes?: Prisma.ClassRoomUncheckedUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUncheckedUpdateManyWithoutAcademyNestedInput
@@ -1374,12 +1693,16 @@ export type AcademyCreateWithoutScansInput = {
   intro?: string | null
   color?: string
   logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
   status?: string
   plan?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.AcademyMemberCreateNestedManyWithoutAcademyInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutAcademyInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutAcademyInput
   classes?: Prisma.ClassRoomCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookCreateNestedManyWithoutAcademyInput
@@ -1396,12 +1719,16 @@ export type AcademyUncheckedCreateWithoutScansInput = {
   intro?: string | null
   color?: string
   logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
   status?: string
   plan?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.AcademyMemberUncheckedCreateNestedManyWithoutAcademyInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutAcademyInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutAcademyInput
   classes?: Prisma.ClassRoomUncheckedCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookUncheckedCreateNestedManyWithoutAcademyInput
@@ -1434,12 +1761,16 @@ export type AcademyUpdateWithoutScansInput = {
   intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.StringFieldUpdateOperationsInput | string
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.AcademyMemberUpdateManyWithoutAcademyNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutAcademyNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutAcademyNestedInput
   classes?: Prisma.ClassRoomUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUpdateManyWithoutAcademyNestedInput
@@ -1456,12 +1787,16 @@ export type AcademyUncheckedUpdateWithoutScansInput = {
   intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.StringFieldUpdateOperationsInput | string
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.AcademyMemberUncheckedUpdateManyWithoutAcademyNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutAcademyNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutAcademyNestedInput
   classes?: Prisma.ClassRoomUncheckedUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUncheckedUpdateManyWithoutAcademyNestedInput
@@ -1478,12 +1813,16 @@ export type AcademyCreateWithoutJobsInput = {
   intro?: string | null
   color?: string
   logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
   status?: string
   plan?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.AcademyMemberCreateNestedManyWithoutAcademyInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutAcademyInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutAcademyInput
   classes?: Prisma.ClassRoomCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookCreateNestedManyWithoutAcademyInput
@@ -1500,12 +1839,16 @@ export type AcademyUncheckedCreateWithoutJobsInput = {
   intro?: string | null
   color?: string
   logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
   status?: string
   plan?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.AcademyMemberUncheckedCreateNestedManyWithoutAcademyInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutAcademyInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutAcademyInput
   classes?: Prisma.ClassRoomUncheckedCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookUncheckedCreateNestedManyWithoutAcademyInput
@@ -1538,12 +1881,16 @@ export type AcademyUpdateWithoutJobsInput = {
   intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.StringFieldUpdateOperationsInput | string
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.AcademyMemberUpdateManyWithoutAcademyNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutAcademyNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutAcademyNestedInput
   classes?: Prisma.ClassRoomUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUpdateManyWithoutAcademyNestedInput
@@ -1560,12 +1907,16 @@ export type AcademyUncheckedUpdateWithoutJobsInput = {
   intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.StringFieldUpdateOperationsInput | string
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.AcademyMemberUncheckedUpdateManyWithoutAcademyNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutAcademyNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutAcademyNestedInput
   classes?: Prisma.ClassRoomUncheckedUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUncheckedUpdateManyWithoutAcademyNestedInput
@@ -1582,12 +1933,16 @@ export type AcademyCreateWithoutAuditLogsInput = {
   intro?: string | null
   color?: string
   logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
   status?: string
   plan?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.AcademyMemberCreateNestedManyWithoutAcademyInput
   invitations?: Prisma.InvitationCreateNestedManyWithoutAcademyInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutAcademyInput
   classes?: Prisma.ClassRoomCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookCreateNestedManyWithoutAcademyInput
@@ -1604,12 +1959,16 @@ export type AcademyUncheckedCreateWithoutAuditLogsInput = {
   intro?: string | null
   color?: string
   logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
   status?: string
   plan?: string
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.AcademyMemberUncheckedCreateNestedManyWithoutAcademyInput
   invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutAcademyInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutAcademyInput
   classes?: Prisma.ClassRoomUncheckedCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookUncheckedCreateNestedManyWithoutAcademyInput
@@ -1642,12 +2001,16 @@ export type AcademyUpdateWithoutAuditLogsInput = {
   intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.StringFieldUpdateOperationsInput | string
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.AcademyMemberUpdateManyWithoutAcademyNestedInput
   invitations?: Prisma.InvitationUpdateManyWithoutAcademyNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutAcademyNestedInput
   classes?: Prisma.ClassRoomUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUpdateManyWithoutAcademyNestedInput
@@ -1664,12 +2027,16 @@ export type AcademyUncheckedUpdateWithoutAuditLogsInput = {
   intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.StringFieldUpdateOperationsInput | string
   logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   plan?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.AcademyMemberUncheckedUpdateManyWithoutAcademyNestedInput
   invitations?: Prisma.InvitationUncheckedUpdateManyWithoutAcademyNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutAcademyNestedInput
   classes?: Prisma.ClassRoomUncheckedUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUncheckedUpdateManyWithoutAcademyNestedInput
@@ -1798,12 +2165,16 @@ export type AcademySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   intro?: boolean
   color?: boolean
   logoPath?: boolean
+  representativeName?: boolean
+  phone?: boolean
+  region?: boolean
   status?: boolean
   plan?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   members?: boolean | Prisma.Academy$membersArgs<ExtArgs>
   invitations?: boolean | Prisma.Academy$invitationsArgs<ExtArgs>
+  subscription?: boolean | Prisma.Academy$subscriptionArgs<ExtArgs>
   classes?: boolean | Prisma.Academy$classesArgs<ExtArgs>
   students?: boolean | Prisma.Academy$studentsArgs<ExtArgs>
   books?: boolean | Prisma.Academy$booksArgs<ExtArgs>
@@ -1822,6 +2193,9 @@ export type AcademySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   intro?: boolean
   color?: boolean
   logoPath?: boolean
+  representativeName?: boolean
+  phone?: boolean
+  region?: boolean
   status?: boolean
   plan?: boolean
   createdAt?: boolean
@@ -1835,6 +2209,9 @@ export type AcademySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   intro?: boolean
   color?: boolean
   logoPath?: boolean
+  representativeName?: boolean
+  phone?: boolean
+  region?: boolean
   status?: boolean
   plan?: boolean
   createdAt?: boolean
@@ -1848,16 +2225,20 @@ export type AcademySelectScalar = {
   intro?: boolean
   color?: boolean
   logoPath?: boolean
+  representativeName?: boolean
+  phone?: boolean
+  region?: boolean
   status?: boolean
   plan?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type AcademyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "intro" | "color" | "logoPath" | "status" | "plan" | "createdAt" | "updatedAt", ExtArgs["result"]["academy"]>
+export type AcademyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "slug" | "intro" | "color" | "logoPath" | "representativeName" | "phone" | "region" | "status" | "plan" | "createdAt" | "updatedAt", ExtArgs["result"]["academy"]>
 export type AcademyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   members?: boolean | Prisma.Academy$membersArgs<ExtArgs>
   invitations?: boolean | Prisma.Academy$invitationsArgs<ExtArgs>
+  subscription?: boolean | Prisma.Academy$subscriptionArgs<ExtArgs>
   classes?: boolean | Prisma.Academy$classesArgs<ExtArgs>
   students?: boolean | Prisma.Academy$studentsArgs<ExtArgs>
   books?: boolean | Prisma.Academy$booksArgs<ExtArgs>
@@ -1876,6 +2257,7 @@ export type $AcademyPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
   objects: {
     members: Prisma.$AcademyMemberPayload<ExtArgs>[]
     invitations: Prisma.$InvitationPayload<ExtArgs>[]
+    subscription: Prisma.$SubscriptionPayload<ExtArgs> | null
     classes: Prisma.$ClassRoomPayload<ExtArgs>[]
     students: Prisma.$StudentPayload<ExtArgs>[]
     books: Prisma.$VocabBookPayload<ExtArgs>[]
@@ -1892,6 +2274,9 @@ export type $AcademyPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     intro: string | null
     color: string
     logoPath: string | null
+    representativeName: string | null
+    phone: string | null
+    region: string | null
     status: string
     plan: string
     createdAt: Date
@@ -2292,6 +2677,7 @@ export interface Prisma__AcademyClient<T, Null = never, ExtArgs extends runtime.
   readonly [Symbol.toStringTag]: "PrismaPromise"
   members<T extends Prisma.Academy$membersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Academy$membersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AcademyMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   invitations<T extends Prisma.Academy$invitationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Academy$invitationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InvitationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  subscription<T extends Prisma.Academy$subscriptionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Academy$subscriptionArgs<ExtArgs>>): Prisma.Prisma__SubscriptionClient<runtime.Types.Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   classes<T extends Prisma.Academy$classesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Academy$classesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClassRoomPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   students<T extends Prisma.Academy$studentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Academy$studentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StudentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   books<T extends Prisma.Academy$booksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Academy$booksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VocabBookPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -2335,6 +2721,9 @@ export interface AcademyFieldRefs {
   readonly intro: Prisma.FieldRef<"Academy", 'String'>
   readonly color: Prisma.FieldRef<"Academy", 'String'>
   readonly logoPath: Prisma.FieldRef<"Academy", 'String'>
+  readonly representativeName: Prisma.FieldRef<"Academy", 'String'>
+  readonly phone: Prisma.FieldRef<"Academy", 'String'>
+  readonly region: Prisma.FieldRef<"Academy", 'String'>
   readonly status: Prisma.FieldRef<"Academy", 'String'>
   readonly plan: Prisma.FieldRef<"Academy", 'String'>
   readonly createdAt: Prisma.FieldRef<"Academy", 'DateTime'>
@@ -2775,6 +3164,25 @@ export type Academy$invitationsArgs<ExtArgs extends runtime.Types.Extensions.Int
   take?: number
   skip?: number
   distinct?: Prisma.InvitationScalarFieldEnum | Prisma.InvitationScalarFieldEnum[]
+}
+
+/**
+ * Academy.subscription
+ */
+export type Academy$subscriptionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Subscription
+   */
+  select?: Prisma.SubscriptionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Subscription
+   */
+  omit?: Prisma.SubscriptionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SubscriptionInclude<ExtArgs> | null
+  where?: Prisma.SubscriptionWhereInput
 }
 
 /**

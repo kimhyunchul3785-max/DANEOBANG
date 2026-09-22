@@ -55,6 +55,9 @@ export const ModelName = {
   Academy: 'Academy',
   AcademyMember: 'AcademyMember',
   Invitation: 'Invitation',
+  Subscription: 'Subscription',
+  Payment: 'Payment',
+  SignupSession: 'SignupSession',
   ClassRoom: 'ClassRoom',
   Student: 'Student',
   TeacherStudent: 'TeacherStudent',
@@ -107,6 +110,8 @@ export const UserScalarFieldEnum = {
   passwordHash: 'passwordHash',
   isPlatformAdmin: 'isPlatformAdmin',
   status: 'status',
+  emailVerifiedAt: 'emailVerifiedAt',
+  phone: 'phone',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -121,6 +126,9 @@ export const AcademyScalarFieldEnum = {
   intro: 'intro',
   color: 'color',
   logoPath: 'logoPath',
+  representativeName: 'representativeName',
+  phone: 'phone',
+  region: 'region',
   status: 'status',
   plan: 'plan',
   createdAt: 'createdAt',
@@ -135,6 +143,7 @@ export const AcademyMemberScalarFieldEnum = {
   academyId: 'academyId',
   userId: 'userId',
   role: 'role',
+  isTeacher: 'isTeacher',
   status: 'status',
   createdAt: 'createdAt'
 } as const
@@ -146,15 +155,80 @@ export const InvitationScalarFieldEnum = {
   id: 'id',
   academyId: 'academyId',
   role: 'role',
+  isTeacher: 'isTeacher',
   email: 'email',
+  name: 'name',
   tokenHash: 'tokenHash',
   expiresAt: 'expiresAt',
   usedAt: 'usedAt',
+  revokedAt: 'revokedAt',
   createdBy: 'createdBy',
   createdAt: 'createdAt'
 } as const
 
 export type InvitationScalarFieldEnum = (typeof InvitationScalarFieldEnum)[keyof typeof InvitationScalarFieldEnum]
+
+
+export const SubscriptionScalarFieldEnum = {
+  id: 'id',
+  academyId: 'academyId',
+  provider: 'provider',
+  providerCustomerId: 'providerCustomerId',
+  providerSubscriptionId: 'providerSubscriptionId',
+  seatQuantity: 'seatQuantity',
+  unitPrice: 'unitPrice',
+  status: 'status',
+  currentPeriodStart: 'currentPeriodStart',
+  currentPeriodEnd: 'currentPeriodEnd',
+  cardLast4: 'cardLast4',
+  lastPaymentAt: 'lastPaymentAt',
+  lastPaymentError: 'lastPaymentError',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SubscriptionScalarFieldEnum = (typeof SubscriptionScalarFieldEnum)[keyof typeof SubscriptionScalarFieldEnum]
+
+
+export const PaymentScalarFieldEnum = {
+  id: 'id',
+  subscriptionId: 'subscriptionId',
+  amount: 'amount',
+  seatQuantity: 'seatQuantity',
+  status: 'status',
+  providerRef: 'providerRef',
+  error: 'error',
+  createdAt: 'createdAt'
+} as const
+
+export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
+
+
+export const SignupSessionScalarFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  step: 'step',
+  academyName: 'academyName',
+  representativeName: 'representativeName',
+  phone: 'phone',
+  region: 'region',
+  teacherCount: 'teacherCount',
+  ownerIsTeacher: 'ownerIsTeacher',
+  ownerName: 'ownerName',
+  email: 'email',
+  passwordHash: 'passwordHash',
+  verifyTokenHash: 'verifyTokenHash',
+  verifyTokenDev: 'verifyTokenDev',
+  verifySentAt: 'verifySentAt',
+  verifiedAt: 'verifiedAt',
+  userId: 'userId',
+  academyId: 'academyId',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt'
+} as const
+
+export type SignupSessionScalarFieldEnum = (typeof SignupSessionScalarFieldEnum)[keyof typeof SignupSessionScalarFieldEnum]
 
 
 export const ClassRoomScalarFieldEnum = {
@@ -176,9 +250,12 @@ export const StudentScalarFieldEnum = {
   school: 'school',
   grade: 'grade',
   memo: 'memo',
+  email: 'email',
+  phone: 'phone',
   userId: 'userId',
   inviteTokenHash: 'inviteTokenHash',
   inviteExpiresAt: 'inviteExpiresAt',
+  inviteSentAt: 'inviteSentAt',
   status: 'status',
   createdAt: 'createdAt'
 } as const

@@ -212,6 +212,10 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
               <input className="input" name="school" defaultValue={student.school ?? ""} placeholder="학교" />
               <input className="input" name="grade" defaultValue={student.grade ?? ""} placeholder="학년" />
             </div>
+            <div className="flex gap-2">
+              <input className="input" name="email" type="email" defaultValue={student.email ?? ""} placeholder="이메일 (계정 설정 링크 발송)" />
+              <input className="input" name="phone" defaultValue={student.phone ?? ""} placeholder="연락처" />
+            </div>
             <select className="input" name="classId" defaultValue={student.classId ?? ""}>
               <option value="">반 없음</option>
               {classes.map((c) => (
@@ -230,7 +234,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         </section>
         <div className="span-3 space-y-4">
           <StudentTools
-            student={{ id: student.id, userId: student.userId, userEmail: student.user?.email ?? null, hasInvite: !!student.inviteTokenHash, inviteExpiresAt: student.inviteExpiresAt?.toISOString() ?? null }}
+            student={{ id: student.id, name: student.name, email: student.email, userId: student.userId, userEmail: student.user?.email ?? null, hasInvite: !!student.inviteTokenHash, inviteExpiresAt: student.inviteExpiresAt?.toISOString() ?? null, inviteSentAt: student.inviteSentAt?.toISOString() ?? null }}
             linkRequests={student.linkRequests.map((r) => ({ id: r.id, user: linkUsers.find((u) => u.id === r.userId) ?? null, createdAt: r.createdAt.toISOString() }))}
             isOwner={ctx.isOwner}
             members={members.map((m) => ({ id: m.id, name: m.user.name, role: m.role }))}

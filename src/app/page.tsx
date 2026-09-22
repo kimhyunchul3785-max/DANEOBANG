@@ -29,26 +29,32 @@ export default async function Home() {
         </nav>
       </header>
       <section className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-5 pb-24">
-        <div className="lbl mb-6">Vocabulary tests for academies</div>
+        <div className="lbl mb-6">Vocabulary tests for English academies</div>
         <h1 className="anim-fade-up">
           <Logo variant="full" height={170} href={null} />
         </h1>
-        <p className="mt-3 text-[18px]" style={{ color: "var(--ink-2)" }}>
-          등록 → 출제 → 채점 → 재시험<span style={{ color: "var(--accent)" }}>.</span>
+        <p className="mt-3 text-[20px] font-semibold leading-snug" style={{ color: "var(--ink)" }}>
+          영어학원의 단어시험과 재시험을 한 곳에서<span style={{ color: "var(--accent)" }}>.</span>
         </p>
-        <div className="mt-9 flex flex-wrap gap-3">
+        <p className="mt-2 text-[15px]" style={{ color: "var(--ink-2)" }}>
+          등록 → 출제 → 채점 → 재시험 · <span className="digital">월 9,900원 / 선생님</span> · 학생 수 무관
+        </p>
+        <div className="mt-9 flex flex-wrap items-center gap-3">
           {user ? (
             <Link className="btn-primary px-6 py-3 text-[13px]" href="/workspaces">
               대시보드로 이동
             </Link>
           ) : (
             <>
-              <Link className="btn-primary px-6 py-3 text-[13px]" href="/login">
-                로그인
+              <Link className="btn-primary px-6 py-3 text-[13px]" href="/start" data-testid="cta-start">
+                학원 시작하기
               </Link>
-              <Link className="btn-secondary px-6 py-3 text-[13px]" href="/signup">
-                학원 개설
-              </Link>
+              <span className="text-[13px]" style={{ color: "var(--ink-2)" }}>
+                이미 사용 중이신가요?{" "}
+                <Link className="underline" href="/login">
+                  로그인
+                </Link>
+              </span>
             </>
           )}
         </div>

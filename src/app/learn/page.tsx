@@ -34,7 +34,8 @@ export default async function LearnHome() {
   const passRate = scored.length ? Math.round((scored.filter((g) => g.passed).length / scored.length) * 100) : null;
 
   return (
-    <div className="space-y-3">
+    <div className="learn-grid">
+      <div className="col">
       {linked === 0 && (
         <div className="card card-body text-[14px]">{pending > 0 ? "선생님 승인을 기다리고 있습니다. 승인되면 시험이 여기에 표시됩니다." : "연결된 학생 명단이 없습니다. 선생님에게 받은 초대 링크를 열어 주세요."}</div>
       )}
@@ -89,6 +90,7 @@ export default async function LearnHome() {
         </div>
       )}
 
+      {rest.length > 0 && <div className="lbl px-1 lg:mt-2">Queue · 다음 시험 {rest.length}</div>}
       {rest.map((a) => (
         <div key={a.assignmentId} className="pill w-full justify-between">
           <div className="min-w-0">
@@ -102,7 +104,9 @@ export default async function LearnHome() {
           ) : a.canStart ? <StartButton assignmentId={a.assignmentId} label="시작" compact /> : <span className="badge-gray">WAIT</span>}
         </div>
       ))}
+      </div>
 
+      <div className="col">
       {/* 보강 일정 필 */}
       <Link href="/learn/retake" className="card-dark flex w-full items-center justify-between gap-3 rounded-full px-5 py-3">
         <span className="flex items-center gap-3">
@@ -143,6 +147,7 @@ export default async function LearnHome() {
           <Sparkline values={series} baseline={90} labels={weeks.map(weekLabel)} height={64} />
         </div>
       </Link>
+      </div>
     </div>
   );
 }

@@ -28,10 +28,13 @@ export type InvitationMinAggregateOutputType = {
   id: string | null
   academyId: string | null
   role: string | null
+  isTeacher: boolean | null
   email: string | null
+  name: string | null
   tokenHash: string | null
   expiresAt: Date | null
   usedAt: Date | null
+  revokedAt: Date | null
   createdBy: string | null
   createdAt: Date | null
 }
@@ -40,10 +43,13 @@ export type InvitationMaxAggregateOutputType = {
   id: string | null
   academyId: string | null
   role: string | null
+  isTeacher: boolean | null
   email: string | null
+  name: string | null
   tokenHash: string | null
   expiresAt: Date | null
   usedAt: Date | null
+  revokedAt: Date | null
   createdBy: string | null
   createdAt: Date | null
 }
@@ -52,10 +58,13 @@ export type InvitationCountAggregateOutputType = {
   id: number
   academyId: number
   role: number
+  isTeacher: number
   email: number
+  name: number
   tokenHash: number
   expiresAt: number
   usedAt: number
+  revokedAt: number
   createdBy: number
   createdAt: number
   _all: number
@@ -66,10 +75,13 @@ export type InvitationMinAggregateInputType = {
   id?: true
   academyId?: true
   role?: true
+  isTeacher?: true
   email?: true
+  name?: true
   tokenHash?: true
   expiresAt?: true
   usedAt?: true
+  revokedAt?: true
   createdBy?: true
   createdAt?: true
 }
@@ -78,10 +90,13 @@ export type InvitationMaxAggregateInputType = {
   id?: true
   academyId?: true
   role?: true
+  isTeacher?: true
   email?: true
+  name?: true
   tokenHash?: true
   expiresAt?: true
   usedAt?: true
+  revokedAt?: true
   createdBy?: true
   createdAt?: true
 }
@@ -90,10 +105,13 @@ export type InvitationCountAggregateInputType = {
   id?: true
   academyId?: true
   role?: true
+  isTeacher?: true
   email?: true
+  name?: true
   tokenHash?: true
   expiresAt?: true
   usedAt?: true
+  revokedAt?: true
   createdBy?: true
   createdAt?: true
   _all?: true
@@ -175,10 +193,13 @@ export type InvitationGroupByOutputType = {
   id: string
   academyId: string
   role: string
+  isTeacher: boolean
   email: string | null
+  name: string | null
   tokenHash: string
   expiresAt: Date
   usedAt: Date | null
+  revokedAt: Date | null
   createdBy: string
   createdAt: Date
   _count: InvitationCountAggregateOutputType | null
@@ -208,10 +229,13 @@ export type InvitationWhereInput = {
   id?: Prisma.StringFilter<"Invitation"> | string
   academyId?: Prisma.StringFilter<"Invitation"> | string
   role?: Prisma.StringFilter<"Invitation"> | string
+  isTeacher?: Prisma.BoolFilter<"Invitation"> | boolean
   email?: Prisma.StringNullableFilter<"Invitation"> | string | null
+  name?: Prisma.StringNullableFilter<"Invitation"> | string | null
   tokenHash?: Prisma.StringFilter<"Invitation"> | string
   expiresAt?: Prisma.DateTimeFilter<"Invitation"> | Date | string
   usedAt?: Prisma.DateTimeNullableFilter<"Invitation"> | Date | string | null
+  revokedAt?: Prisma.DateTimeNullableFilter<"Invitation"> | Date | string | null
   createdBy?: Prisma.StringFilter<"Invitation"> | string
   createdAt?: Prisma.DateTimeFilter<"Invitation"> | Date | string
   academy?: Prisma.XOR<Prisma.AcademyScalarRelationFilter, Prisma.AcademyWhereInput>
@@ -221,10 +245,13 @@ export type InvitationOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   academyId?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  isTeacher?: Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
+  name?: Prisma.SortOrderInput | Prisma.SortOrder
   tokenHash?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   usedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  revokedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdBy?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   academy?: Prisma.AcademyOrderByWithRelationInput
@@ -238,9 +265,12 @@ export type InvitationWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.InvitationWhereInput | Prisma.InvitationWhereInput[]
   academyId?: Prisma.StringFilter<"Invitation"> | string
   role?: Prisma.StringFilter<"Invitation"> | string
+  isTeacher?: Prisma.BoolFilter<"Invitation"> | boolean
   email?: Prisma.StringNullableFilter<"Invitation"> | string | null
+  name?: Prisma.StringNullableFilter<"Invitation"> | string | null
   expiresAt?: Prisma.DateTimeFilter<"Invitation"> | Date | string
   usedAt?: Prisma.DateTimeNullableFilter<"Invitation"> | Date | string | null
+  revokedAt?: Prisma.DateTimeNullableFilter<"Invitation"> | Date | string | null
   createdBy?: Prisma.StringFilter<"Invitation"> | string
   createdAt?: Prisma.DateTimeFilter<"Invitation"> | Date | string
   academy?: Prisma.XOR<Prisma.AcademyScalarRelationFilter, Prisma.AcademyWhereInput>
@@ -250,10 +280,13 @@ export type InvitationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   academyId?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  isTeacher?: Prisma.SortOrder
   email?: Prisma.SortOrderInput | Prisma.SortOrder
+  name?: Prisma.SortOrderInput | Prisma.SortOrder
   tokenHash?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   usedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  revokedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdBy?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.InvitationCountOrderByAggregateInput
@@ -268,10 +301,13 @@ export type InvitationScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"Invitation"> | string
   academyId?: Prisma.StringWithAggregatesFilter<"Invitation"> | string
   role?: Prisma.StringWithAggregatesFilter<"Invitation"> | string
+  isTeacher?: Prisma.BoolWithAggregatesFilter<"Invitation"> | boolean
   email?: Prisma.StringNullableWithAggregatesFilter<"Invitation"> | string | null
+  name?: Prisma.StringNullableWithAggregatesFilter<"Invitation"> | string | null
   tokenHash?: Prisma.StringWithAggregatesFilter<"Invitation"> | string
   expiresAt?: Prisma.DateTimeWithAggregatesFilter<"Invitation"> | Date | string
   usedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Invitation"> | Date | string | null
+  revokedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Invitation"> | Date | string | null
   createdBy?: Prisma.StringWithAggregatesFilter<"Invitation"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Invitation"> | Date | string
 }
@@ -279,10 +315,13 @@ export type InvitationScalarWhereWithAggregatesInput = {
 export type InvitationCreateInput = {
   id?: string
   role: string
+  isTeacher?: boolean
   email?: string | null
+  name?: string | null
   tokenHash: string
   expiresAt: Date | string
   usedAt?: Date | string | null
+  revokedAt?: Date | string | null
   createdBy: string
   createdAt?: Date | string
   academy: Prisma.AcademyCreateNestedOneWithoutInvitationsInput
@@ -292,10 +331,13 @@ export type InvitationUncheckedCreateInput = {
   id?: string
   academyId: string
   role: string
+  isTeacher?: boolean
   email?: string | null
+  name?: string | null
   tokenHash: string
   expiresAt: Date | string
   usedAt?: Date | string | null
+  revokedAt?: Date | string | null
   createdBy: string
   createdAt?: Date | string
 }
@@ -303,10 +345,13 @@ export type InvitationUncheckedCreateInput = {
 export type InvitationUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  isTeacher?: Prisma.BoolFieldUpdateOperationsInput | boolean
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdBy?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   academy?: Prisma.AcademyUpdateOneRequiredWithoutInvitationsNestedInput
@@ -316,10 +361,13 @@ export type InvitationUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   academyId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  isTeacher?: Prisma.BoolFieldUpdateOperationsInput | boolean
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdBy?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -328,10 +376,13 @@ export type InvitationCreateManyInput = {
   id?: string
   academyId: string
   role: string
+  isTeacher?: boolean
   email?: string | null
+  name?: string | null
   tokenHash: string
   expiresAt: Date | string
   usedAt?: Date | string | null
+  revokedAt?: Date | string | null
   createdBy: string
   createdAt?: Date | string
 }
@@ -339,10 +390,13 @@ export type InvitationCreateManyInput = {
 export type InvitationUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  isTeacher?: Prisma.BoolFieldUpdateOperationsInput | boolean
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdBy?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -351,10 +405,13 @@ export type InvitationUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   academyId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  isTeacher?: Prisma.BoolFieldUpdateOperationsInput | boolean
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdBy?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -373,10 +430,13 @@ export type InvitationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   academyId?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  isTeacher?: Prisma.SortOrder
   email?: Prisma.SortOrder
+  name?: Prisma.SortOrder
   tokenHash?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   usedAt?: Prisma.SortOrder
+  revokedAt?: Prisma.SortOrder
   createdBy?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -385,10 +445,13 @@ export type InvitationMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   academyId?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  isTeacher?: Prisma.SortOrder
   email?: Prisma.SortOrder
+  name?: Prisma.SortOrder
   tokenHash?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   usedAt?: Prisma.SortOrder
+  revokedAt?: Prisma.SortOrder
   createdBy?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -397,10 +460,13 @@ export type InvitationMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   academyId?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  isTeacher?: Prisma.SortOrder
   email?: Prisma.SortOrder
+  name?: Prisma.SortOrder
   tokenHash?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   usedAt?: Prisma.SortOrder
+  revokedAt?: Prisma.SortOrder
   createdBy?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -447,17 +513,16 @@ export type InvitationUncheckedUpdateManyWithoutAcademyNestedInput = {
   deleteMany?: Prisma.InvitationScalarWhereInput | Prisma.InvitationScalarWhereInput[]
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type InvitationCreateWithoutAcademyInput = {
   id?: string
   role: string
+  isTeacher?: boolean
   email?: string | null
+  name?: string | null
   tokenHash: string
   expiresAt: Date | string
   usedAt?: Date | string | null
+  revokedAt?: Date | string | null
   createdBy: string
   createdAt?: Date | string
 }
@@ -465,10 +530,13 @@ export type InvitationCreateWithoutAcademyInput = {
 export type InvitationUncheckedCreateWithoutAcademyInput = {
   id?: string
   role: string
+  isTeacher?: boolean
   email?: string | null
+  name?: string | null
   tokenHash: string
   expiresAt: Date | string
   usedAt?: Date | string | null
+  revokedAt?: Date | string | null
   createdBy: string
   createdAt?: Date | string
 }
@@ -505,10 +573,13 @@ export type InvitationScalarWhereInput = {
   id?: Prisma.StringFilter<"Invitation"> | string
   academyId?: Prisma.StringFilter<"Invitation"> | string
   role?: Prisma.StringFilter<"Invitation"> | string
+  isTeacher?: Prisma.BoolFilter<"Invitation"> | boolean
   email?: Prisma.StringNullableFilter<"Invitation"> | string | null
+  name?: Prisma.StringNullableFilter<"Invitation"> | string | null
   tokenHash?: Prisma.StringFilter<"Invitation"> | string
   expiresAt?: Prisma.DateTimeFilter<"Invitation"> | Date | string
   usedAt?: Prisma.DateTimeNullableFilter<"Invitation"> | Date | string | null
+  revokedAt?: Prisma.DateTimeNullableFilter<"Invitation"> | Date | string | null
   createdBy?: Prisma.StringFilter<"Invitation"> | string
   createdAt?: Prisma.DateTimeFilter<"Invitation"> | Date | string
 }
@@ -516,10 +587,13 @@ export type InvitationScalarWhereInput = {
 export type InvitationCreateManyAcademyInput = {
   id?: string
   role: string
+  isTeacher?: boolean
   email?: string | null
+  name?: string | null
   tokenHash: string
   expiresAt: Date | string
   usedAt?: Date | string | null
+  revokedAt?: Date | string | null
   createdBy: string
   createdAt?: Date | string
 }
@@ -527,10 +601,13 @@ export type InvitationCreateManyAcademyInput = {
 export type InvitationUpdateWithoutAcademyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  isTeacher?: Prisma.BoolFieldUpdateOperationsInput | boolean
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdBy?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -538,10 +615,13 @@ export type InvitationUpdateWithoutAcademyInput = {
 export type InvitationUncheckedUpdateWithoutAcademyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  isTeacher?: Prisma.BoolFieldUpdateOperationsInput | boolean
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdBy?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -549,10 +629,13 @@ export type InvitationUncheckedUpdateWithoutAcademyInput = {
 export type InvitationUncheckedUpdateManyWithoutAcademyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  isTeacher?: Prisma.BoolFieldUpdateOperationsInput | boolean
   email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   tokenHash?: Prisma.StringFieldUpdateOperationsInput | string
   expiresAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  revokedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdBy?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -563,10 +646,13 @@ export type InvitationSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   id?: boolean
   academyId?: boolean
   role?: boolean
+  isTeacher?: boolean
   email?: boolean
+  name?: boolean
   tokenHash?: boolean
   expiresAt?: boolean
   usedAt?: boolean
+  revokedAt?: boolean
   createdBy?: boolean
   createdAt?: boolean
   academy?: boolean | Prisma.AcademyDefaultArgs<ExtArgs>
@@ -576,10 +662,13 @@ export type InvitationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   id?: boolean
   academyId?: boolean
   role?: boolean
+  isTeacher?: boolean
   email?: boolean
+  name?: boolean
   tokenHash?: boolean
   expiresAt?: boolean
   usedAt?: boolean
+  revokedAt?: boolean
   createdBy?: boolean
   createdAt?: boolean
   academy?: boolean | Prisma.AcademyDefaultArgs<ExtArgs>
@@ -589,10 +678,13 @@ export type InvitationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   id?: boolean
   academyId?: boolean
   role?: boolean
+  isTeacher?: boolean
   email?: boolean
+  name?: boolean
   tokenHash?: boolean
   expiresAt?: boolean
   usedAt?: boolean
+  revokedAt?: boolean
   createdBy?: boolean
   createdAt?: boolean
   academy?: boolean | Prisma.AcademyDefaultArgs<ExtArgs>
@@ -602,15 +694,18 @@ export type InvitationSelectScalar = {
   id?: boolean
   academyId?: boolean
   role?: boolean
+  isTeacher?: boolean
   email?: boolean
+  name?: boolean
   tokenHash?: boolean
   expiresAt?: boolean
   usedAt?: boolean
+  revokedAt?: boolean
   createdBy?: boolean
   createdAt?: boolean
 }
 
-export type InvitationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "academyId" | "role" | "email" | "tokenHash" | "expiresAt" | "usedAt" | "createdBy" | "createdAt", ExtArgs["result"]["invitation"]>
+export type InvitationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "academyId" | "role" | "isTeacher" | "email" | "name" | "tokenHash" | "expiresAt" | "usedAt" | "revokedAt" | "createdBy" | "createdAt", ExtArgs["result"]["invitation"]>
 export type InvitationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   academy?: boolean | Prisma.AcademyDefaultArgs<ExtArgs>
 }
@@ -630,10 +725,13 @@ export type $InvitationPayload<ExtArgs extends runtime.Types.Extensions.Internal
     id: string
     academyId: string
     role: string
+    isTeacher: boolean
     email: string | null
+    name: string | null
     tokenHash: string
     expiresAt: Date
     usedAt: Date | null
+    revokedAt: Date | null
     createdBy: string
     createdAt: Date
   }, ExtArgs["result"]["invitation"]>
@@ -1063,10 +1161,13 @@ export interface InvitationFieldRefs {
   readonly id: Prisma.FieldRef<"Invitation", 'String'>
   readonly academyId: Prisma.FieldRef<"Invitation", 'String'>
   readonly role: Prisma.FieldRef<"Invitation", 'String'>
+  readonly isTeacher: Prisma.FieldRef<"Invitation", 'Boolean'>
   readonly email: Prisma.FieldRef<"Invitation", 'String'>
+  readonly name: Prisma.FieldRef<"Invitation", 'String'>
   readonly tokenHash: Prisma.FieldRef<"Invitation", 'String'>
   readonly expiresAt: Prisma.FieldRef<"Invitation", 'DateTime'>
   readonly usedAt: Prisma.FieldRef<"Invitation", 'DateTime'>
+  readonly revokedAt: Prisma.FieldRef<"Invitation", 'DateTime'>
   readonly createdBy: Prisma.FieldRef<"Invitation", 'String'>
   readonly createdAt: Prisma.FieldRef<"Invitation", 'DateTime'>
 }

@@ -401,6 +401,9 @@ export const ModelName = {
   Academy: 'Academy',
   AcademyMember: 'AcademyMember',
   Invitation: 'Invitation',
+  Subscription: 'Subscription',
+  Payment: 'Payment',
+  SignupSession: 'SignupSession',
   ClassRoom: 'ClassRoom',
   Student: 'Student',
   TeacherStudent: 'TeacherStudent',
@@ -444,7 +447,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "academy" | "academyMember" | "invitation" | "classRoom" | "student" | "teacherStudent" | "studentLinkRequest" | "vocabBook" | "bookDay" | "word" | "wordRevision" | "import" | "importRow" | "exam" | "examScope" | "examForm" | "formItem" | "formOption" | "assignment" | "attempt" | "attemptAnswer" | "gradeRevision" | "printInstance" | "printPage" | "scanUpload" | "retakeTask" | "job" | "auditLog" | "deviceToken" | "notification" | "usageEvent"
+    modelProps: "user" | "academy" | "academyMember" | "invitation" | "subscription" | "payment" | "signupSession" | "classRoom" | "student" | "teacherStudent" | "studentLinkRequest" | "vocabBook" | "bookDay" | "word" | "wordRevision" | "import" | "importRow" | "exam" | "examScope" | "examForm" | "formItem" | "formOption" | "assignment" | "attempt" | "attemptAnswer" | "gradeRevision" | "printInstance" | "printPage" | "scanUpload" | "retakeTask" | "job" | "auditLog" | "deviceToken" | "notification" | "usageEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -741,6 +744,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.InvitationCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.InvitationCountAggregateOutputType> | number
+        }
+      }
+    }
+    Subscription: {
+      payload: Prisma.$SubscriptionPayload<ExtArgs>
+      fields: Prisma.SubscriptionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SubscriptionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SubscriptionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPayload>
+        }
+        findFirst: {
+          args: Prisma.SubscriptionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SubscriptionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPayload>
+        }
+        findMany: {
+          args: Prisma.SubscriptionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPayload>[]
+        }
+        create: {
+          args: Prisma.SubscriptionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPayload>
+        }
+        createMany: {
+          args: Prisma.SubscriptionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SubscriptionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPayload>[]
+        }
+        delete: {
+          args: Prisma.SubscriptionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPayload>
+        }
+        update: {
+          args: Prisma.SubscriptionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPayload>
+        }
+        deleteMany: {
+          args: Prisma.SubscriptionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SubscriptionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SubscriptionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPayload>[]
+        }
+        upsert: {
+          args: Prisma.SubscriptionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SubscriptionPayload>
+        }
+        aggregate: {
+          args: Prisma.SubscriptionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSubscription>
+        }
+        groupBy: {
+          args: Prisma.SubscriptionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SubscriptionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SubscriptionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SubscriptionCountAggregateOutputType> | number
+        }
+      }
+    }
+    Payment: {
+      payload: Prisma.$PaymentPayload<ExtArgs>
+      fields: Prisma.PaymentFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PaymentFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PaymentFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentPayload>
+        }
+        findFirst: {
+          args: Prisma.PaymentFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PaymentFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentPayload>
+        }
+        findMany: {
+          args: Prisma.PaymentFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentPayload>[]
+        }
+        create: {
+          args: Prisma.PaymentCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentPayload>
+        }
+        createMany: {
+          args: Prisma.PaymentCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PaymentCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentPayload>[]
+        }
+        delete: {
+          args: Prisma.PaymentDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentPayload>
+        }
+        update: {
+          args: Prisma.PaymentUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentPayload>
+        }
+        deleteMany: {
+          args: Prisma.PaymentDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PaymentUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PaymentUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentPayload>[]
+        }
+        upsert: {
+          args: Prisma.PaymentUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PaymentPayload>
+        }
+        aggregate: {
+          args: Prisma.PaymentAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePayment>
+        }
+        groupBy: {
+          args: Prisma.PaymentGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaymentGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PaymentCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PaymentCountAggregateOutputType> | number
+        }
+      }
+    }
+    SignupSession: {
+      payload: Prisma.$SignupSessionPayload<ExtArgs>
+      fields: Prisma.SignupSessionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SignupSessionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SignupSessionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SignupSessionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SignupSessionPayload>
+        }
+        findFirst: {
+          args: Prisma.SignupSessionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SignupSessionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SignupSessionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SignupSessionPayload>
+        }
+        findMany: {
+          args: Prisma.SignupSessionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SignupSessionPayload>[]
+        }
+        create: {
+          args: Prisma.SignupSessionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SignupSessionPayload>
+        }
+        createMany: {
+          args: Prisma.SignupSessionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SignupSessionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SignupSessionPayload>[]
+        }
+        delete: {
+          args: Prisma.SignupSessionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SignupSessionPayload>
+        }
+        update: {
+          args: Prisma.SignupSessionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SignupSessionPayload>
+        }
+        deleteMany: {
+          args: Prisma.SignupSessionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SignupSessionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SignupSessionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SignupSessionPayload>[]
+        }
+        upsert: {
+          args: Prisma.SignupSessionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SignupSessionPayload>
+        }
+        aggregate: {
+          args: Prisma.SignupSessionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSignupSession>
+        }
+        groupBy: {
+          args: Prisma.SignupSessionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SignupSessionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SignupSessionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SignupSessionCountAggregateOutputType> | number
         }
       }
     }
@@ -2861,6 +3086,8 @@ export const UserScalarFieldEnum = {
   passwordHash: 'passwordHash',
   isPlatformAdmin: 'isPlatformAdmin',
   status: 'status',
+  emailVerifiedAt: 'emailVerifiedAt',
+  phone: 'phone',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2875,6 +3102,9 @@ export const AcademyScalarFieldEnum = {
   intro: 'intro',
   color: 'color',
   logoPath: 'logoPath',
+  representativeName: 'representativeName',
+  phone: 'phone',
+  region: 'region',
   status: 'status',
   plan: 'plan',
   createdAt: 'createdAt',
@@ -2889,6 +3119,7 @@ export const AcademyMemberScalarFieldEnum = {
   academyId: 'academyId',
   userId: 'userId',
   role: 'role',
+  isTeacher: 'isTeacher',
   status: 'status',
   createdAt: 'createdAt'
 } as const
@@ -2900,15 +3131,80 @@ export const InvitationScalarFieldEnum = {
   id: 'id',
   academyId: 'academyId',
   role: 'role',
+  isTeacher: 'isTeacher',
   email: 'email',
+  name: 'name',
   tokenHash: 'tokenHash',
   expiresAt: 'expiresAt',
   usedAt: 'usedAt',
+  revokedAt: 'revokedAt',
   createdBy: 'createdBy',
   createdAt: 'createdAt'
 } as const
 
 export type InvitationScalarFieldEnum = (typeof InvitationScalarFieldEnum)[keyof typeof InvitationScalarFieldEnum]
+
+
+export const SubscriptionScalarFieldEnum = {
+  id: 'id',
+  academyId: 'academyId',
+  provider: 'provider',
+  providerCustomerId: 'providerCustomerId',
+  providerSubscriptionId: 'providerSubscriptionId',
+  seatQuantity: 'seatQuantity',
+  unitPrice: 'unitPrice',
+  status: 'status',
+  currentPeriodStart: 'currentPeriodStart',
+  currentPeriodEnd: 'currentPeriodEnd',
+  cardLast4: 'cardLast4',
+  lastPaymentAt: 'lastPaymentAt',
+  lastPaymentError: 'lastPaymentError',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SubscriptionScalarFieldEnum = (typeof SubscriptionScalarFieldEnum)[keyof typeof SubscriptionScalarFieldEnum]
+
+
+export const PaymentScalarFieldEnum = {
+  id: 'id',
+  subscriptionId: 'subscriptionId',
+  amount: 'amount',
+  seatQuantity: 'seatQuantity',
+  status: 'status',
+  providerRef: 'providerRef',
+  error: 'error',
+  createdAt: 'createdAt'
+} as const
+
+export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
+
+
+export const SignupSessionScalarFieldEnum = {
+  id: 'id',
+  tokenHash: 'tokenHash',
+  step: 'step',
+  academyName: 'academyName',
+  representativeName: 'representativeName',
+  phone: 'phone',
+  region: 'region',
+  teacherCount: 'teacherCount',
+  ownerIsTeacher: 'ownerIsTeacher',
+  ownerName: 'ownerName',
+  email: 'email',
+  passwordHash: 'passwordHash',
+  verifyTokenHash: 'verifyTokenHash',
+  verifyTokenDev: 'verifyTokenDev',
+  verifySentAt: 'verifySentAt',
+  verifiedAt: 'verifiedAt',
+  userId: 'userId',
+  academyId: 'academyId',
+  completedAt: 'completedAt',
+  createdAt: 'createdAt',
+  expiresAt: 'expiresAt'
+} as const
+
+export type SignupSessionScalarFieldEnum = (typeof SignupSessionScalarFieldEnum)[keyof typeof SignupSessionScalarFieldEnum]
 
 
 export const ClassRoomScalarFieldEnum = {
@@ -2930,9 +3226,12 @@ export const StudentScalarFieldEnum = {
   school: 'school',
   grade: 'grade',
   memo: 'memo',
+  email: 'email',
+  phone: 'phone',
   userId: 'userId',
   inviteTokenHash: 'inviteTokenHash',
   inviteExpiresAt: 'inviteExpiresAt',
+  inviteSentAt: 'inviteSentAt',
   status: 'status',
   createdAt: 'createdAt'
 } as const
@@ -3526,6 +3825,9 @@ export type GlobalOmitConfig = {
   academy?: Prisma.AcademyOmit
   academyMember?: Prisma.AcademyMemberOmit
   invitation?: Prisma.InvitationOmit
+  subscription?: Prisma.SubscriptionOmit
+  payment?: Prisma.PaymentOmit
+  signupSession?: Prisma.SignupSessionOmit
   classRoom?: Prisma.ClassRoomOmit
   student?: Prisma.StudentOmit
   teacherStudent?: Prisma.TeacherStudentOmit

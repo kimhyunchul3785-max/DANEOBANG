@@ -255,7 +255,23 @@ async function seedTesters() {
   await seedWeeklyExam(academy.id, m1.userId);
   await seedHistory(academy.id, m1.userId);
   await seedNumberedBook(academy.id, owner.id);
+  await seedSubscriptions();
   console.log("testers ready: tester.owner / tester.t1 / tester.t2 / tester.s01~s10 / tester.admin @daneobang.dev (password test1234)");
+}
+
+/** 모든 학원에 구독 보장: Seat = 활성 선생님 수 + 여유 1 (테스트학원은 초대 E2E 를 위해 +2), 월 9,900원, 정상 */
+async function seedSubscriptions() {
+  const academies = await prisma.academy.findMany({ include: { subscription: true, members: { where: { status: "active", isTeacher: true } } } });
+  for (const a of academies) {
+    const seats = Math.max(1, a.members.length + (a.slug === "tester" ? 2 : 1));
+    if (a.subscription) {
+      if (a.subscription.seatQuantity < seats) await prisma.subscription.update({ where: { academyId: a.id }, data: { seatQuantity: seats } });
+      continue;
+    }
+    await prisma.subscription.create({ data: { academyId: a.id, provider: "mock", seatQuantity: seats, unitPrice: 9900, status: "active", cardLast4: "4242", currentPeriodEnd: new Date(Date.now() + 30 * 86400e3), lastPaymentAt: new Date() } });
+  }
+  await prisma.user.updateMany({ where: { emailVerifiedAt: null }, data: { emailVerifiedAt: new Date() } });
+  console.log(`subscriptions ready: ${academies.length} academies`);
 }
 
 /**

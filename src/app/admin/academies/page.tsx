@@ -5,7 +5,7 @@ import { setAcademyStatusAction, setAcademyPlanAction } from "../actions";
 
 export default async function AdminAcademies() {
   const academies = await prisma.academy.findMany({
-    include: { _count: { select: { members: true, students: true, exams: true, imports: true, scans: true } }, members: { where: { role: "OWNER" }, include: { user: { select: { name: true, email: true } } } } },
+    include: { _count: { select: { members: true, students: true, exams: true, imports: true, scans: true } }, members: { where: { role: "OWNER" }, include: { user: { select: { name: true, email: true } } } }, subscription: true },
     orderBy: { createdAt: "desc" },
   });
   return (
@@ -40,13 +40,26 @@ export default async function AdminAcademies() {
                   {a._count.exams} / {a._count.imports} / {a._count.scans}
                 </td>
                 <td>
-                  <ActionForm action={setAcademyPlanAction} className="flex gap-1" resetOnSuccess={false}>
+                  {a.subscription ? (
+                    <div className="text-xs">
+                      <div className="font-medium">
+                        선생님 {a.subscription.seatQuantity}명 · 월 {(a.subscription.seatQuantity * a.subscription.unitPrice).toLocaleString("ko-KR")}원
+                      </div>
+                      <div className="text-slate-500">
+                        {a.subscription.provider} · {a.subscription.status}
+                        {a.subscription.cardLast4 ? ` · ****${a.subscription.cardLast4}` : ""}
+                      </div>
+                    </div>
+                  ) : (
+                    <span className="text-xs text-slate-500">구독 없음</span>
+                  )}
+                  <ActionForm action={setAcademyPlanAction} className="mt-1 flex gap-1" resetOnSuccess={false}>
                     <input type="hidden" name="academyId" value={a.id} />
                     <input className="input w-20" name="plan" defaultValue={a.plan} />
                     <button className="btn-ghost btn-sm">저장</button>
                   </ActionForm>
                 </td>
-                <td>{a.status === "active" ? <span className="badge-green">운영</span> : <span className="badge-red">정지</span>}</td>
+                <td>{a.status === "active" ? <span className="badge-green">운영</span> : a.status === "pending_payment" ? <span className="badge-amber">결제 대기</span> : a.status === "suspended" ? <span className="badge-red">정지</span> : <span className="badge-gray">{a.status}</span>}</td>
                 <td className="text-xs text-slate-500">{fmtDate(a.createdAt, false)}</td>
                 <td className="text-right">
                   <ActionButton action={setAcademyStatusAction.bind(null, a.id, a.status === "active" ? "suspended" : "active")} className={a.status === "active" ? "btn-danger btn-sm" : "btn-secondary btn-sm"} confirm={a.status === "active" ? "이 학원의 이용을 정지할까요? 소속 사용자가 접속할 수 없게 됩니다." : undefined}>

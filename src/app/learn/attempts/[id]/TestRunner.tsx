@@ -237,7 +237,7 @@ export function TestRunner({ attemptId }: { attemptId: string }) {
   const urgent = left <= 2;
 
   return (
-    <div className="space-y-3 select-none" data-testid="runner">
+    <div className="mx-auto w-full space-y-3 select-none lg:max-w-[720px]" data-testid="runner">
       {/* 상단: 제목 · 저장 상태 · 전체 남은 시간 */}
       <div className="flex items-center justify-between gap-2 px-1">
         <span className="lbl min-w-0 truncate">{dto.exam.title}</span>

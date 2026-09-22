@@ -3,21 +3,32 @@ import { useState } from "react";
 import { ActionForm } from "@/components/ActionForm";
 import { createInvitationAction } from "./actions";
 
-export function InviteBox() {
-  const [url, setUrl] = useState<string | null>(null);
+/** 선생님 이메일 초대. 여러 명은 줄바꿈·쉼표로. 메일 서버가 없으면 링크를 여기서 바로 보여준다 */
+export function InviteBox({ available }: { available: number }) {
+  const [sent, setSent] = useState<{ email: string; devLink?: string }[] | null>(null);
   return (
     <div>
-      <ActionForm action={createInvitationAction} className="flex gap-2" onSuccess={(r) => setUrl((r.data as { url?: string })?.url ?? null)}>
-        <input className="input" name="email" type="email" placeholder="선생님 이메일 (선택: 지정 시 그 계정만 사용 가능)" />
-        <button className="btn-primary whitespace-nowrap">링크 발급</button>
+      <ActionForm action={createInvitationAction} className="grid gap-2" onSuccess={(r) => setSent(((r.data as { sent?: { email: string; devLink?: string }[] })?.sent) ?? [])}>
+        <textarea className="input" name="emails" rows={2} placeholder={available > 0 ? "선생님 이메일 (여러 명은 줄바꿈)" : "빈 자리가 없습니다 — 요금제에서 선생님 수를 늘려주세요"} disabled={available <= 0} data-testid="invite-emails" />
+        <button className="btn whitespace-nowrap py-2.5" style={{ background: "#ece9e3", color: "#1b1a18" }} disabled={available <= 0} data-testid="invite-send">
+          초대 메일 보내기
+        </button>
       </ActionForm>
-      {url && (
-        <div className="mt-2 rounded bg-slate-50 p-2">
-          <input className="input font-mono text-xs" readOnly value={url} onFocus={(e) => e.currentTarget.select()} />
-          <button type="button" className="btn-secondary btn-sm mt-1" onClick={() => navigator.clipboard?.writeText(url)}>
-            복사
-          </button>
-        </div>
+      {sent && sent.length > 0 && (
+        <ul className="mt-2 text-[12px]" style={{ color: "rgba(236,233,227,0.85)" }} data-testid="invite-results">
+          {sent.map((s) => (
+            <li key={s.email} className="flex items-center justify-between gap-2 py-1">
+              <span className="truncate">{s.email}</span>
+              {s.devLink ? (
+                <button type="button" className="lbl underline" onClick={() => navigator.clipboard?.writeText(s.devLink!)} title={s.devLink} data-testid="invite-devlink" data-link={s.devLink}>
+                  링크 복사 (메일 서버 없음)
+                </button>
+              ) : (
+                <span className="badge-green">발송</span>
+              )}
+            </li>
+          ))}
+        </ul>
       )}
     </div>
   );

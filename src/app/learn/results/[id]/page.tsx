@@ -17,9 +17,10 @@ export default async function LearnResultPage({ params }: { params: Promise<{ id
     throw e;
   }
   return (
-    <div className="space-y-3">
-      <Link href="/learn" className="lbl-ink inline-block px-1">
-        ← Tests
+    <div className="learn-grid">
+      <div className="col sticky">
+      <Link href="/learn/grades" className="lbl-ink inline-block px-1">
+        ← Grades
       </Link>
       <div className={`${r.score?.passed ? "card-dark" : r.score ? "card-accent" : "card"} card-body min-h-[220px]`}>
         <div className="flex items-start justify-between">
@@ -51,6 +52,8 @@ export default async function LearnResultPage({ params }: { params: Promise<{ id
           <p className="mt-6">점수는 선생님이 공개한 뒤 확인할 수 있습니다.</p>
         )}
       </div>
+      </div>
+      <div className="col">
       {r.graded && (
         <section className="card card-body">
           <div className="mb-3 flex items-center justify-between">
@@ -97,6 +100,7 @@ export default async function LearnResultPage({ params }: { params: Promise<{ id
           )}
         </section>
       )}
+      </div>
     </div>
   );
 }

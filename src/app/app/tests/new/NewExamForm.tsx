@@ -152,8 +152,8 @@ export function NewExamForm({ books, defaultBookId, defaultDays, classes }: { bo
 
         {/* 3. 조건 */}
         <section className="card card-body">
-          <div className="lbl">3 · Rules · 문항 · 통과 · 마감</div>
-          <div className="mt-3 grid gap-4 sm:grid-cols-3">
+          <div className="lbl">3 · Rules · 문항 · 통과 · 타이머 · 마감</div>
+          <div className="mt-3 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <div>
               <div className="label">문항 수</div>
               <div className="seg">
@@ -177,6 +177,20 @@ export function NewExamForm({ books, defaultBookId, defaultDays, classes }: { bo
               <input type="number" min={0} max={100} value={pass} onChange={(e) => setPass(Math.max(0, Math.min(100, Number(e.target.value) || 0)))} className="input mt-2 w-24" aria-label="통과 기준 직접 입력" />
             </div>
             <div>
+              <div className="label">타이머 · 단어당</div>
+              <div className="seg" role="radiogroup" aria-label="단어당 시간" data-testid="timer-toggle">
+                {([
+                  [7, "7초 · 기본"],
+                  [12, "12초 · 여유"],
+                ] as const).map(([n, l]) => (
+                  <button key={n} type="button" role="radio" aria-checked={perWord === n} className={`seg-item${perWord === n ? " on" : ""}`} onClick={() => setPerWord(n)}>
+                    {l}
+                  </button>
+                ))}
+              </div>
+              <p className="muted mt-2">온라인 응시에서 단어마다 주는 시간. 종이 시험은 제한 없음.</p>
+            </div>
+            <div>
               <div className="label">마감</div>
               <div className="seg">
                 {(
@@ -197,17 +211,7 @@ export function NewExamForm({ books, defaultBookId, defaultDays, classes }: { bo
           </div>
           <details className="mt-3">
             <summary className="lbl cursor-pointer">More · 시간 제한 · 공개 설정</summary>
-            <div className="mt-2 grid gap-3 sm:grid-cols-3">
-              <div>
-                <label className="label">단어당 시간 (초, 온라인)</label>
-                <div className="seg">
-                  {[5, 7, 10].map((n) => (
-                    <button key={n} type="button" className={`seg-item${perWord === n ? " on" : ""}`} onClick={() => setPerWord(n)}>
-                      {n}s
-                    </button>
-                  ))}
-                </div>
-              </div>
+            <div className="mt-2 grid gap-3 sm:grid-cols-2">
               <div>
                 <label className="label">전체 시간 제한 (분, 0=없음)</label>
                 <input className="input" type="number" min={0} max={600} value={timeLimit} onChange={(e) => setTimeLimit(Number(e.target.value) || 0)} />

@@ -32,9 +32,12 @@ export type StudentMinAggregateOutputType = {
   school: string | null
   grade: string | null
   memo: string | null
+  email: string | null
+  phone: string | null
   userId: string | null
   inviteTokenHash: string | null
   inviteExpiresAt: Date | null
+  inviteSentAt: Date | null
   status: string | null
   createdAt: Date | null
 }
@@ -47,9 +50,12 @@ export type StudentMaxAggregateOutputType = {
   school: string | null
   grade: string | null
   memo: string | null
+  email: string | null
+  phone: string | null
   userId: string | null
   inviteTokenHash: string | null
   inviteExpiresAt: Date | null
+  inviteSentAt: Date | null
   status: string | null
   createdAt: Date | null
 }
@@ -62,9 +68,12 @@ export type StudentCountAggregateOutputType = {
   school: number
   grade: number
   memo: number
+  email: number
+  phone: number
   userId: number
   inviteTokenHash: number
   inviteExpiresAt: number
+  inviteSentAt: number
   status: number
   createdAt: number
   _all: number
@@ -79,9 +88,12 @@ export type StudentMinAggregateInputType = {
   school?: true
   grade?: true
   memo?: true
+  email?: true
+  phone?: true
   userId?: true
   inviteTokenHash?: true
   inviteExpiresAt?: true
+  inviteSentAt?: true
   status?: true
   createdAt?: true
 }
@@ -94,9 +106,12 @@ export type StudentMaxAggregateInputType = {
   school?: true
   grade?: true
   memo?: true
+  email?: true
+  phone?: true
   userId?: true
   inviteTokenHash?: true
   inviteExpiresAt?: true
+  inviteSentAt?: true
   status?: true
   createdAt?: true
 }
@@ -109,9 +124,12 @@ export type StudentCountAggregateInputType = {
   school?: true
   grade?: true
   memo?: true
+  email?: true
+  phone?: true
   userId?: true
   inviteTokenHash?: true
   inviteExpiresAt?: true
+  inviteSentAt?: true
   status?: true
   createdAt?: true
   _all?: true
@@ -197,9 +215,12 @@ export type StudentGroupByOutputType = {
   school: string | null
   grade: string | null
   memo: string | null
+  email: string | null
+  phone: string | null
   userId: string | null
   inviteTokenHash: string | null
   inviteExpiresAt: Date | null
+  inviteSentAt: Date | null
   status: string
   createdAt: Date
   _count: StudentCountAggregateOutputType | null
@@ -233,9 +254,12 @@ export type StudentWhereInput = {
   school?: Prisma.StringNullableFilter<"Student"> | string | null
   grade?: Prisma.StringNullableFilter<"Student"> | string | null
   memo?: Prisma.StringNullableFilter<"Student"> | string | null
+  email?: Prisma.StringNullableFilter<"Student"> | string | null
+  phone?: Prisma.StringNullableFilter<"Student"> | string | null
   userId?: Prisma.StringNullableFilter<"Student"> | string | null
   inviteTokenHash?: Prisma.StringNullableFilter<"Student"> | string | null
   inviteExpiresAt?: Prisma.DateTimeNullableFilter<"Student"> | Date | string | null
+  inviteSentAt?: Prisma.DateTimeNullableFilter<"Student"> | Date | string | null
   status?: Prisma.StringFilter<"Student"> | string
   createdAt?: Prisma.DateTimeFilter<"Student"> | Date | string
   academy?: Prisma.XOR<Prisma.AcademyScalarRelationFilter, Prisma.AcademyWhereInput>
@@ -255,9 +279,12 @@ export type StudentOrderByWithRelationInput = {
   school?: Prisma.SortOrderInput | Prisma.SortOrder
   grade?: Prisma.SortOrderInput | Prisma.SortOrder
   memo?: Prisma.SortOrderInput | Prisma.SortOrder
+  email?: Prisma.SortOrderInput | Prisma.SortOrder
+  phone?: Prisma.SortOrderInput | Prisma.SortOrder
   userId?: Prisma.SortOrderInput | Prisma.SortOrder
   inviteTokenHash?: Prisma.SortOrderInput | Prisma.SortOrder
   inviteExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  inviteSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   academy?: Prisma.AcademyOrderByWithRelationInput
@@ -282,8 +309,11 @@ export type StudentWhereUniqueInput = Prisma.AtLeast<{
   school?: Prisma.StringNullableFilter<"Student"> | string | null
   grade?: Prisma.StringNullableFilter<"Student"> | string | null
   memo?: Prisma.StringNullableFilter<"Student"> | string | null
+  email?: Prisma.StringNullableFilter<"Student"> | string | null
+  phone?: Prisma.StringNullableFilter<"Student"> | string | null
   userId?: Prisma.StringNullableFilter<"Student"> | string | null
   inviteExpiresAt?: Prisma.DateTimeNullableFilter<"Student"> | Date | string | null
+  inviteSentAt?: Prisma.DateTimeNullableFilter<"Student"> | Date | string | null
   status?: Prisma.StringFilter<"Student"> | string
   createdAt?: Prisma.DateTimeFilter<"Student"> | Date | string
   academy?: Prisma.XOR<Prisma.AcademyScalarRelationFilter, Prisma.AcademyWhereInput>
@@ -303,9 +333,12 @@ export type StudentOrderByWithAggregationInput = {
   school?: Prisma.SortOrderInput | Prisma.SortOrder
   grade?: Prisma.SortOrderInput | Prisma.SortOrder
   memo?: Prisma.SortOrderInput | Prisma.SortOrder
+  email?: Prisma.SortOrderInput | Prisma.SortOrder
+  phone?: Prisma.SortOrderInput | Prisma.SortOrder
   userId?: Prisma.SortOrderInput | Prisma.SortOrder
   inviteTokenHash?: Prisma.SortOrderInput | Prisma.SortOrder
   inviteExpiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  inviteSentAt?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.StudentCountOrderByAggregateInput
@@ -324,9 +357,12 @@ export type StudentScalarWhereWithAggregatesInput = {
   school?: Prisma.StringNullableWithAggregatesFilter<"Student"> | string | null
   grade?: Prisma.StringNullableWithAggregatesFilter<"Student"> | string | null
   memo?: Prisma.StringNullableWithAggregatesFilter<"Student"> | string | null
+  email?: Prisma.StringNullableWithAggregatesFilter<"Student"> | string | null
+  phone?: Prisma.StringNullableWithAggregatesFilter<"Student"> | string | null
   userId?: Prisma.StringNullableWithAggregatesFilter<"Student"> | string | null
   inviteTokenHash?: Prisma.StringNullableWithAggregatesFilter<"Student"> | string | null
   inviteExpiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Student"> | Date | string | null
+  inviteSentAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Student"> | Date | string | null
   status?: Prisma.StringWithAggregatesFilter<"Student"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Student"> | Date | string
 }
@@ -337,8 +373,11 @@ export type StudentCreateInput = {
   school?: string | null
   grade?: string | null
   memo?: string | null
+  email?: string | null
+  phone?: string | null
   inviteTokenHash?: string | null
   inviteExpiresAt?: Date | string | null
+  inviteSentAt?: Date | string | null
   status?: string
   createdAt?: Date | string
   academy: Prisma.AcademyCreateNestedOneWithoutStudentsInput
@@ -358,9 +397,12 @@ export type StudentUncheckedCreateInput = {
   school?: string | null
   grade?: string | null
   memo?: string | null
+  email?: string | null
+  phone?: string | null
   userId?: string | null
   inviteTokenHash?: string | null
   inviteExpiresAt?: Date | string | null
+  inviteSentAt?: Date | string | null
   status?: string
   createdAt?: Date | string
   teachers?: Prisma.TeacherStudentUncheckedCreateNestedManyWithoutStudentInput
@@ -375,8 +417,11 @@ export type StudentUpdateInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   academy?: Prisma.AcademyUpdateOneRequiredWithoutStudentsNestedInput
@@ -396,9 +441,12 @@ export type StudentUncheckedUpdateInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teachers?: Prisma.TeacherStudentUncheckedUpdateManyWithoutStudentNestedInput
@@ -415,9 +463,12 @@ export type StudentCreateManyInput = {
   school?: string | null
   grade?: string | null
   memo?: string | null
+  email?: string | null
+  phone?: string | null
   userId?: string | null
   inviteTokenHash?: string | null
   inviteExpiresAt?: Date | string | null
+  inviteSentAt?: Date | string | null
   status?: string
   createdAt?: Date | string
 }
@@ -428,8 +479,11 @@ export type StudentUpdateManyMutationInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -442,9 +496,12 @@ export type StudentUncheckedUpdateManyInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -472,9 +529,12 @@ export type StudentCountOrderByAggregateInput = {
   school?: Prisma.SortOrder
   grade?: Prisma.SortOrder
   memo?: Prisma.SortOrder
+  email?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   inviteTokenHash?: Prisma.SortOrder
   inviteExpiresAt?: Prisma.SortOrder
+  inviteSentAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -487,9 +547,12 @@ export type StudentMaxOrderByAggregateInput = {
   school?: Prisma.SortOrder
   grade?: Prisma.SortOrder
   memo?: Prisma.SortOrder
+  email?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   inviteTokenHash?: Prisma.SortOrder
   inviteExpiresAt?: Prisma.SortOrder
+  inviteSentAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -502,9 +565,12 @@ export type StudentMinOrderByAggregateInput = {
   school?: Prisma.SortOrder
   grade?: Prisma.SortOrder
   memo?: Prisma.SortOrder
+  email?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   inviteTokenHash?: Prisma.SortOrder
   inviteExpiresAt?: Prisma.SortOrder
+  inviteSentAt?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -702,8 +768,11 @@ export type StudentCreateWithoutUserInput = {
   school?: string | null
   grade?: string | null
   memo?: string | null
+  email?: string | null
+  phone?: string | null
   inviteTokenHash?: string | null
   inviteExpiresAt?: Date | string | null
+  inviteSentAt?: Date | string | null
   status?: string
   createdAt?: Date | string
   academy: Prisma.AcademyCreateNestedOneWithoutStudentsInput
@@ -722,8 +791,11 @@ export type StudentUncheckedCreateWithoutUserInput = {
   school?: string | null
   grade?: string | null
   memo?: string | null
+  email?: string | null
+  phone?: string | null
   inviteTokenHash?: string | null
   inviteExpiresAt?: Date | string | null
+  inviteSentAt?: Date | string | null
   status?: string
   createdAt?: Date | string
   teachers?: Prisma.TeacherStudentUncheckedCreateNestedManyWithoutStudentInput
@@ -768,9 +840,12 @@ export type StudentScalarWhereInput = {
   school?: Prisma.StringNullableFilter<"Student"> | string | null
   grade?: Prisma.StringNullableFilter<"Student"> | string | null
   memo?: Prisma.StringNullableFilter<"Student"> | string | null
+  email?: Prisma.StringNullableFilter<"Student"> | string | null
+  phone?: Prisma.StringNullableFilter<"Student"> | string | null
   userId?: Prisma.StringNullableFilter<"Student"> | string | null
   inviteTokenHash?: Prisma.StringNullableFilter<"Student"> | string | null
   inviteExpiresAt?: Prisma.DateTimeNullableFilter<"Student"> | Date | string | null
+  inviteSentAt?: Prisma.DateTimeNullableFilter<"Student"> | Date | string | null
   status?: Prisma.StringFilter<"Student"> | string
   createdAt?: Prisma.DateTimeFilter<"Student"> | Date | string
 }
@@ -781,8 +856,11 @@ export type StudentCreateWithoutAcademyInput = {
   school?: string | null
   grade?: string | null
   memo?: string | null
+  email?: string | null
+  phone?: string | null
   inviteTokenHash?: string | null
   inviteExpiresAt?: Date | string | null
+  inviteSentAt?: Date | string | null
   status?: string
   createdAt?: Date | string
   classRoom?: Prisma.ClassRoomCreateNestedOneWithoutStudentsInput
@@ -800,9 +878,12 @@ export type StudentUncheckedCreateWithoutAcademyInput = {
   school?: string | null
   grade?: string | null
   memo?: string | null
+  email?: string | null
+  phone?: string | null
   userId?: string | null
   inviteTokenHash?: string | null
   inviteExpiresAt?: Date | string | null
+  inviteSentAt?: Date | string | null
   status?: string
   createdAt?: Date | string
   teachers?: Prisma.TeacherStudentUncheckedCreateNestedManyWithoutStudentInput
@@ -842,8 +923,11 @@ export type StudentCreateWithoutClassRoomInput = {
   school?: string | null
   grade?: string | null
   memo?: string | null
+  email?: string | null
+  phone?: string | null
   inviteTokenHash?: string | null
   inviteExpiresAt?: Date | string | null
+  inviteSentAt?: Date | string | null
   status?: string
   createdAt?: Date | string
   academy: Prisma.AcademyCreateNestedOneWithoutStudentsInput
@@ -861,9 +945,12 @@ export type StudentUncheckedCreateWithoutClassRoomInput = {
   school?: string | null
   grade?: string | null
   memo?: string | null
+  email?: string | null
+  phone?: string | null
   userId?: string | null
   inviteTokenHash?: string | null
   inviteExpiresAt?: Date | string | null
+  inviteSentAt?: Date | string | null
   status?: string
   createdAt?: Date | string
   teachers?: Prisma.TeacherStudentUncheckedCreateNestedManyWithoutStudentInput
@@ -903,8 +990,11 @@ export type StudentCreateWithoutTeachersInput = {
   school?: string | null
   grade?: string | null
   memo?: string | null
+  email?: string | null
+  phone?: string | null
   inviteTokenHash?: string | null
   inviteExpiresAt?: Date | string | null
+  inviteSentAt?: Date | string | null
   status?: string
   createdAt?: Date | string
   academy: Prisma.AcademyCreateNestedOneWithoutStudentsInput
@@ -923,9 +1013,12 @@ export type StudentUncheckedCreateWithoutTeachersInput = {
   school?: string | null
   grade?: string | null
   memo?: string | null
+  email?: string | null
+  phone?: string | null
   userId?: string | null
   inviteTokenHash?: string | null
   inviteExpiresAt?: Date | string | null
+  inviteSentAt?: Date | string | null
   status?: string
   createdAt?: Date | string
   assignments?: Prisma.AssignmentUncheckedCreateNestedManyWithoutStudentInput
@@ -955,8 +1048,11 @@ export type StudentUpdateWithoutTeachersInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   academy?: Prisma.AcademyUpdateOneRequiredWithoutStudentsNestedInput
@@ -975,9 +1071,12 @@ export type StudentUncheckedUpdateWithoutTeachersInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   assignments?: Prisma.AssignmentUncheckedUpdateManyWithoutStudentNestedInput
@@ -991,8 +1090,11 @@ export type StudentCreateWithoutLinkRequestsInput = {
   school?: string | null
   grade?: string | null
   memo?: string | null
+  email?: string | null
+  phone?: string | null
   inviteTokenHash?: string | null
   inviteExpiresAt?: Date | string | null
+  inviteSentAt?: Date | string | null
   status?: string
   createdAt?: Date | string
   academy: Prisma.AcademyCreateNestedOneWithoutStudentsInput
@@ -1011,9 +1113,12 @@ export type StudentUncheckedCreateWithoutLinkRequestsInput = {
   school?: string | null
   grade?: string | null
   memo?: string | null
+  email?: string | null
+  phone?: string | null
   userId?: string | null
   inviteTokenHash?: string | null
   inviteExpiresAt?: Date | string | null
+  inviteSentAt?: Date | string | null
   status?: string
   createdAt?: Date | string
   teachers?: Prisma.TeacherStudentUncheckedCreateNestedManyWithoutStudentInput
@@ -1043,8 +1148,11 @@ export type StudentUpdateWithoutLinkRequestsInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   academy?: Prisma.AcademyUpdateOneRequiredWithoutStudentsNestedInput
@@ -1063,9 +1171,12 @@ export type StudentUncheckedUpdateWithoutLinkRequestsInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teachers?: Prisma.TeacherStudentUncheckedUpdateManyWithoutStudentNestedInput
@@ -1079,8 +1190,11 @@ export type StudentCreateWithoutAssignmentsInput = {
   school?: string | null
   grade?: string | null
   memo?: string | null
+  email?: string | null
+  phone?: string | null
   inviteTokenHash?: string | null
   inviteExpiresAt?: Date | string | null
+  inviteSentAt?: Date | string | null
   status?: string
   createdAt?: Date | string
   academy: Prisma.AcademyCreateNestedOneWithoutStudentsInput
@@ -1099,9 +1213,12 @@ export type StudentUncheckedCreateWithoutAssignmentsInput = {
   school?: string | null
   grade?: string | null
   memo?: string | null
+  email?: string | null
+  phone?: string | null
   userId?: string | null
   inviteTokenHash?: string | null
   inviteExpiresAt?: Date | string | null
+  inviteSentAt?: Date | string | null
   status?: string
   createdAt?: Date | string
   teachers?: Prisma.TeacherStudentUncheckedCreateNestedManyWithoutStudentInput
@@ -1131,8 +1248,11 @@ export type StudentUpdateWithoutAssignmentsInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   academy?: Prisma.AcademyUpdateOneRequiredWithoutStudentsNestedInput
@@ -1151,9 +1271,12 @@ export type StudentUncheckedUpdateWithoutAssignmentsInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teachers?: Prisma.TeacherStudentUncheckedUpdateManyWithoutStudentNestedInput
@@ -1167,8 +1290,11 @@ export type StudentCreateWithoutRetakesInput = {
   school?: string | null
   grade?: string | null
   memo?: string | null
+  email?: string | null
+  phone?: string | null
   inviteTokenHash?: string | null
   inviteExpiresAt?: Date | string | null
+  inviteSentAt?: Date | string | null
   status?: string
   createdAt?: Date | string
   academy: Prisma.AcademyCreateNestedOneWithoutStudentsInput
@@ -1187,9 +1313,12 @@ export type StudentUncheckedCreateWithoutRetakesInput = {
   school?: string | null
   grade?: string | null
   memo?: string | null
+  email?: string | null
+  phone?: string | null
   userId?: string | null
   inviteTokenHash?: string | null
   inviteExpiresAt?: Date | string | null
+  inviteSentAt?: Date | string | null
   status?: string
   createdAt?: Date | string
   teachers?: Prisma.TeacherStudentUncheckedCreateNestedManyWithoutStudentInput
@@ -1219,8 +1348,11 @@ export type StudentUpdateWithoutRetakesInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   academy?: Prisma.AcademyUpdateOneRequiredWithoutStudentsNestedInput
@@ -1239,9 +1371,12 @@ export type StudentUncheckedUpdateWithoutRetakesInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teachers?: Prisma.TeacherStudentUncheckedUpdateManyWithoutStudentNestedInput
@@ -1257,8 +1392,11 @@ export type StudentCreateManyUserInput = {
   school?: string | null
   grade?: string | null
   memo?: string | null
+  email?: string | null
+  phone?: string | null
   inviteTokenHash?: string | null
   inviteExpiresAt?: Date | string | null
+  inviteSentAt?: Date | string | null
   status?: string
   createdAt?: Date | string
 }
@@ -1269,8 +1407,11 @@ export type StudentUpdateWithoutUserInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   academy?: Prisma.AcademyUpdateOneRequiredWithoutStudentsNestedInput
@@ -1289,8 +1430,11 @@ export type StudentUncheckedUpdateWithoutUserInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teachers?: Prisma.TeacherStudentUncheckedUpdateManyWithoutStudentNestedInput
@@ -1307,8 +1451,11 @@ export type StudentUncheckedUpdateManyWithoutUserInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1320,9 +1467,12 @@ export type StudentCreateManyAcademyInput = {
   school?: string | null
   grade?: string | null
   memo?: string | null
+  email?: string | null
+  phone?: string | null
   userId?: string | null
   inviteTokenHash?: string | null
   inviteExpiresAt?: Date | string | null
+  inviteSentAt?: Date | string | null
   status?: string
   createdAt?: Date | string
 }
@@ -1333,8 +1483,11 @@ export type StudentUpdateWithoutAcademyInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   classRoom?: Prisma.ClassRoomUpdateOneWithoutStudentsNestedInput
@@ -1352,9 +1505,12 @@ export type StudentUncheckedUpdateWithoutAcademyInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teachers?: Prisma.TeacherStudentUncheckedUpdateManyWithoutStudentNestedInput
@@ -1370,9 +1526,12 @@ export type StudentUncheckedUpdateManyWithoutAcademyInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1384,9 +1543,12 @@ export type StudentCreateManyClassRoomInput = {
   school?: string | null
   grade?: string | null
   memo?: string | null
+  email?: string | null
+  phone?: string | null
   userId?: string | null
   inviteTokenHash?: string | null
   inviteExpiresAt?: Date | string | null
+  inviteSentAt?: Date | string | null
   status?: string
   createdAt?: Date | string
 }
@@ -1397,8 +1559,11 @@ export type StudentUpdateWithoutClassRoomInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   academy?: Prisma.AcademyUpdateOneRequiredWithoutStudentsNestedInput
@@ -1416,9 +1581,12 @@ export type StudentUncheckedUpdateWithoutClassRoomInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   teachers?: Prisma.TeacherStudentUncheckedUpdateManyWithoutStudentNestedInput
@@ -1434,9 +1602,12 @@ export type StudentUncheckedUpdateManyWithoutClassRoomInput = {
   school?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   memo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   userId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteTokenHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inviteExpiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  inviteSentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1507,9 +1678,12 @@ export type StudentSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   school?: boolean
   grade?: boolean
   memo?: boolean
+  email?: boolean
+  phone?: boolean
   userId?: boolean
   inviteTokenHash?: boolean
   inviteExpiresAt?: boolean
+  inviteSentAt?: boolean
   status?: boolean
   createdAt?: boolean
   academy?: boolean | Prisma.AcademyDefaultArgs<ExtArgs>
@@ -1530,9 +1704,12 @@ export type StudentSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   school?: boolean
   grade?: boolean
   memo?: boolean
+  email?: boolean
+  phone?: boolean
   userId?: boolean
   inviteTokenHash?: boolean
   inviteExpiresAt?: boolean
+  inviteSentAt?: boolean
   status?: boolean
   createdAt?: boolean
   academy?: boolean | Prisma.AcademyDefaultArgs<ExtArgs>
@@ -1548,9 +1725,12 @@ export type StudentSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   school?: boolean
   grade?: boolean
   memo?: boolean
+  email?: boolean
+  phone?: boolean
   userId?: boolean
   inviteTokenHash?: boolean
   inviteExpiresAt?: boolean
+  inviteSentAt?: boolean
   status?: boolean
   createdAt?: boolean
   academy?: boolean | Prisma.AcademyDefaultArgs<ExtArgs>
@@ -1566,14 +1746,17 @@ export type StudentSelectScalar = {
   school?: boolean
   grade?: boolean
   memo?: boolean
+  email?: boolean
+  phone?: boolean
   userId?: boolean
   inviteTokenHash?: boolean
   inviteExpiresAt?: boolean
+  inviteSentAt?: boolean
   status?: boolean
   createdAt?: boolean
 }
 
-export type StudentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "academyId" | "classId" | "name" | "school" | "grade" | "memo" | "userId" | "inviteTokenHash" | "inviteExpiresAt" | "status" | "createdAt", ExtArgs["result"]["student"]>
+export type StudentOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "academyId" | "classId" | "name" | "school" | "grade" | "memo" | "email" | "phone" | "userId" | "inviteTokenHash" | "inviteExpiresAt" | "inviteSentAt" | "status" | "createdAt", ExtArgs["result"]["student"]>
 export type StudentInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   academy?: boolean | Prisma.AcademyDefaultArgs<ExtArgs>
   classRoom?: boolean | Prisma.Student$classRoomArgs<ExtArgs>
@@ -1614,9 +1797,12 @@ export type $StudentPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     school: string | null
     grade: string | null
     memo: string | null
+    email: string | null
+    phone: string | null
     userId: string | null
     inviteTokenHash: string | null
     inviteExpiresAt: Date | null
+    inviteSentAt: Date | null
     status: string
     createdAt: Date
   }, ExtArgs["result"]["student"]>
@@ -2056,9 +2242,12 @@ export interface StudentFieldRefs {
   readonly school: Prisma.FieldRef<"Student", 'String'>
   readonly grade: Prisma.FieldRef<"Student", 'String'>
   readonly memo: Prisma.FieldRef<"Student", 'String'>
+  readonly email: Prisma.FieldRef<"Student", 'String'>
+  readonly phone: Prisma.FieldRef<"Student", 'String'>
   readonly userId: Prisma.FieldRef<"Student", 'String'>
   readonly inviteTokenHash: Prisma.FieldRef<"Student", 'String'>
   readonly inviteExpiresAt: Prisma.FieldRef<"Student", 'DateTime'>
+  readonly inviteSentAt: Prisma.FieldRef<"Student", 'DateTime'>
   readonly status: Prisma.FieldRef<"Student", 'String'>
   readonly createdAt: Prisma.FieldRef<"Student", 'DateTime'>
 }

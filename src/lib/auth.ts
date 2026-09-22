@@ -79,6 +79,9 @@ export async function requirePlatformAdmin(): Promise<User> {
   return u;
 }
 
+/** 들어갈 수는 있는 학원 상태 (active 만 기능 사용 가능, 나머지는 결제 안내 화면) */
+export const ACADEMY_ENTERABLE = ["active", "pending_payment", "past_due", "read_only"];
+
 export type AcademyContext = {
   user: User;
   member: AcademyMember & { academy: { id: string; name: string; slug: string; color: string; status: string; logoPath: string | null } };
@@ -97,7 +100,7 @@ export async function getAcademyContext(): Promise<AcademyContext | null> {
   }
   if (!academyId) return null;
   const member = await prisma.academyMember.findFirst({
-    where: { userId: user.id, academyId, status: "active", academy: { status: "active" } },
+    where: { userId: user.id, academyId, status: "active", academy: { status: { in: ACADEMY_ENTERABLE } } },
     include: { academy: { select: { id: true, name: true, slug: true, color: true, status: true, logoPath: true } } },
   });
   if (!member) return null;
@@ -151,7 +154,7 @@ export async function audit(params: { academyId?: string | null; userId?: string
 export async function landingAfterLogin(userId: string, next?: string | null): Promise<string> {
   if (next && next.startsWith("/") && !next.startsWith("//") && next !== "/workspaces") return next;
   const [memberships, students] = await Promise.all([
-    prisma.academyMember.findMany({ where: { userId, status: "active", academy: { status: "active" } }, select: { academyId: true } }),
+    prisma.academyMember.findMany({ where: { userId, status: "active", academy: { status: { in: ACADEMY_ENTERABLE } } }, select: { academyId: true } }),
     prisma.student.count({ where: { userId, status: "active" } }),
   ]);
   if (memberships.length === 1 && students === 0) {

@@ -34,6 +34,20 @@ export default async function SettingsPage() {
               <label className="label">학원 이름</label>
               <input className="input" name="name" defaultValue={academy.name} />
             </div>
+            <div className="grid gap-3 sm:grid-cols-3">
+              <div>
+                <label className="label">대표자명</label>
+                <input className="input" name="representativeName" defaultValue={academy.representativeName ?? ""} maxLength={30} />
+              </div>
+              <div>
+                <label className="label">학원 전화번호</label>
+                <input className="input" name="phone" defaultValue={academy.phone ?? ""} maxLength={30} />
+              </div>
+              <div>
+                <label className="label">지역</label>
+                <input className="input" name="region" defaultValue={academy.region ?? ""} maxLength={30} />
+              </div>
+            </div>
             <div>
               <label className="label">소개</label>
               <textarea className="input" name="intro" rows={3} defaultValue={academy.intro ?? ""} />

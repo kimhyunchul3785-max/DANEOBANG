@@ -132,7 +132,7 @@ export function PracticeRunner({ title, words, meaningPool, englishPool, backHre
   const speakText = q ? q.w.english : missed[0]?.english ?? words[0]?.english ?? "";
 
   return (
-    <div className="space-y-3 select-none" data-testid="practice">
+    <div className="mx-auto w-full space-y-3 select-none lg:max-w-[640px]" data-testid="practice">
       <div className="flex items-center justify-between gap-2 px-1">
         <span className="flex min-w-0 items-center gap-2">
           <Link href={backHref} className="lbl-ink shrink-0">

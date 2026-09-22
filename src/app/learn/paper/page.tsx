@@ -22,7 +22,8 @@ export default async function PaperPage() {
   const paperOpen = list.filter((a) => a.mode === "paper" && a.status !== "completed" && a.status !== "expired");
   const processing = scans.some((s) => s.status === "queued" || s.status === "processing");
   return (
-    <div className="space-y-3">
+    <div className="learn-grid">
+      <div className="col">
       {processing && <AutoRefresh ms={2500} />}
       <div className="flex items-end justify-between px-1">
         <div>
@@ -62,6 +63,9 @@ export default async function PaperPage() {
         </section>
       )}
 
+      </div>
+
+      <div className="col">
       <section className="card card-body">
         <div className="mb-1 flex items-center justify-between">
           <div className="lbl">Submitted · 제출 기록</div>
@@ -99,6 +103,7 @@ export default async function PaperPage() {
           })}
         </ul>
       </section>
+      </div>
     </div>
   );
 }

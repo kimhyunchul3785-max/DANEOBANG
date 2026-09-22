@@ -28,16 +28,7 @@ export default async function RetakePage() {
   }
   const cells: (number | null)[] = [...Array.from({ length: firstDow }, () => null), ...Array.from({ length: daysIn }, (_, i) => i + 1)];
 
-  return (
-    <div className="space-y-3">
-      <div className="flex items-end justify-between px-1">
-        <div>
-          <div className="lbl">Retake</div>
-          <div className="mt-1 text-[15px] font-semibold">재시험 · 보강 일정</div>
-        </div>
-        <span className="digital">{String(open.length).padStart(2, "0")} OPEN</span>
-      </div>
-
+  const calendar = (
       <div className="card card-body">
         <div className="flex items-center justify-between">
           <div className="lbl">
@@ -61,6 +52,18 @@ export default async function RetakePage() {
             );
           })}
         </div>
+      </div>
+  );
+
+  return (
+    <div className="learn-grid">
+      <div className="col">
+      <div className="flex items-end justify-between px-1">
+        <div>
+          <div className="lbl">Retake</div>
+          <div className="mt-1 text-[15px] font-semibold">재시험 · 보강 일정</div>
+        </div>
+        <span className="digital">{String(open.length).padStart(2, "0")} OPEN</span>
       </div>
 
       {next ? (
@@ -134,6 +137,11 @@ export default async function RetakePage() {
         </section>
       )}
 
+      </div>
+
+      <div className="col">
+      {calendar}
+
       {open.length > 1 && (
         <section className="card card-body">
           <div className="lbl mb-1">Upcoming</div>
@@ -166,6 +174,7 @@ export default async function RetakePage() {
           </ul>
         </section>
       )}
+      </div>
     </div>
   );
 }

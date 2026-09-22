@@ -24,7 +24,7 @@ src/app/         페이지·서버 액션·API (app=교사, learn=학생, admin=
 src/lib/         auth, scope(테넌트 경계), exam-gen, grading, attempts, parsers/, omr/, jobs
 assets/fonts/    PDF 용 Noto Sans KR 서브셋
 fixtures/        파서·OMR 테스트 파일
-scripts/         db-init, gen-sqlite-ddl, test-parsers, test-omr, e2e
+scripts/         db-init, gen-sqlite-ddl, test-parsers, test-omr, e2e, e2e-linked, e2e-signup, qa-shots
 docs/            PRD.md, MVP.md, TECH_STACK.md
 storage/         업로드·PDF·사진 (자동 생성, git 제외)
 ```
@@ -47,6 +47,7 @@ node scripts/gen-sqlite-ddl.cjs   # schema.prisma 변경 후 init.sql 재생성 
 
 ## 문서
 
+- `docs/PRD_B2B_SIGNUP.md` — v4.2 B2B 가입·Seat 과금 (학원 단위 결제, 선생님 초대 기반 가입, 학생 계정 설정 링크, 요금제 화면, 모의 결제·메일 개발 모드)
 - `docs/IA_REVIEW_v4.md` — v4 계정별 IA 검수 (소셜 로그인, 엑셀 등록, 학생/성적 탭 재정의, 게임형 응시, 종이 시험 학생 제출·QR)
 - `docs/QA_REPORT_v3.md` — IA·UX 개선 v3 (업로드 자동 저장·DAY 나누기, 그룹 대시보드, 1화면 출제, 재시험→보강 흐름) QA 결과
 - `docs/PRD.md` — 제품 요구사항 (학원 SaaS 기준, 1차 구현 상태 표기)

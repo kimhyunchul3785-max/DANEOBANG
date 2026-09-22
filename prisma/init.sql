@@ -9,6 +9,8 @@ CREATE TABLE IF NOT EXISTS "User" (
   "passwordHash" TEXT,
   "isPlatformAdmin" BOOLEAN NOT NULL DEFAULT false,
   "status" TEXT NOT NULL DEFAULT 'active',
+  "emailVerifiedAt" DATETIME,
+  "phone" TEXT,
   "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updatedAt" DATETIME NOT NULL
 );
@@ -20,6 +22,9 @@ CREATE TABLE IF NOT EXISTS "Academy" (
   "intro" TEXT,
   "color" TEXT NOT NULL DEFAULT '#2563eb',
   "logoPath" TEXT,
+  "representativeName" TEXT,
+  "phone" TEXT,
+  "region" TEXT,
   "status" TEXT NOT NULL DEFAULT 'active',
   "plan" TEXT NOT NULL DEFAULT 'free',
   "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -31,6 +36,7 @@ CREATE TABLE IF NOT EXISTS "AcademyMember" (
   "academyId" TEXT NOT NULL,
   "userId" TEXT NOT NULL,
   "role" TEXT NOT NULL,
+  "isTeacher" BOOLEAN NOT NULL DEFAULT true,
   "status" TEXT NOT NULL DEFAULT 'active',
   "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "AcademyMember_academyId_fkey" FOREIGN KEY ("academyId") REFERENCES "Academy" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
@@ -42,15 +48,75 @@ CREATE TABLE IF NOT EXISTS "Invitation" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "academyId" TEXT NOT NULL,
   "role" TEXT NOT NULL,
+  "isTeacher" BOOLEAN NOT NULL DEFAULT true,
   "email" TEXT,
+  "name" TEXT,
   "tokenHash" TEXT NOT NULL,
   "expiresAt" DATETIME NOT NULL,
   "usedAt" DATETIME,
+  "revokedAt" DATETIME,
   "createdBy" TEXT NOT NULL,
   "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "Invitation_academyId_fkey" FOREIGN KEY ("academyId") REFERENCES "Academy" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE UNIQUE INDEX IF NOT EXISTS "Invitation_tokenHash_key" ON "Invitation"("tokenHash");
+CREATE INDEX IF NOT EXISTS "Invitation_academyId_usedAt_idx" ON "Invitation"("academyId", "usedAt");
+CREATE TABLE IF NOT EXISTS "Subscription" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "academyId" TEXT NOT NULL,
+  "provider" TEXT NOT NULL DEFAULT 'mock',
+  "providerCustomerId" TEXT,
+  "providerSubscriptionId" TEXT,
+  "seatQuantity" INTEGER NOT NULL DEFAULT 1,
+  "unitPrice" INTEGER NOT NULL DEFAULT 9900,
+  "status" TEXT NOT NULL DEFAULT 'active',
+  "currentPeriodStart" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "currentPeriodEnd" DATETIME,
+  "cardLast4" TEXT,
+  "lastPaymentAt" DATETIME,
+  "lastPaymentError" TEXT,
+  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "updatedAt" DATETIME NOT NULL,
+  CONSTRAINT "Subscription_academyId_fkey" FOREIGN KEY ("academyId") REFERENCES "Academy" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "Subscription_academyId_key" ON "Subscription"("academyId");
+CREATE TABLE IF NOT EXISTS "Payment" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "subscriptionId" TEXT NOT NULL,
+  "amount" INTEGER NOT NULL,
+  "seatQuantity" INTEGER NOT NULL,
+  "status" TEXT NOT NULL,
+  "providerRef" TEXT,
+  "error" TEXT,
+  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "Payment_subscriptionId_fkey" FOREIGN KEY ("subscriptionId") REFERENCES "Subscription" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE INDEX IF NOT EXISTS "Payment_subscriptionId_createdAt_idx" ON "Payment"("subscriptionId", "createdAt");
+CREATE TABLE IF NOT EXISTS "SignupSession" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "tokenHash" TEXT NOT NULL,
+  "step" INTEGER NOT NULL DEFAULT 1,
+  "academyName" TEXT,
+  "representativeName" TEXT,
+  "phone" TEXT,
+  "region" TEXT,
+  "teacherCount" INTEGER NOT NULL DEFAULT 1,
+  "ownerIsTeacher" BOOLEAN NOT NULL DEFAULT true,
+  "ownerName" TEXT,
+  "email" TEXT,
+  "passwordHash" TEXT,
+  "verifyTokenHash" TEXT,
+  "verifyTokenDev" TEXT,
+  "verifySentAt" DATETIME,
+  "verifiedAt" DATETIME,
+  "userId" TEXT,
+  "academyId" TEXT,
+  "completedAt" DATETIME,
+  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  "expiresAt" DATETIME NOT NULL
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "SignupSession_tokenHash_key" ON "SignupSession"("tokenHash");
+CREATE UNIQUE INDEX IF NOT EXISTS "SignupSession_verifyTokenHash_key" ON "SignupSession"("verifyTokenHash");
 CREATE TABLE IF NOT EXISTS "ClassRoom" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "academyId" TEXT NOT NULL,
@@ -68,9 +134,12 @@ CREATE TABLE IF NOT EXISTS "Student" (
   "school" TEXT,
   "grade" TEXT,
   "memo" TEXT,
+  "email" TEXT,
+  "phone" TEXT,
   "userId" TEXT,
   "inviteTokenHash" TEXT,
   "inviteExpiresAt" DATETIME,
+  "inviteSentAt" DATETIME,
   "status" TEXT NOT NULL DEFAULT 'active',
   "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "Student_academyId_fkey" FOREIGN KEY ("academyId") REFERENCES "Academy" ("id") ON DELETE CASCADE ON UPDATE CASCADE,

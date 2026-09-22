@@ -47,6 +47,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
     grade: s.grade,
     teachers: s.teachers.map((t) => t.member.user.name).join(", "),
     linked: !!s.user,
+    invited: !!s.inviteTokenHash && (!s.inviteExpiresAt || s.inviteExpiresAt > new Date()),
     pending: s._count.linkRequests,
     avg: avg(byStudent.get(s.id) ?? []),
     retake: s._count.retakes,
@@ -70,7 +71,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
         </div>
         <div className="flex items-center gap-3">
           <span className="digital">
-            <CountUp value={rows.length} /> STUDENTS · <CountUp value={linked} /> LINKED
+            <CountUp value={rows.length} /> STUDENTS · <CountUp value={linked} /> ACTIVE
           </span>
           <Link href="/app/results" className="btn-secondary btn-sm">
             성적 보기 →
@@ -123,7 +124,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
               </a>
             </div>
             <p className="mt-2 text-[13px]" style={{ color: "rgba(255,244,240,0.9)" }}>
-              시트 이름이 곧 반 이름입니다. 각 시트에 <b>이름 · 학교 · 학년</b>을 적어 올리면 학생이 그 반으로 등록됩니다. 없는 반은 자동으로 만들어집니다.
+              시트 이름이 곧 반 이름입니다. 각 시트에 <b>이름 · 학교 · 학년 · 이메일(선택)</b>을 적어 올리면 학생이 그 반으로 등록됩니다. 없는 반은 자동으로 만들어집니다. 학생 계정은 등록 후 "계정 설정 링크"로 활성화합니다.
             </p>
             <div className="mt-3">
               <RosterUpload />
@@ -139,6 +140,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
                 <input className="input" name="school" placeholder="학교" />
                 <input className="input" name="grade" placeholder="학년 (예: 고1)" />
               </div>
+              <input className="input" name="email" type="email" placeholder="이메일 (선택 · 계정 설정 링크 발송)" />
               <select className="input" name="classId" defaultValue={sp.classId && sp.classId !== "none" ? sp.classId : ""}>
                 <option value="">반 없음</option>
                 {activeClasses.map((c) => (

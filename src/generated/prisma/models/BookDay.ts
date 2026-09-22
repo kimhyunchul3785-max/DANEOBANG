@@ -399,14 +399,6 @@ export type BookDayUncheckedUpdateManyWithoutBookNestedInput = {
   deleteMany?: Prisma.BookDayScalarWhereInput | Prisma.BookDayScalarWhereInput[]
 }
 
-export type IntFieldUpdateOperationsInput = {
-  set?: number
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type BookDayCreateNestedOneWithoutWordsInput = {
   create?: Prisma.XOR<Prisma.BookDayCreateWithoutWordsInput, Prisma.BookDayUncheckedCreateWithoutWordsInput>
   connectOrCreate?: Prisma.BookDayCreateOrConnectWithoutWordsInput

@@ -29,6 +29,7 @@ export type AcademyMemberMinAggregateOutputType = {
   academyId: string | null
   userId: string | null
   role: string | null
+  isTeacher: boolean | null
   status: string | null
   createdAt: Date | null
 }
@@ -38,6 +39,7 @@ export type AcademyMemberMaxAggregateOutputType = {
   academyId: string | null
   userId: string | null
   role: string | null
+  isTeacher: boolean | null
   status: string | null
   createdAt: Date | null
 }
@@ -47,6 +49,7 @@ export type AcademyMemberCountAggregateOutputType = {
   academyId: number
   userId: number
   role: number
+  isTeacher: number
   status: number
   createdAt: number
   _all: number
@@ -58,6 +61,7 @@ export type AcademyMemberMinAggregateInputType = {
   academyId?: true
   userId?: true
   role?: true
+  isTeacher?: true
   status?: true
   createdAt?: true
 }
@@ -67,6 +71,7 @@ export type AcademyMemberMaxAggregateInputType = {
   academyId?: true
   userId?: true
   role?: true
+  isTeacher?: true
   status?: true
   createdAt?: true
 }
@@ -76,6 +81,7 @@ export type AcademyMemberCountAggregateInputType = {
   academyId?: true
   userId?: true
   role?: true
+  isTeacher?: true
   status?: true
   createdAt?: true
   _all?: true
@@ -158,6 +164,7 @@ export type AcademyMemberGroupByOutputType = {
   academyId: string
   userId: string
   role: string
+  isTeacher: boolean
   status: string
   createdAt: Date
   _count: AcademyMemberCountAggregateOutputType | null
@@ -188,6 +195,7 @@ export type AcademyMemberWhereInput = {
   academyId?: Prisma.StringFilter<"AcademyMember"> | string
   userId?: Prisma.StringFilter<"AcademyMember"> | string
   role?: Prisma.StringFilter<"AcademyMember"> | string
+  isTeacher?: Prisma.BoolFilter<"AcademyMember"> | boolean
   status?: Prisma.StringFilter<"AcademyMember"> | string
   createdAt?: Prisma.DateTimeFilter<"AcademyMember"> | Date | string
   academy?: Prisma.XOR<Prisma.AcademyScalarRelationFilter, Prisma.AcademyWhereInput>
@@ -200,6 +208,7 @@ export type AcademyMemberOrderByWithRelationInput = {
   academyId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  isTeacher?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   academy?: Prisma.AcademyOrderByWithRelationInput
@@ -216,6 +225,7 @@ export type AcademyMemberWhereUniqueInput = Prisma.AtLeast<{
   academyId?: Prisma.StringFilter<"AcademyMember"> | string
   userId?: Prisma.StringFilter<"AcademyMember"> | string
   role?: Prisma.StringFilter<"AcademyMember"> | string
+  isTeacher?: Prisma.BoolFilter<"AcademyMember"> | boolean
   status?: Prisma.StringFilter<"AcademyMember"> | string
   createdAt?: Prisma.DateTimeFilter<"AcademyMember"> | Date | string
   academy?: Prisma.XOR<Prisma.AcademyScalarRelationFilter, Prisma.AcademyWhereInput>
@@ -228,6 +238,7 @@ export type AcademyMemberOrderByWithAggregationInput = {
   academyId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  isTeacher?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.AcademyMemberCountOrderByAggregateInput
@@ -243,6 +254,7 @@ export type AcademyMemberScalarWhereWithAggregatesInput = {
   academyId?: Prisma.StringWithAggregatesFilter<"AcademyMember"> | string
   userId?: Prisma.StringWithAggregatesFilter<"AcademyMember"> | string
   role?: Prisma.StringWithAggregatesFilter<"AcademyMember"> | string
+  isTeacher?: Prisma.BoolWithAggregatesFilter<"AcademyMember"> | boolean
   status?: Prisma.StringWithAggregatesFilter<"AcademyMember"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"AcademyMember"> | Date | string
 }
@@ -250,6 +262,7 @@ export type AcademyMemberScalarWhereWithAggregatesInput = {
 export type AcademyMemberCreateInput = {
   id?: string
   role: string
+  isTeacher?: boolean
   status?: string
   createdAt?: Date | string
   academy: Prisma.AcademyCreateNestedOneWithoutMembersInput
@@ -262,6 +275,7 @@ export type AcademyMemberUncheckedCreateInput = {
   academyId: string
   userId: string
   role: string
+  isTeacher?: boolean
   status?: string
   createdAt?: Date | string
   students?: Prisma.TeacherStudentUncheckedCreateNestedManyWithoutMemberInput
@@ -270,6 +284,7 @@ export type AcademyMemberUncheckedCreateInput = {
 export type AcademyMemberUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  isTeacher?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   academy?: Prisma.AcademyUpdateOneRequiredWithoutMembersNestedInput
@@ -282,6 +297,7 @@ export type AcademyMemberUncheckedUpdateInput = {
   academyId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  isTeacher?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   students?: Prisma.TeacherStudentUncheckedUpdateManyWithoutMemberNestedInput
@@ -292,6 +308,7 @@ export type AcademyMemberCreateManyInput = {
   academyId: string
   userId: string
   role: string
+  isTeacher?: boolean
   status?: string
   createdAt?: Date | string
 }
@@ -299,6 +316,7 @@ export type AcademyMemberCreateManyInput = {
 export type AcademyMemberUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  isTeacher?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -308,6 +326,7 @@ export type AcademyMemberUncheckedUpdateManyInput = {
   academyId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  isTeacher?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -332,6 +351,7 @@ export type AcademyMemberCountOrderByAggregateInput = {
   academyId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  isTeacher?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -341,6 +361,7 @@ export type AcademyMemberMaxOrderByAggregateInput = {
   academyId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  isTeacher?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -350,6 +371,7 @@ export type AcademyMemberMinOrderByAggregateInput = {
   academyId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
   role?: Prisma.SortOrder
+  isTeacher?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -460,6 +482,7 @@ export type AcademyMemberUpdateOneRequiredWithoutStudentsNestedInput = {
 export type AcademyMemberCreateWithoutUserInput = {
   id?: string
   role: string
+  isTeacher?: boolean
   status?: string
   createdAt?: Date | string
   academy: Prisma.AcademyCreateNestedOneWithoutMembersInput
@@ -470,6 +493,7 @@ export type AcademyMemberUncheckedCreateWithoutUserInput = {
   id?: string
   academyId: string
   role: string
+  isTeacher?: boolean
   status?: string
   createdAt?: Date | string
   students?: Prisma.TeacherStudentUncheckedCreateNestedManyWithoutMemberInput
@@ -508,6 +532,7 @@ export type AcademyMemberScalarWhereInput = {
   academyId?: Prisma.StringFilter<"AcademyMember"> | string
   userId?: Prisma.StringFilter<"AcademyMember"> | string
   role?: Prisma.StringFilter<"AcademyMember"> | string
+  isTeacher?: Prisma.BoolFilter<"AcademyMember"> | boolean
   status?: Prisma.StringFilter<"AcademyMember"> | string
   createdAt?: Prisma.DateTimeFilter<"AcademyMember"> | Date | string
 }
@@ -515,6 +540,7 @@ export type AcademyMemberScalarWhereInput = {
 export type AcademyMemberCreateWithoutAcademyInput = {
   id?: string
   role: string
+  isTeacher?: boolean
   status?: string
   createdAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutMembershipsInput
@@ -525,6 +551,7 @@ export type AcademyMemberUncheckedCreateWithoutAcademyInput = {
   id?: string
   userId: string
   role: string
+  isTeacher?: boolean
   status?: string
   createdAt?: Date | string
   students?: Prisma.TeacherStudentUncheckedCreateNestedManyWithoutMemberInput
@@ -558,6 +585,7 @@ export type AcademyMemberUpdateManyWithWhereWithoutAcademyInput = {
 export type AcademyMemberCreateWithoutStudentsInput = {
   id?: string
   role: string
+  isTeacher?: boolean
   status?: string
   createdAt?: Date | string
   academy: Prisma.AcademyCreateNestedOneWithoutMembersInput
@@ -569,6 +597,7 @@ export type AcademyMemberUncheckedCreateWithoutStudentsInput = {
   academyId: string
   userId: string
   role: string
+  isTeacher?: boolean
   status?: string
   createdAt?: Date | string
 }
@@ -592,6 +621,7 @@ export type AcademyMemberUpdateToOneWithWhereWithoutStudentsInput = {
 export type AcademyMemberUpdateWithoutStudentsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  isTeacher?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   academy?: Prisma.AcademyUpdateOneRequiredWithoutMembersNestedInput
@@ -603,6 +633,7 @@ export type AcademyMemberUncheckedUpdateWithoutStudentsInput = {
   academyId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  isTeacher?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -611,6 +642,7 @@ export type AcademyMemberCreateManyUserInput = {
   id?: string
   academyId: string
   role: string
+  isTeacher?: boolean
   status?: string
   createdAt?: Date | string
 }
@@ -618,6 +650,7 @@ export type AcademyMemberCreateManyUserInput = {
 export type AcademyMemberUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  isTeacher?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   academy?: Prisma.AcademyUpdateOneRequiredWithoutMembersNestedInput
@@ -628,6 +661,7 @@ export type AcademyMemberUncheckedUpdateWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   academyId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  isTeacher?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   students?: Prisma.TeacherStudentUncheckedUpdateManyWithoutMemberNestedInput
@@ -637,6 +671,7 @@ export type AcademyMemberUncheckedUpdateManyWithoutUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   academyId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  isTeacher?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -645,6 +680,7 @@ export type AcademyMemberCreateManyAcademyInput = {
   id?: string
   userId: string
   role: string
+  isTeacher?: boolean
   status?: string
   createdAt?: Date | string
 }
@@ -652,6 +688,7 @@ export type AcademyMemberCreateManyAcademyInput = {
 export type AcademyMemberUpdateWithoutAcademyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  isTeacher?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutMembershipsNestedInput
@@ -662,6 +699,7 @@ export type AcademyMemberUncheckedUpdateWithoutAcademyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  isTeacher?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   students?: Prisma.TeacherStudentUncheckedUpdateManyWithoutMemberNestedInput
@@ -671,6 +709,7 @@ export type AcademyMemberUncheckedUpdateManyWithoutAcademyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
   role?: Prisma.StringFieldUpdateOperationsInput | string
+  isTeacher?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -711,6 +750,7 @@ export type AcademyMemberSelect<ExtArgs extends runtime.Types.Extensions.Interna
   academyId?: boolean
   userId?: boolean
   role?: boolean
+  isTeacher?: boolean
   status?: boolean
   createdAt?: boolean
   academy?: boolean | Prisma.AcademyDefaultArgs<ExtArgs>
@@ -724,6 +764,7 @@ export type AcademyMemberSelectCreateManyAndReturn<ExtArgs extends runtime.Types
   academyId?: boolean
   userId?: boolean
   role?: boolean
+  isTeacher?: boolean
   status?: boolean
   createdAt?: boolean
   academy?: boolean | Prisma.AcademyDefaultArgs<ExtArgs>
@@ -735,6 +776,7 @@ export type AcademyMemberSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
   academyId?: boolean
   userId?: boolean
   role?: boolean
+  isTeacher?: boolean
   status?: boolean
   createdAt?: boolean
   academy?: boolean | Prisma.AcademyDefaultArgs<ExtArgs>
@@ -746,11 +788,12 @@ export type AcademyMemberSelectScalar = {
   academyId?: boolean
   userId?: boolean
   role?: boolean
+  isTeacher?: boolean
   status?: boolean
   createdAt?: boolean
 }
 
-export type AcademyMemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "academyId" | "userId" | "role" | "status" | "createdAt", ExtArgs["result"]["academyMember"]>
+export type AcademyMemberOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "academyId" | "userId" | "role" | "isTeacher" | "status" | "createdAt", ExtArgs["result"]["academyMember"]>
 export type AcademyMemberInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   academy?: boolean | Prisma.AcademyDefaultArgs<ExtArgs>
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
@@ -778,6 +821,7 @@ export type $AcademyMemberPayload<ExtArgs extends runtime.Types.Extensions.Inter
     academyId: string
     userId: string
     role: string
+    isTeacher: boolean
     status: string
     createdAt: Date
   }, ExtArgs["result"]["academyMember"]>
@@ -1210,6 +1254,7 @@ export interface AcademyMemberFieldRefs {
   readonly academyId: Prisma.FieldRef<"AcademyMember", 'String'>
   readonly userId: Prisma.FieldRef<"AcademyMember", 'String'>
   readonly role: Prisma.FieldRef<"AcademyMember", 'String'>
+  readonly isTeacher: Prisma.FieldRef<"AcademyMember", 'Boolean'>
   readonly status: Prisma.FieldRef<"AcademyMember", 'String'>
   readonly createdAt: Prisma.FieldRef<"AcademyMember", 'DateTime'>
 }

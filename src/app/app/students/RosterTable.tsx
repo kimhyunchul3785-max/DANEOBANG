@@ -6,7 +6,7 @@ import { toast } from "@/components/Toaster";
 import { SortHeader } from "@/components/Motion";
 import { moveStudentsAction, setStudentsStatusAction, deleteStudentsAction, assignTeacherBulkAction } from "./actions";
 
-export type RosterRow = { id: string; name: string; className: string | null; classId: string | null; school: string | null; grade: string | null; teachers: string; linked: boolean; pending: number; avg: number | null; retake: number; status: string };
+export type RosterRow = { id: string; name: string; className: string | null; classId: string | null; school: string | null; grade: string | null; teachers: string; linked: boolean; invited: boolean; pending: number; avg: number | null; retake: number; status: string };
 
 /** 명단 표: 체크해서 반 이동 · 담당 지정 · 비활성 · 삭제 */
 export function RosterTable({ rows, classes, members, isOwner }: { rows: RosterRow[]; classes: { id: string; name: string }[]; members: { id: string; name: string }[]; isOwner: boolean }) {
@@ -142,7 +142,7 @@ export function RosterTable({ rows, classes, members, isOwner }: { rows: RosterR
                 {r.avg ?? "–"}
               </td>
               <td>{r.retake ? <span className="badge-red">{r.retake}</span> : <span className="muted">-</span>}</td>
-              <td>{r.linked ? <span className="badge-green">LINKED</span> : r.pending ? <span className="badge-amber">승인 대기 {r.pending}</span> : <span className="badge-gray">OFFLINE</span>}</td>
+              <td>{r.linked ? <span className="badge-green">ACTIVE</span> : r.pending ? <span className="badge-amber">승인 대기 {r.pending}</span> : r.invited ? <span className="badge-amber">INVITED</span> : <span className="badge-gray">REGISTERED</span>}</td>
               <td>{r.status === "active" ? <span className="badge-gray">ACTIVE</span> : <span className="badge-amber">OFF</span>}</td>
             </tr>
           ))}

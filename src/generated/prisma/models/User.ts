@@ -33,6 +33,8 @@ export type UserMinAggregateOutputType = {
   passwordHash: string | null
   isPlatformAdmin: boolean | null
   status: string | null
+  emailVerifiedAt: Date | null
+  phone: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -46,6 +48,8 @@ export type UserMaxAggregateOutputType = {
   passwordHash: string | null
   isPlatformAdmin: boolean | null
   status: string | null
+  emailVerifiedAt: Date | null
+  phone: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -59,6 +63,8 @@ export type UserCountAggregateOutputType = {
   passwordHash: number
   isPlatformAdmin: number
   status: number
+  emailVerifiedAt: number
+  phone: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -74,6 +80,8 @@ export type UserMinAggregateInputType = {
   passwordHash?: true
   isPlatformAdmin?: true
   status?: true
+  emailVerifiedAt?: true
+  phone?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -87,6 +95,8 @@ export type UserMaxAggregateInputType = {
   passwordHash?: true
   isPlatformAdmin?: true
   status?: true
+  emailVerifiedAt?: true
+  phone?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -100,6 +110,8 @@ export type UserCountAggregateInputType = {
   passwordHash?: true
   isPlatformAdmin?: true
   status?: true
+  emailVerifiedAt?: true
+  phone?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -186,6 +198,8 @@ export type UserGroupByOutputType = {
   passwordHash: string | null
   isPlatformAdmin: boolean
   status: string
+  emailVerifiedAt: Date | null
+  phone: string | null
   createdAt: Date
   updatedAt: Date
   _count: UserCountAggregateOutputType | null
@@ -220,6 +234,8 @@ export type UserWhereInput = {
   passwordHash?: Prisma.StringNullableFilter<"User"> | string | null
   isPlatformAdmin?: Prisma.BoolFilter<"User"> | boolean
   status?: Prisma.StringFilter<"User"> | string
+  emailVerifiedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  phone?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   memberships?: Prisma.AcademyMemberListRelationFilter
@@ -238,6 +254,8 @@ export type UserOrderByWithRelationInput = {
   passwordHash?: Prisma.SortOrderInput | Prisma.SortOrder
   isPlatformAdmin?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  emailVerifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  phone?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   memberships?: Prisma.AcademyMemberOrderByRelationAggregateInput
@@ -259,6 +277,8 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   passwordHash?: Prisma.StringNullableFilter<"User"> | string | null
   isPlatformAdmin?: Prisma.BoolFilter<"User"> | boolean
   status?: Prisma.StringFilter<"User"> | string
+  emailVerifiedAt?: Prisma.DateTimeNullableFilter<"User"> | Date | string | null
+  phone?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   memberships?: Prisma.AcademyMemberListRelationFilter
@@ -277,6 +297,8 @@ export type UserOrderByWithAggregationInput = {
   passwordHash?: Prisma.SortOrderInput | Prisma.SortOrder
   isPlatformAdmin?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  emailVerifiedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  phone?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
@@ -296,6 +318,8 @@ export type UserScalarWhereWithAggregatesInput = {
   passwordHash?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   isPlatformAdmin?: Prisma.BoolWithAggregatesFilter<"User"> | boolean
   status?: Prisma.StringWithAggregatesFilter<"User"> | string
+  emailVerifiedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"User"> | Date | string | null
+  phone?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
@@ -309,6 +333,8 @@ export type UserCreateInput = {
   passwordHash?: string | null
   isPlatformAdmin?: boolean
   status?: string
+  emailVerifiedAt?: Date | string | null
+  phone?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   memberships?: Prisma.AcademyMemberCreateNestedManyWithoutUserInput
@@ -327,6 +353,8 @@ export type UserUncheckedCreateInput = {
   passwordHash?: string | null
   isPlatformAdmin?: boolean
   status?: string
+  emailVerifiedAt?: Date | string | null
+  phone?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   memberships?: Prisma.AcademyMemberUncheckedCreateNestedManyWithoutUserInput
@@ -345,6 +373,8 @@ export type UserUpdateInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPlatformAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.AcademyMemberUpdateManyWithoutUserNestedInput
@@ -363,6 +393,8 @@ export type UserUncheckedUpdateInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPlatformAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.AcademyMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -381,6 +413,8 @@ export type UserCreateManyInput = {
   passwordHash?: string | null
   isPlatformAdmin?: boolean
   status?: string
+  emailVerifiedAt?: Date | string | null
+  phone?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -394,6 +428,8 @@ export type UserUpdateManyMutationInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPlatformAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -407,6 +443,8 @@ export type UserUncheckedUpdateManyInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPlatformAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -420,6 +458,8 @@ export type UserCountOrderByAggregateInput = {
   passwordHash?: Prisma.SortOrder
   isPlatformAdmin?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  emailVerifiedAt?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -433,6 +473,8 @@ export type UserMaxOrderByAggregateInput = {
   passwordHash?: Prisma.SortOrder
   isPlatformAdmin?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  emailVerifiedAt?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -446,6 +488,8 @@ export type UserMinOrderByAggregateInput = {
   passwordHash?: Prisma.SortOrder
   isPlatformAdmin?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  emailVerifiedAt?: Prisma.SortOrder
+  phone?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -470,6 +514,10 @@ export type NullableStringFieldUpdateOperationsInput = {
 
 export type BoolFieldUpdateOperationsInput = {
   set?: boolean
+}
+
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -559,6 +607,8 @@ export type UserCreateWithoutMembershipsInput = {
   passwordHash?: string | null
   isPlatformAdmin?: boolean
   status?: string
+  emailVerifiedAt?: Date | string | null
+  phone?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   studentLinks?: Prisma.StudentCreateNestedManyWithoutUserInput
@@ -576,6 +626,8 @@ export type UserUncheckedCreateWithoutMembershipsInput = {
   passwordHash?: string | null
   isPlatformAdmin?: boolean
   status?: string
+  emailVerifiedAt?: Date | string | null
+  phone?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   studentLinks?: Prisma.StudentUncheckedCreateNestedManyWithoutUserInput
@@ -609,6 +661,8 @@ export type UserUpdateWithoutMembershipsInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPlatformAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   studentLinks?: Prisma.StudentUpdateManyWithoutUserNestedInput
@@ -626,6 +680,8 @@ export type UserUncheckedUpdateWithoutMembershipsInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPlatformAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   studentLinks?: Prisma.StudentUncheckedUpdateManyWithoutUserNestedInput
@@ -643,6 +699,8 @@ export type UserCreateWithoutStudentLinksInput = {
   passwordHash?: string | null
   isPlatformAdmin?: boolean
   status?: string
+  emailVerifiedAt?: Date | string | null
+  phone?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   memberships?: Prisma.AcademyMemberCreateNestedManyWithoutUserInput
@@ -660,6 +718,8 @@ export type UserUncheckedCreateWithoutStudentLinksInput = {
   passwordHash?: string | null
   isPlatformAdmin?: boolean
   status?: string
+  emailVerifiedAt?: Date | string | null
+  phone?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   memberships?: Prisma.AcademyMemberUncheckedCreateNestedManyWithoutUserInput
@@ -693,6 +753,8 @@ export type UserUpdateWithoutStudentLinksInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPlatformAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.AcademyMemberUpdateManyWithoutUserNestedInput
@@ -710,6 +772,8 @@ export type UserUncheckedUpdateWithoutStudentLinksInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPlatformAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.AcademyMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -727,6 +791,8 @@ export type UserCreateWithoutAuditLogsInput = {
   passwordHash?: string | null
   isPlatformAdmin?: boolean
   status?: string
+  emailVerifiedAt?: Date | string | null
+  phone?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   memberships?: Prisma.AcademyMemberCreateNestedManyWithoutUserInput
@@ -744,6 +810,8 @@ export type UserUncheckedCreateWithoutAuditLogsInput = {
   passwordHash?: string | null
   isPlatformAdmin?: boolean
   status?: string
+  emailVerifiedAt?: Date | string | null
+  phone?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   memberships?: Prisma.AcademyMemberUncheckedCreateNestedManyWithoutUserInput
@@ -777,6 +845,8 @@ export type UserUpdateWithoutAuditLogsInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPlatformAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.AcademyMemberUpdateManyWithoutUserNestedInput
@@ -794,6 +864,8 @@ export type UserUncheckedUpdateWithoutAuditLogsInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPlatformAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.AcademyMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -811,6 +883,8 @@ export type UserCreateWithoutDeviceTokensInput = {
   passwordHash?: string | null
   isPlatformAdmin?: boolean
   status?: string
+  emailVerifiedAt?: Date | string | null
+  phone?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   memberships?: Prisma.AcademyMemberCreateNestedManyWithoutUserInput
@@ -828,6 +902,8 @@ export type UserUncheckedCreateWithoutDeviceTokensInput = {
   passwordHash?: string | null
   isPlatformAdmin?: boolean
   status?: string
+  emailVerifiedAt?: Date | string | null
+  phone?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   memberships?: Prisma.AcademyMemberUncheckedCreateNestedManyWithoutUserInput
@@ -861,6 +937,8 @@ export type UserUpdateWithoutDeviceTokensInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPlatformAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.AcademyMemberUpdateManyWithoutUserNestedInput
@@ -878,6 +956,8 @@ export type UserUncheckedUpdateWithoutDeviceTokensInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPlatformAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.AcademyMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -895,6 +975,8 @@ export type UserCreateWithoutNotificationsInput = {
   passwordHash?: string | null
   isPlatformAdmin?: boolean
   status?: string
+  emailVerifiedAt?: Date | string | null
+  phone?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   memberships?: Prisma.AcademyMemberCreateNestedManyWithoutUserInput
@@ -912,6 +994,8 @@ export type UserUncheckedCreateWithoutNotificationsInput = {
   passwordHash?: string | null
   isPlatformAdmin?: boolean
   status?: string
+  emailVerifiedAt?: Date | string | null
+  phone?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   memberships?: Prisma.AcademyMemberUncheckedCreateNestedManyWithoutUserInput
@@ -945,6 +1029,8 @@ export type UserUpdateWithoutNotificationsInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPlatformAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.AcademyMemberUpdateManyWithoutUserNestedInput
@@ -962,6 +1048,8 @@ export type UserUncheckedUpdateWithoutNotificationsInput = {
   passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isPlatformAdmin?: Prisma.BoolFieldUpdateOperationsInput | boolean
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  emailVerifiedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   memberships?: Prisma.AcademyMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -1046,6 +1134,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   passwordHash?: boolean
   isPlatformAdmin?: boolean
   status?: boolean
+  emailVerifiedAt?: boolean
+  phone?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   memberships?: boolean | Prisma.User$membershipsArgs<ExtArgs>
@@ -1065,6 +1155,8 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   passwordHash?: boolean
   isPlatformAdmin?: boolean
   status?: boolean
+  emailVerifiedAt?: boolean
+  phone?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -1078,6 +1170,8 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   passwordHash?: boolean
   isPlatformAdmin?: boolean
   status?: boolean
+  emailVerifiedAt?: boolean
+  phone?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -1091,11 +1185,13 @@ export type UserSelectScalar = {
   passwordHash?: boolean
   isPlatformAdmin?: boolean
   status?: boolean
+  emailVerifiedAt?: boolean
+  phone?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "provider" | "providerId" | "passwordHash" | "isPlatformAdmin" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "name" | "provider" | "providerId" | "passwordHash" | "isPlatformAdmin" | "status" | "emailVerifiedAt" | "phone" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   memberships?: boolean | Prisma.User$membershipsArgs<ExtArgs>
   studentLinks?: boolean | Prisma.User$studentLinksArgs<ExtArgs>
@@ -1125,6 +1221,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     passwordHash: string | null
     isPlatformAdmin: boolean
     status: string
+    emailVerifiedAt: Date | null
+    phone: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["user"]>
@@ -1563,6 +1661,8 @@ export interface UserFieldRefs {
   readonly passwordHash: Prisma.FieldRef<"User", 'String'>
   readonly isPlatformAdmin: Prisma.FieldRef<"User", 'Boolean'>
   readonly status: Prisma.FieldRef<"User", 'String'>
+  readonly emailVerifiedAt: Prisma.FieldRef<"User", 'DateTime'>
+  readonly phone: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }

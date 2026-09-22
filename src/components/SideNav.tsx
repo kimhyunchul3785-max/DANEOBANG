@@ -13,6 +13,7 @@ const NAV: Item[] = [
   { href: "/app/results", en: "Results", ko: "성적" },
   { href: "/app/retakes", en: "Retake", ko: "재시험" },
   { href: "/app/teachers", en: "Teachers", ko: "선생님", owner: true },
+  { href: "/app/billing", en: "Billing", ko: "요금제", owner: true },
   { href: "/app/settings", en: "Setup", ko: "학원 설정", owner: true },
 ];
 

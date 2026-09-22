@@ -22,6 +22,8 @@ model User {
   passwordHash    String?
   isPlatformAdmin Boolean  @default(false)
   status          String   @default("active") // active | suspended
+  emailVerifiedAt DateTime? // 이메일 인증 시각 (초대·활성화 링크로 만든 계정은 즉시 인증)
+  phone           String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
@@ -33,19 +35,23 @@ model User {
 }
 
 model Academy {
-  id        String   @id @default(cuid())
-  name      String
-  slug      String   @unique
-  intro     String?
-  color     String   @default("#2563eb")
-  logoPath  String?  // storage 상대경로 (설정에서 업로드, 시험지 헤더에 인쇄)
-  status    String   @default("active") // active | suspended
-  plan      String   @default("free")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                 String   @id @default(cuid())
+  name               String
+  slug               String   @unique
+  intro              String?
+  color              String   @default("#2563eb")
+  logoPath           String?  // storage 상대경로 (설정에서 업로드, 시험지 헤더에 인쇄)
+  representativeName String?  // 대표자명
+  phone              String?
+  region             String?
+  status             String   @default("active") // pending_payment | active | past_due | read_only | suspended
+  plan               String   @default("free")
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
 
-  members     AcademyMember[]
-  invitations Invitation[]
+  members      AcademyMember[]
+  invitations  Invitation[]
+  subscription Subscription?
   classes     ClassRoom[]
   students    Student[]
   books       VocabBook[]
@@ -60,8 +66,9 @@ model AcademyMember {
   id        String   @id @default(cuid())
   academyId String
   userId    String
-  role      String   // OWNER | TEACHER
-  status    String   @default("active")
+  role      String   // OWNER | ADMIN | TEACHER
+  isTeacher Boolean  @default(true) // 선생님 기능 사용 = Teacher Seat 1개 소비. 관리만 하는 원장·실장은 false
+  status    String   @default("active") // active | disabled (접근 중지)
   createdAt DateTime @default(now())
 
   academy  Academy @relation(fields: [academyId], references: [id], onDelete: Cascade)
@@ -75,15 +82,82 @@ model AcademyMember {
 model Invitation {
   id        String    @id @default(cuid())
   academyId String
-  role      String    // TEACHER
-  email     String?
+  role      String    // TEACHER | ADMIN
+  isTeacher Boolean   @default(true) // 수락하면 Seat 1개 사용. 대기 중(pending)에도 Seat 를 예약한다
+  email     String?   // 초대받은 이메일 = 계정 이메일
+  name      String?
   tokenHash String    @unique
   expiresAt DateTime
   usedAt    DateTime?
+  revokedAt DateTime?
   createdBy String
   createdAt DateTime  @default(now())
 
   academy Academy @relation(fields: [academyId], references: [id], onDelete: Cascade)
+
+  @@index([academyId, usedAt])
+}
+
+/// 학원 구독 — 결제 주체는 User 가 아니라 Academy. 월 요금 = seatQuantity × unitPrice
+model Subscription {
+  id                     String    @id @default(cuid())
+  academyId              String    @unique
+  provider               String    @default("mock") // mock (PG 연동 전 테스트 결제) | toss | stripe …
+  providerCustomerId     String?
+  providerSubscriptionId String?
+  seatQuantity           Int       @default(1) // 구매한 Teacher Seat 수
+  unitPrice              Int       @default(9900)
+  status                 String    @default("active") // pending | active | past_due | canceled
+  currentPeriodStart     DateTime  @default(now())
+  currentPeriodEnd       DateTime?
+  cardLast4              String?
+  lastPaymentAt          DateTime?
+  lastPaymentError       String?
+  createdAt              DateTime  @default(now())
+  updatedAt              DateTime  @updatedAt
+
+  academy  Academy   @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  payments Payment[]
+}
+
+model Payment {
+  id             String   @id @default(cuid())
+  subscriptionId String
+  amount         Int
+  seatQuantity   Int
+  status         String   // succeeded | failed
+  providerRef    String?
+  error          String?
+  createdAt      DateTime @default(now())
+
+  subscription Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId, createdAt])
+}
+
+/// 학원 가입 위저드의 임시 상태 (결제 완료 전). 토큰은 쿠키로 브라우저에, 해시만 저장
+model SignupSession {
+  id                 String    @id @default(cuid())
+  tokenHash          String    @unique
+  step               Int       @default(1)
+  academyName        String?
+  representativeName String?
+  phone              String?
+  region             String?
+  teacherCount       Int       @default(1)
+  ownerIsTeacher     Boolean   @default(true)
+  ownerName          String?
+  email              String?
+  passwordHash       String?
+  verifyTokenHash    String?   @unique
+  verifyTokenDev     String?   // 메일 서버가 없을 때만(개발 모드) 평문 보관 — 화면에 인증 링크를 보여주기 위해
+  verifySentAt       DateTime?
+  verifiedAt         DateTime?
+  userId             String?
+  academyId          String?
+  completedAt        DateTime?
+  createdAt          DateTime  @default(now())
+  expiresAt          DateTime
 }
 
 // ───────────── 반 · 학생 ─────────────
@@ -109,10 +183,13 @@ model Student {
   school           String?
   grade            String?
   memo             String?
-  userId           String?   // 로그인 계정 연결 (없으면 오프라인 명단)
+  email            String?   // 계정 설정 링크를 보낼 곳 (선택)
+  phone            String?
+  userId           String?   // 로그인 계정 연결 (없으면 오프라인 명단). 계정 상태: userId → active, inviteToken → invited, 그 외 registered
   inviteTokenHash  String?   @unique
   inviteExpiresAt  DateTime?
-  status           String    @default("active")
+  inviteSentAt     DateTime?
+  status           String    @default("active") // active | inactive(퇴원·차단)
   createdAt        DateTime  @default(now())
 
   academy     Academy          @relation(fields: [academyId], references: [id], onDelete: Cascade)

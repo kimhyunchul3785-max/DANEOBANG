@@ -62,6 +62,21 @@ export type AcademyMember = Prisma.AcademyMemberModel
  */
 export type Invitation = Prisma.InvitationModel
 /**
+ * Model Subscription
+ * 학원 구독 — 결제 주체는 User 가 아니라 Academy. 월 요금 = seatQuantity × unitPrice
+ */
+export type Subscription = Prisma.SubscriptionModel
+/**
+ * Model Payment
+ * 
+ */
+export type Payment = Prisma.PaymentModel
+/**
+ * Model SignupSession
+ * 학원 가입 위저드의 임시 상태 (결제 완료 전). 토큰은 쿠키로 브라우저에, 해시만 저장
+ */
+export type SignupSession = Prisma.SignupSessionModel
+/**
  * Model ClassRoom
  * 
  */

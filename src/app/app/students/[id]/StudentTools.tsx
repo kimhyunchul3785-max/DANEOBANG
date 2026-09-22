@@ -11,21 +11,26 @@ export function StudentTools({
   members,
   assignedMemberIds,
 }: {
-  student: { id: string; userId: string | null; userEmail: string | null; hasInvite: boolean; inviteExpiresAt: string | null };
+  student: { id: string; name: string; email: string | null; userId: string | null; userEmail: string | null; hasInvite: boolean; inviteExpiresAt: string | null; inviteSentAt: string | null };
   linkRequests: { id: string; user: { name: string; email: string } | null; createdAt: string }[];
   isOwner: boolean;
   members: { id: string; name: string; role: string }[];
   assignedMemberIds: string[];
 }) {
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
+  const [mailed, setMailed] = useState(false);
+  const accountState = student.userId ? "active" : student.hasInvite ? "invited" : "registered";
   const [sel, setSel] = useState<string[]>(assignedMemberIds);
   const [pending, start] = useTransition();
   const router = useRouter();
 
   return (
     <>
-      <div className="card card-body">
-        <h2 className="h2 mb-2">학생 계정 연결</h2>
+      <div className="card card-body" data-account-state={accountState}>
+        <div className="mb-2 flex items-center justify-between">
+          <h2 className="h2">학생 계정</h2>
+          <span className={accountState === "active" ? "badge-green" : accountState === "invited" ? "badge-amber" : "badge-gray"}>{accountState === "active" ? "ACTIVE" : accountState === "invited" ? "INVITED" : "REGISTERED"}</span>
+        </div>
         {student.userId ? (
           <div className="space-y-2 text-sm">
             <p>
@@ -37,28 +42,29 @@ export function StudentTools({
           </div>
         ) : (
           <div className="space-y-2 text-sm">
-            <p className="muted">학생이 가입 후 초대 링크를 열면 연결 요청이 오고, 선생님이 승인하면 기존 성적과 연결됩니다. 이름만 같다고 자동 연결하지 않습니다.</p>
+            <p className="muted">학원이 먼저 등록하고, 학생은 계정 설정 링크에서 <b>비밀번호만</b> 정하면 바로 연결됩니다. 학교·학년·반은 다시 묻지 않습니다.{student.email ? ` 링크는 ${student.email} 로 보냅니다.` : " 이메일을 적어 두면 메일로 보낼 수 있습니다."}</p>
             <ActionButton
               action={issueStudentInviteAction.bind(null, student.id)}
               className="btn-primary btn-sm"
               onDone={(r) => {
-                const url = (r.data as { url?: string } | undefined)?.url;
-                if (url) setInviteUrl(url);
+                const d = r.data as { url?: string; mailed?: boolean } | undefined;
+                if (d?.url) setInviteUrl(d.url);
+                setMailed(!!d?.mailed);
               }}
             >
-              {student.hasInvite ? "초대 링크 재발급" : "초대 링크 발급"}
+              {student.hasInvite ? "계정 설정 링크 다시 보내기" : student.email ? "계정 설정 링크 보내기" : "계정 설정 링크 만들기"}
             </ActionButton>
             {student.hasInvite && !inviteUrl && (
               <p className="text-xs text-slate-500">
-                발급된 링크가 있습니다 (만료 {student.inviteExpiresAt ? new Date(student.inviteExpiresAt).toLocaleDateString("ko-KR") : "-"}). 링크는 발급 시 한 번만 표시됩니다.
+                {student.inviteSentAt ? "메일을 보냈습니다" : "링크를 만들었습니다"} (만료 {student.inviteExpiresAt ? new Date(student.inviteExpiresAt).toLocaleDateString("ko-KR") : "-"}). 링크는 만들 때 한 번만 표시됩니다.
                 <ActionButton action={revokeStudentInviteAction.bind(null, student.id)} className="btn-ghost btn-sm ml-1">
                   취소
                 </ActionButton>
               </p>
             )}
             {inviteUrl && (
-              <div className="rounded bg-slate-50 p-2">
-                <div className="mb-1 text-xs text-slate-500">7일간 유효 · 1회 사용. 학생에게 전달하세요.</div>
+              <div className="rounded bg-slate-50 p-2" data-testid="student-invite-url">
+                <div className="mb-1 text-xs text-slate-500">{mailed ? "메일로 보냈습니다. 직접 전달하려면 아래 링크를 복사하세요." : "7일간 유효 · 1회 사용. 학생에게 전달하세요 (메일 서버가 없어 직접 전달)."}</div>
                 <input className="input font-mono text-xs" readOnly value={inviteUrl} onFocus={(e) => e.currentTarget.select()} />
                 <button type="button" className="btn-secondary btn-sm mt-1" onClick={() => navigator.clipboard?.writeText(inviteUrl)}>
                   복사
