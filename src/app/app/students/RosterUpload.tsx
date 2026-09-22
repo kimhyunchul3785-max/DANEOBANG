@@ -58,7 +58,7 @@ export function RosterUpload() {
           </>
         )}
       </div>
-      <button className="btn w-full py-3 text-[13px]" style={{ background: file ? "#fff4f0" : "rgba(255,244,240,0.35)", color: "var(--accent)" }} disabled={!file}>
+      <button className="btn w-full py-3 text-[13px]" style={file ? { background: "#fff4f0", color: "var(--accent)" } : undefined} disabled={!file}>
         업로드 · 학생 등록 →
       </button>
     </ActionForm>

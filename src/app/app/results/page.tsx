@@ -4,10 +4,10 @@ import { requireAcademy } from "@/lib/auth";
 import { studentScope } from "@/lib/scope";
 import { fmtDate } from "@/lib/util";
 import { StatusBadge } from "@/components/StatusBadge";
-import { CountUp, SortHeader } from "@/components/Motion";
+import { SortHeader } from "@/components/Motion";
 import { GradesDashboard } from "./Dashboard";
 
-export default async function ResultsPage({ searchParams }: { searchParams: Promise<{ filter?: string; examId?: string; classId?: string; group?: string; range?: string; teacher?: string; q?: string; pick?: string; view?: string }> }) {
+export default async function ResultsPage({ searchParams }: { searchParams: Promise<{ filter?: string; examId?: string; classId?: string; group?: string; range?: string; teacher?: string; q?: string; pick?: string; view?: string; all?: string }> }) {
   const ctx = await requireAcademy();
   const sp = await searchParams;
   const academyId = ctx.member.academyId;
@@ -80,13 +80,14 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
   const retakes = grades.filter((g) => g.attempt.attemptNo > 1 || g.attempt.assignment.exam.isRetake);
   const avg = initial.length ? Math.round(initial.reduce((s, g) => s + g.score, 0) / initial.length) : null;
   const passRate = initial.length ? Math.round((initial.filter((g) => g.passed).length / initial.length) * 100) : null;
+  const shownGrades = sp.all ? grades : grades.slice(0, 30);
   const retakePass = retakes.length ? Math.round((retakes.filter((g) => g.passed).length / retakes.length) * 100) : null;
 
   return (
     <div className="mx-auto max-w-6xl">
       <GradesDashboard ctx={ctx} sp={sp} />
 
-      <div className="mb-3 mt-8 flex flex-wrap items-end justify-between gap-3">
+      <div className="mb-3 mt-10 flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="kicker">Detail · 확정 성적</div>
           <div className="h3">시험별 상세 성적</div>
@@ -114,35 +115,20 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
           미응시·기한 경과
         </Link>
       </form>
-      <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="card-sm card-body">
-          <div className="lbl">First attempt</div>
-          <div className="num-lg mt-2">
-            <CountUp value={avg} placeholder="–" />
-          </div>
-          <div className="muted mt-1">최초 시험 평균</div>
-        </div>
-        <div className="card-sm card-body">
-          <div className="lbl">Pass rate</div>
-          <div className="num-lg mt-2">
-            <CountUp value={passRate} suffix="%" placeholder="–" />
-          </div>
-          <div className="muted mt-1">최초 통과율</div>
-        </div>
-        <div className="card-sm card-body">
-          <div className="lbl">Retake pass</div>
-          <div className="num-lg mt-2">
-            <CountUp value={retakePass} suffix="%" placeholder="–" />
-          </div>
-          <div className="muted mt-1">재시험 통과율</div>
-        </div>
-        <div className="card-sm card-body">
-          <div className="lbl">Graded</div>
-          <div className="num-lg mt-2">
-            <CountUp value={grades.length} />
-          </div>
-          <div className="muted mt-1">확정 응시</div>
-        </div>
+      {/* 위 위젯과 겹치는 KPI 카드 대신 한 줄 요약 (필터 결과 기준) */}
+      <div className="mb-3 flex flex-wrap items-center gap-x-5 gap-y-1 px-1 text-[13px]" style={{ color: "var(--ink-2)" }} data-testid="detail-summary">
+        <span>
+          확정 <b className="font-semibold">{grades.length}</b>건
+        </span>
+        <span>
+          첫 응시 평균 <b className="font-semibold">{avg ?? "–"}</b>
+        </span>
+        <span>
+          첫 응시 통과율 <b className="font-semibold">{passRate ?? "–"}%</b>
+        </span>
+        <span>
+          재시험 통과율 <b className="font-semibold">{retakePass ?? "–"}%</b>
+        </span>
       </div>
       <div className="card overflow-x-auto">
         <table className="tbl">
@@ -162,7 +148,7 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
             </tr>
           </thead>
           <tbody id="results-body">
-            {grades.map((g) => (
+            {shownGrades.map((g) => (
               <tr key={g.id} data-score={Math.round(g.score)} data-at={g.createdAt.getTime()}>
                 <td>
                   <Link href={`/app/students/${g.attempt.assignment.studentId}`} className="hover:underline">
@@ -199,6 +185,13 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
             )}
           </tbody>
         </table>
+        {shownGrades.length < grades.length && (
+          <div className="border-t px-4 py-3 text-center" style={{ borderColor: "var(--line)" }}>
+            <Link href={`/app/results?${new URLSearchParams({ ...(sp.examId ? { examId: sp.examId } : {}), ...(sp.classId ? { classId: sp.classId } : {}), all: "1" }).toString()}#detail`} className="btn-ghost btn-sm" scroll={false}>
+              {grades.length - shownGrades.length}건 더 보기
+            </Link>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -87,39 +87,42 @@ export default async function RetakesPage({ searchParams }: { searchParams: Prom
         <div>
           <div className="kicker">Retake · 재시험</div>
           <h1 className="h1 mt-1">재시험</h1>
-          <p className="muted mt-1">통과 기준에 못 미치면 자동으로 여기에 들어옵니다. 범위(오답만 / 같은 범위)와 마감을 정해 출제하면 학생 앱에 바로 보이고 알림이 갑니다.</p>
+          <p className="muted mt-1">통과 기준 미달이면 자동으로 들어옵니다. 오답만·같은 범위와 마감을 정해 출제하세요.</p>
         </div>
         <Link href={sp.all ? "/app/retakes" : "/app/retakes?all=1"} className="btn-ghost btn-sm">
           {sp.all ? "미완료만" : "완료 포함 전체"}
         </Link>
       </header>
 
-      <div className="bento mb-4">
-        <div className="card-sm card-body span-2">
+      {/* 숫자 세 개는 휴대폰에서도 한 줄 */}
+      <div className="mb-4 grid grid-cols-3 gap-2 sm:gap-3">
+        <div className="card-sm card-body">
           <div className="lbl">출제 전</div>
           <div className="num-lg mt-2" style={notIssued ? { color: "var(--accent)" } : undefined}>
             <CountUp value={notIssued} />
           </div>
-          <div className="muted">범위·마감을 정해 내면 됩니다</div>
+          <div className="muted hidden sm:block">범위·마감을 정해 내면 됩니다</div>
         </div>
-        <div className="card-sm card-body span-2">
+        <div className="card-sm card-body">
           <div className="lbl">응시 대기</div>
           <div className="num-lg mt-2">
             <CountUp value={waiting} />
           </div>
-          <div className="muted">출제됨 · 학생이 칠 차례{overdueN ? ` · 마감 지남 ${overdueN}` : ""}</div>
+          <div className="muted hidden sm:block">출제됨 · 학생이 칠 차례{overdueN ? ` · 마감 지남 ${overdueN}` : ""}</div>
         </div>
-        <div className="card-sm card-body span-2">
+        <div className="card-sm card-body">
           <div className="lbl">이번 주</div>
           <div className="num-lg mt-2">
             <CountUp value={dueThisWeek} />
           </div>
-          <div className="muted">
+          <div className="muted hidden sm:block">
             이번 주 마감 · 통과 {passedThisWeek}
             {passedAll !== null ? ` · 누적 통과 ${passedAll}` : ""}
           </div>
         </div>
-        <div className="card-dark span-6 flex items-center gap-4 overflow-x-auto rounded-full px-6 py-3" data-testid="due-strip">
+      </div>
+      {byDay.some((d) => d.n > 0) && (
+        <div className="card-dark mb-4 flex items-center gap-5 overflow-x-auto rounded-full px-6 py-3" data-testid="due-strip">
           <span className="lbl shrink-0" style={{ color: "rgba(236,233,227,0.55)" }}>
             마감일별
           </span>
@@ -134,7 +137,7 @@ export default async function RetakesPage({ searchParams }: { searchParams: Prom
             </div>
           ))}
         </div>
-      </div>
+      )}
 
       <section className="card">
         <div className="card-body">

@@ -53,7 +53,7 @@ export function RetakeQueue({ rows }: { rows: RetakeRow[] }) {
           const isOpen = r.status === "pending" || r.status === "issued";
           const overdue = r.dueAt && new Date(r.dueAt).getTime() < now && r.retakeState !== "done";
           return (
-            <li key={r.id} className="row flex-wrap gap-y-2" data-testid="retake-row" data-task={r.id} data-score={r.score ?? ""} data-wrong={r.wrong} data-when={r.dueAt ? new Date(r.dueAt).getTime() : ""} style={sel.includes(r.id) ? { background: "rgba(27,26,24,0.04)" } : undefined}>
+            <li key={r.id} className="row flex-wrap gap-x-5 gap-y-2 !py-3.5" data-testid="retake-row" data-task={r.id} data-score={r.score ?? ""} data-wrong={r.wrong} data-when={r.dueAt ? new Date(r.dueAt).getTime() : ""} style={sel.includes(r.id) ? { background: "rgba(27,26,24,0.04)" } : undefined}>
               <div className="flex min-w-[220px] flex-1 items-start gap-3">
                 {isOpen ? <input type="checkbox" className="mt-1.5" checked={sel.includes(r.id)} onChange={() => toggle(r.id)} aria-label={`${r.studentName} 선택`} /> : <span className="w-[13px]" />}
                 <div className="min-w-0">
@@ -110,7 +110,7 @@ export function RetakeQueue({ rows }: { rows: RetakeRow[] }) {
 
               {/* 동작 */}
               {isOpen && (
-                <div className="flex w-full flex-wrap items-center gap-2 pl-[25px] sm:w-auto sm:pl-0">
+                <div className="flex w-full flex-wrap items-center gap-3 pl-[25px] sm:w-auto sm:pl-0">
                   {!r.retakeExamId ? (
                     <IssueBox taskId={r.id} wrong={r.wrong} same={r.same} />
                   ) : (

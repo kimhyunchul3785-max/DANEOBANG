@@ -124,8 +124,8 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
                 양식 내려받기 ↓
               </a>
             </div>
-            <p className="mt-2 text-[13px]" style={{ color: "rgba(255,244,240,0.9)" }}>
-              시트 이름이 곧 반 이름입니다. 각 시트에 <b>이름 · 학교 · 학년 · 휴대폰</b>을 적어 올리면 학생이 그 반으로 등록됩니다. 없는 반은 자동으로 만들어집니다. 등록 뒤 체크해서 <b>인증번호 보내기</b> → 학생이 번호·인증번호·비밀번호로 가입합니다.
+            <p className="mt-3 text-[13px] leading-relaxed" style={{ color: "rgba(255,244,240,0.9)" }}>
+              시트 이름 = 반 이름. 각 시트에 <b>이름 · 학교 · 학년 · 휴대폰</b>을 적어 올리세요. 등록 뒤 <b>인증번호 보내기</b>로 학생이 가입합니다.
             </p>
             <div className="mt-3">
               <RosterUpload />

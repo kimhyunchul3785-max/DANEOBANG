@@ -27,7 +27,7 @@ export function ModeToggle({ mode, onChange, wrong, same, compact }: { mode: "wr
         </button>
       </div>
       {!compact && (
-        <div className="lbl mt-1" data-testid="retake-mode-summary">
+        <div className="muted mt-1 text-[12px]" data-testid="retake-mode-summary">
           {mode === "wrong" ? `틀린 단어 ${wrong}개만 · ${wrong}문항` : `원 시험 범위 전체 · ${same}문항`}
         </div>
       )}
@@ -42,11 +42,11 @@ export function IssueBox({ taskId, wrong, same }: { taskId: string; wrong: numbe
   const [pending, start] = useTransition();
   const router = useRouter();
   return (
-    <div className="flex flex-wrap items-end gap-2" data-testid="issue-box">
+    <div className="flex flex-wrap items-end gap-3" data-testid="issue-box">
       <ModeToggle mode={mode} onChange={setMode} wrong={wrong} same={same} />
       <label className="block">
         <span className="lbl block">마감</span>
-        <input type="datetime-local" className="input mt-1 w-[190px]" value={due} onChange={(e) => setDue(e.target.value)} style={{ padding: "6px 10px" }} aria-label="재시험 마감" data-testid="issue-due" />
+        <input type="datetime-local" className="input mt-1 w-[214px]" value={due} onChange={(e) => setDue(e.target.value)} style={{ padding: "6px 10px", fontSize: 13 }} aria-label="재시험 마감" data-testid="issue-due" />
       </label>
       <button
         type="button"
@@ -106,7 +106,7 @@ export function BulkIssueBar({ selected, onDone }: { selected: { id: string; wro
         <span className="lbl block" style={{ color: "rgba(236,233,227,0.6)" }}>
           마감
         </span>
-        <input type="datetime-local" className="input mt-1 w-[190px]" value={due} onChange={(e) => setDue(e.target.value)} style={{ padding: "6px 10px" }} aria-label="마감" />
+        <input type="datetime-local" className="input mt-1 w-[214px]" value={due} onChange={(e) => setDue(e.target.value)} style={{ padding: "6px 10px", fontSize: 13 }} aria-label="마감" />
       </label>
       <button
         type="button"
@@ -157,7 +157,7 @@ export function DueBox({ taskId, dueAt }: { taskId: string; dueAt: string | null
     );
   return (
     <span className="inline-flex flex-wrap items-center gap-1">
-      <input type="datetime-local" className="input w-[190px]" value={due} onChange={(e) => setDue(e.target.value)} style={{ padding: "6px 10px" }} aria-label="재시험 마감" />
+      <input type="datetime-local" className="input w-[214px]" value={due} onChange={(e) => setDue(e.target.value)} style={{ padding: "6px 10px", fontSize: 13 }} aria-label="재시험 마감" />
       <button
         type="button"
         className="btn-primary btn-sm"

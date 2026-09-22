@@ -19,6 +19,7 @@ export function UploadForm({ action, books, ocr = false }: { action: (f: FormDat
   const [bookId, setBookId] = useState<string>(books[0]?.id ?? "");
   const input = useRef<HTMLInputElement>(null);
   const bad = file ? /\.hwp$/i.test(file.name) : false;
+  const uploadDisabled = !file || bad || (isImages && !ocr) || (files.length > 1 && !isImages);
   const ext = file?.name.split(".").pop()?.toUpperCase();
 
   const pick = (list: File[]) => {
@@ -122,7 +123,8 @@ export function UploadForm({ action, books, ocr = false }: { action: (f: FormDat
         </p>
       )}
 
-      <button className="btn w-full py-3 text-[13px]" style={{ background: file && !bad && (!isImages || ocr) ? "#fff4f0" : "rgba(255,244,240,0.35)", color: "var(--accent)" }} disabled={!file || bad || (isImages && !ocr) || (files.length > 1 && !isImages)}>
+      {/* 비활성 모양은 globals.css 의 .card-accent 버튼 규칙이 맡는다 */}
+      <button className="btn w-full py-3 text-[13px]" style={!uploadDisabled ? { background: "#fff4f0", color: "var(--accent)" } : undefined} disabled={uploadDisabled}>
         {isImages ? `사진 ${files.length}장 OCR · 자동 저장 →` : "업로드 · 자동 저장 →"}
       </button>
     </ActionForm>

@@ -68,7 +68,17 @@ export default async function LearnHome() {
             </div>
             <div className="shrink-0 text-right">
               <div className="digital-lg">{primary.dueAt ? `D-${dday(primary.dueAt)}` : "OPEN"}</div>
-              <div className="lbl-on mt-1">{primary.dueAt ? fmtDate(primary.dueAt).slice(5) : "no due"}</div>
+              {/* 휴대폰: 날짜만 (시각까지 쓰면 제목 폭을 좁혀 두 줄로 꺾인다) */}
+              <div className="lbl-on mt-1 whitespace-nowrap">
+                {primary.dueAt ? (
+                  <>
+                    <span className="sm:hidden">{fmtDate(primary.dueAt, false).slice(6)}</span>
+                    <span className="hidden sm:inline">{fmtDate(primary.dueAt).slice(5)}</span>
+                  </>
+                ) : (
+                  "no due"
+                )}
+              </div>
             </div>
           </div>
           <div className="mt-5">

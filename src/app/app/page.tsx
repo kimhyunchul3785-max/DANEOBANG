@@ -68,9 +68,6 @@ async function OwnerOverview({ ctx }: { ctx: AcademyContext }) {
           <div className="kicker">Overview · 학원 전체</div>
           <h1 className="h1 mt-1">{ctx.member.academy.name} 운영 현황</h1>
         </div>
-        <span className="digital">
-          <CountUp value={thisWeek.length} /> GRADED · <CountUp value={retakeOpen} /> RETAKE
-        </span>
       </header>
 
       <div className="bento">
@@ -91,19 +88,17 @@ async function OwnerOverview({ ctx }: { ctx: AcademyContext }) {
                 <PulseBars values={byDay} labels={["월", "화", "수", "목", "금", "토", "일"]} height={34} />
               </div>
             </div>
+            {/* 통과율은 링 하나로만 (같은 숫자를 옆에 한 번 더 쓰지 않는다) */}
             <div className="flex items-end gap-6">
-              <Ring value={weekPass ?? 0} size={104} stroke={6}>
-                <span className="digital">
-                  <CountUp value={weekPass} suffix="%" />
-                </span>
-              </Ring>
-              <div className="flex gap-6">
-                <div>
-                  <div className="lbl">Pass rate</div>
-                  <div className="num-md mt-1">
+              <div className="flex flex-col items-center gap-2">
+                <Ring value={weekPass ?? 0} size={96} stroke={6}>
+                  <span className="digital">
                     <CountUp value={weekPass} suffix="%" />
-                  </div>
-                </div>
+                  </span>
+                </Ring>
+                <div className="lbl">Pass rate</div>
+              </div>
+              <div className="flex gap-6 pb-7">
                 <div>
                   <div className="lbl">Retake open</div>
                   <div className="num-md mt-1" style={retakeOpen ? { color: "var(--accent)" } : undefined}>

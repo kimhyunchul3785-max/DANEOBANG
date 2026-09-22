@@ -109,7 +109,8 @@ export function WidgetBoard({ data, initialLayout }: { data: DashboardData; init
 
   return (
     <div data-testid="widget-board" data-edit={edit ? "1" : "0"} data-cols={cols}>
-      <div className="mb-2 flex flex-wrap items-center justify-between gap-2 px-1">
+      {/* 휴대폰·좁은 화면에서는 편집할 수 없으므로 안내·버튼을 숨긴다 */}
+      <div className={`mb-3 flex flex-wrap items-center justify-between gap-2 px-1 ${!canEdit && !edit ? "hidden" : ""}`}>
         <p className="muted text-[12.5px]">
           {edit ? "제목 부분을 끌어 옮기고, 오른쪽 아래 모서리를 끌어 크기를 바꾸세요. ✕ 로 빼고 아래 팔레트에서 다시 넣을 수 있습니다." : "위젯은 편집에서 옮기고·키우고·빼고·넣을 수 있습니다."}
         </p>
@@ -125,12 +126,14 @@ export function WidgetBoard({ data, initialLayout }: { data: DashboardData; init
         </div>
       </div>
 
-      <div ref={ref} className="relative" style={cols === 1 ? undefined : { height: totalRows * (ROW_PX + GAP_PX) - GAP_PX }} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}>
+      <div ref={ref} className="relative" style={cols === 1 ? { display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: GAP_PX } : { height: totalRows * (ROW_PX + GAP_PX) - GAP_PX }} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}>
         {(cols === 1 ? [...shown].sort((a, b) => a.y - b.y || a.x - b.x) : shown).map((item) => {
           const def = WIDGETS[item.i];
+          const compactHead = item.h <= 2;
           const style: React.CSSProperties =
             cols === 1
-              ? { position: "relative", marginBottom: GAP_PX, minHeight: Math.min(item.h, 4) * (ROW_PX + GAP_PX) - GAP_PX }
+              ? // 휴대폰: 숫자 위젯은 두 개씩 한 줄, 나머지는 한 줄에 하나
+                { position: "relative", gridColumn: compactHead ? "span 1" : "span 2", minHeight: Math.min(item.h, 4) * (ROW_PX + GAP_PX) - GAP_PX }
               : {
                   position: "absolute",
                   left: item.x * (colW + GAP_PX),
@@ -140,13 +143,16 @@ export function WidgetBoard({ data, initialLayout }: { data: DashboardData; init
                   transition: active === item.i ? "none" : "left 160ms ease, top 160ms ease, width 160ms ease, height 160ms ease",
                   zIndex: active === item.i ? 5 : 1,
                 };
-          const bodyPx = cols === 1 ? Math.max(120, Math.min(item.h, 5) * (ROW_PX + GAP_PX) - GAP_PX - 62) : item.h * (ROW_PX + GAP_PX) - GAP_PX - 62;
+          // 2칸 높이(숫자 위젯)는 설명 줄을 숨기고 제목 툴팁으로 — 큰 숫자와 설명이 겹치지 않게
+          // 머리(pt-4 + 제목/설명 줄) + 본문 위아래 여백
+          const headPx = compactHead ? 16 + 20 + 4 + 16 : 16 + 40 + 12 + 16;
+          const bodyPx = cols === 1 ? Math.max(120, Math.min(item.h, 5) * (ROW_PX + GAP_PX) - GAP_PX - headPx) : item.h * (ROW_PX + GAP_PX) - GAP_PX - headPx;
           return (
             <section key={item.i} className="card flex flex-col overflow-hidden" style={{ ...style, boxShadow: active === item.i ? "0 12px 32px rgba(27,26,24,0.18)" : undefined, outline: edit ? "1.5px dashed rgba(27,26,24,0.25)" : undefined }} data-testid={`widget-${item.i}`} data-w={item.w} data-h={item.h} data-x={item.x} data-y={item.y}>
-              <header className={`flex items-start justify-between gap-2 px-4 pt-3 ${edit ? "cursor-grab select-none active:cursor-grabbing" : ""}`} onPointerDown={(e) => onPointerDown(e, item, "move")} data-testid="widget-handle">
-                <div className="min-w-0">
-                  <div className="text-[13.5px] font-semibold">{def.title}</div>
-                  <div className="muted truncate text-[11.5px]">{def.hint}</div>
+              <header className={`flex items-start justify-between gap-2 px-5 pt-4 ${edit ? "cursor-grab select-none active:cursor-grabbing" : ""}`} onPointerDown={(e) => onPointerDown(e, item, "move")} data-testid="widget-handle">
+                <div className="min-w-0" title={def.hint}>
+                  <div className="text-[13.5px] font-semibold leading-5">{def.title}</div>
+                  {!compactHead && <div className="muted truncate text-[12px] leading-5">{def.hint}</div>}
                 </div>
                 {edit && (
                   <button type="button" className="btn-ghost btn-sm shrink-0" onPointerDown={(e) => e.stopPropagation()} onClick={() => remove(item.i)} aria-label={`${def.title} 빼기`} data-testid="widget-remove">
@@ -154,7 +160,7 @@ export function WidgetBoard({ data, initialLayout }: { data: DashboardData; init
                   </button>
                 )}
               </header>
-              <div className="min-h-0 flex-1 px-4 pb-3 pt-2">
+              <div className={`min-h-0 flex-1 px-5 ${compactHead ? "pb-4 pt-1" : "pb-4 pt-3"}`}>
                 <Widget type={item.i} data={data} bodyPx={bodyPx} w={item.w} />
               </div>
               {edit && canEdit && <div className="absolute bottom-1 right-1 h-5 w-5 cursor-se-resize rounded-[4px]" style={{ background: "linear-gradient(135deg, transparent 50%, rgba(27,26,24,0.45) 50%)" }} onPointerDown={(e) => onPointerDown(e, item, "resize")} aria-label="크기 조절" data-testid="widget-resize" />}
@@ -194,10 +200,10 @@ function Delta({ now, prev, suffix = "" }: { now: number | null; prev: number | 
 function Stat({ value, suffix, sub, accent }: { value: number | null; suffix?: string; sub: React.ReactNode; accent?: boolean }) {
   return (
     <div className="flex h-full flex-col justify-end">
-      <div className="num-lg leading-none" style={accent ? { color: "var(--accent)" } : undefined}>
+      <div className="num-lg" style={accent ? { color: "var(--accent)" } : undefined}>
         <CountUp value={value} suffix={suffix} placeholder="–" />
       </div>
-      <div className="mt-1">{sub}</div>
+      <div className="mt-1.5 truncate">{sub}</div>
     </div>
   );
 }
@@ -247,7 +253,7 @@ function Widget({ type, data, bodyPx, w }: { type: WidgetType; data: DashboardDa
     }
     case "trend": {
       const listH = w >= 6 && data.groups.length ? Math.min(4, data.groups.length) * 24 + 8 : 0;
-      const h = Math.max(60, bodyPx - 22 - listH);
+      const h = Math.max(60, bodyPx - 40 - listH); // 위 라벨 줄 + 아래 주 라벨 줄
       const last = data.trend.filter((v): v is number => v !== null);
       return (
         <div className="flex h-full flex-col">
