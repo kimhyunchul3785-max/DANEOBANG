@@ -1,6 +1,7 @@
 "use client";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { SpeakButton } from "@/components/Speak";
 
 type DTO = {
   attemptId: string;
@@ -238,15 +239,18 @@ export function TestRunner({ attemptId }: { attemptId: string }) {
   return (
     <div className="space-y-3 select-none" data-testid="runner">
       {/* 상단: 제목 · 저장 상태 · 전체 남은 시간 */}
-      <div className="flex items-center justify-between px-1">
-        <span className="lbl truncate">{dto.exam.title}</span>
-        <span className="digital">
+      <div className="flex items-center justify-between gap-2 px-1">
+        <span className="lbl min-w-0 truncate">{dto.exam.title}</span>
+        <span className="flex shrink-0 items-center gap-2">
+          <SpeakButton text={it.prompt} size={32} autoKey="runner" />
+          <span className="digital">
           {remaining !== null && <span style={remaining < 60 ? { color: "var(--accent)" } : undefined}>{fmt(remaining)} </span>}
           {save === "saving" && "SAVING"}
           {save === "saved" && "SAVED"}
           {save === "error" && <span style={{ color: "var(--accent)" }}>RETRY</span>}
           {save === "offline" && <span style={{ color: "var(--accent)" }}>OFFLINE</span>}
           {save === "idle" && "READY"}
+          </span>
         </span>
       </div>
       {/* 진행 바: 단어 수 기준 */}

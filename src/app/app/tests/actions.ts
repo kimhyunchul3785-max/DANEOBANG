@@ -50,7 +50,7 @@ export async function createExamAction(_prev: { error?: string } | undefined, fo
       timeLimitMin: d.timeLimitMin || null,
       secondsPerItem: d.secondsPerItem ?? 7,
       scoreVisibility: d.scoreVisibility ?? "immediate",
-      answerVisibility: d.answerVisibility ?? "after_release",
+      answerVisibility: d.answerVisibility ?? "immediate",
       scopes: { create: dayIds.map((dayId) => ({ dayId })) },
     },
   });

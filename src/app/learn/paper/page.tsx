@@ -34,9 +34,9 @@ export default async function PaperPage() {
 
       <div className="card-accent card-body anim-fade-up">
         <div className="lbl-on">Submit · 사진 채점</div>
-        <div className="mt-2 text-[18px] font-semibold leading-tight">시험지를 다 풀었으면 사진을 찍어 올리세요</div>
+        <div className="mt-2 text-[18px] font-semibold leading-tight">다 풀었으면 사진을 찍어 올리세요</div>
         <p className="mt-1 text-[12.5px]" style={{ color: "rgba(255,244,240,0.85)" }}>
-          QR 로 어느 시험인지 자동으로 알아봅니다. 채점이 끝나면 알림이 오고, 점수·재시험 여부·틀린 문항을 바로 볼 수 있습니다. 종이 시험은 시간 제한이 없습니다.
+          QR로 시험을 알아보고 바로 채점합니다 · 시간 제한 없음
         </p>
         <div className="mt-4 [&_.btn-accent]:bg-[#fff4f0] [&_.btn-accent]:text-[var(--accent)] [&_.muted]:text-[rgba(255,244,240,0.8)]">
           <SubmitPhoto />

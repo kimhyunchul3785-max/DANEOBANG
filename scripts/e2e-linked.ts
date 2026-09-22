@@ -132,6 +132,7 @@ async function main() {
     await t1.fill('input[aria-label="문항 수 직접 입력"]', "10");
     await t1.locator('label.chip[data-class="테스트 A반"]').click();
     await t1.locator("summary", { hasText: "More" }).click();
+    await t1.selectOption('select[name="answerVisibility"]', "after_release");
     await t1.fill('input[name="title"]', RUN_TITLE);
     await t1.waitForSelector("ol", { timeout: 15000 }); // 미리보기 문항
     await shot(t1, "t1-compose");
@@ -296,11 +297,22 @@ async function main() {
     await t1.click('button:has-text("정답·오답노트 공개")');
     await t1.waitForSelector("text=공개했습니다", { timeout: 10000 });
     await s1.reload();
-    await s1.waitForSelector("text=오답노트 PDF", { timeout: 10000 });
+    await s1.waitForSelector("[data-testid='practice-link']", { timeout: 10000 });
     expect((await s1.locator("text=1 WRONG").count()) === 1, "오답 1개 표시 기대");
+    expect((await s1.locator("[data-testid='speak']").count()) >= 1, "틀린 단어 스피커 없음");
     const wn = await s1Ctx.request.get(`${BASE}/api/files/wrong-note/${attemptId}?scope=attempt`);
     expect(wn.status() === 200, "wrong-note " + wn.status());
     await shot(s1, "s01-result-after-release");
+    // 개인 연습: 틀린 1단어 random test → 완료 화면. 서버에 기록 없음
+    const before = await prisma.attempt.count();
+    await s1.click("[data-testid='practice-link']");
+    await s1.waitForURL(/\/learn\/practice\//);
+    await s1.waitForSelector("[data-testid='practice'] button.tile", { timeout: 15000 });
+    await shot(s1, "s01-practice");
+    await s1.locator("[data-testid='practice'] button.tile").first().click();
+    await s1.waitForSelector("[data-testid='practice-done']", { timeout: 10000 });
+    await shot(s1, "s01-practice-done");
+    expect((await prisma.attempt.count()) === before, "연습이 DB 에 기록됨");
   });
 
   // ── 7. 선생님2(다른 반 담당)는 학생01 을 볼 수 없다

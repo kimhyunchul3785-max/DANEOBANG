@@ -13,7 +13,7 @@ export function Ring({ value, size = 96, stroke = 5, color = INK, track = TRACK,
   return (
     <div className="relative inline-flex items-center justify-center" style={{ width: size, height: size }}>
       <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="-rotate-90" role="img" aria-label={`${Math.round(v)}%`}>
-        <title>{Math.round(v)}%</title>
+        <title>{`${Math.round(v)}%`}</title>
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={track} strokeWidth={stroke} />
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={color} strokeWidth={stroke} strokeLinecap="round" strokeDasharray={c} strokeDashoffset={c * (1 - v / 100)} className="tick anim-ring" style={{ ["--c" as string]: c }} />
       </svg>

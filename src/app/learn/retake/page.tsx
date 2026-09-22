@@ -1,7 +1,9 @@
+import Link from "next/link";
 import { requireUser } from "@/lib/auth";
 import { studentRetakes } from "@/lib/learn";
 import { fmtMD, fmtMDHM } from "@/lib/util";
 import { StartButton } from "../StartButton";
+import { SpeakButton } from "@/components/Speak";
 
 /** 재시험·보강: 달력 + 예정된 보강 상세(날짜·시간·틀린 단어) + 이력 */
 export default async function RetakePage() {
@@ -110,16 +112,24 @@ export default async function RetakePage() {
           {next.wrongWords.length === 0 ? (
             <p className="muted">선생님이 정답을 공개하면 틀린 단어가 여기에 보입니다.</p>
           ) : (
-            <ul>
-              {next.wrongWords.map((w, i) => (
-                <li key={i} className="row">
-                  <span className="text-[15px] font-medium">{w.english}</span>
-                  <span className="text-[13px]" style={{ color: "var(--ink-2)" }}>
-                    {w.meaning}
-                  </span>
-                </li>
-              ))}
-            </ul>
+            <>
+              <Link href={`/learn/practice/${next.sourceAttemptId}`} className="btn-primary mb-2 w-full py-3">
+                재시험 전에 연습 · random
+              </Link>
+              <ul>
+                {next.wrongWords.map((w, i) => (
+                  <li key={i} className="row">
+                    <span className="flex min-w-0 items-center gap-2">
+                      <SpeakButton text={w.english} size={28} />
+                      <span className="text-[15px] font-medium">{w.english}</span>
+                    </span>
+                    <span className="text-[13px]" style={{ color: "var(--ink-2)" }}>
+                      {w.meaning}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
         </section>
       )}

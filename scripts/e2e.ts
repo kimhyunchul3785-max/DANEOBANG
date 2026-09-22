@@ -94,6 +94,7 @@ async function main() {
   for (const d of [14, 17, 20]) await page.locator(`label.chip[data-day="${d}"]`).click();
   await page.fill('input[aria-label="문항 수 직접 입력"]', "12");
   await page.locator("summary", { hasText: "More" }).click();
+  await page.selectOption('select[name="answerVisibility"]', "after_release");
   await page.fill('input[name="title"]', RUN_TITLE);
   await page.click('button:has-text("초안만 저장")');
   await page.waitForURL(/\/app\/tests\/(?!new)[a-z0-9]+$/, { timeout: 20000 });
@@ -227,6 +228,9 @@ async function main() {
   if ((await sp.locator("text=정답과 오답노트는 선생님이 공개한 뒤").count()) !== 1) fail("answers leaked before release");
   const wn = await sctx.request.get(`${BASE}/api/files/wrong-note/${attemptId}?scope=attempt`);
   if (wn.status() !== 403) fail("wrong-note should be 403 before release, got " + wn.status());
+  // 공개 전에는 개인 연습도 잠김
+  await sp.goto(`${BASE}/learn/practice/${attemptId}`);
+  if (!(await sp.locator("text=정답이 공개된 뒤 연습할 수 있습니다").count())) fail("practice should be locked before release");
   // DTO 에 정답 키 없음
   const dtoRes = await sctx.request.get(`${BASE}/api/v1/attempts/${attemptId}`);
   const dtoText = await dtoRes.text();
@@ -257,6 +261,29 @@ async function main() {
   if (wn2.status() !== 200 || !(wn2.headers()["content-type"] ?? "").includes("pdf")) fail("wrong-note after release failed " + wn2.status());
   fs.writeFileSync(path.join(OUT, "wrong-note.pdf"), Buffer.from(await wn2.body()));
   log("answers released → student wrong-note PDF ok");
+
+  // ── 학생 개인 연습: 결과 → 틀린 단어 연습(random) → 틀렸던 1단어 → 정답 → 1/1 완료. DB 에는 아무것도 남지 않는다.
+  const dbBefore = [await prisma.attempt.count(), await prisma.gradeRevision.count(), await prisma.attemptAnswer.count()];
+  await sp.goto(`${BASE}/learn/results/${attemptId}`);
+  if ((await sp.locator('[data-testid="speak"]').count()) < 1) fail("results wrong item speaker missing");
+  await sp.locator('[data-testid="practice-link"]').click();
+  await sp.waitForURL(/\/learn\/practice\//);
+  await sp.waitForSelector('[data-testid="practice"] button.tile', { timeout: 15000 });
+  if ((await sp.locator('[data-testid="practice"] [data-testid="speak"]').count()) < 1) fail("practice speaker missing");
+  if ((await sp.locator('[data-testid="practice"] button.tile').count()) !== 4) fail("practice should show 4 options");
+  const lastCorrect = items[items.length - 1].options.find((o) => o.isCorrect)!.text;
+  await sp.locator("button.tile").filter({ has: sp.locator(`span:text-is("${lastCorrect}")`) }).first().click();
+  await sp.waitForSelector('[data-testid="practice-done"]', { timeout: 10000 });
+  const doneText = await sp.locator('[data-testid="practice-done"]').innerText();
+  if (!doneText.includes("100%")) fail("practice done should be 100%: " + doneText.replace(/\s+/g, " "));
+  const dbAfter = [await prisma.attempt.count(), await prisma.gradeRevision.count(), await prisma.attemptAnswer.count()];
+  if (dbBefore.join() !== dbAfter.join()) fail("practice must not write to DB: " + dbBefore.join() + " → " + dbAfter.join());
+  // 전체 틀린 단어 연습 (성적 탭 필)
+  await sp.goto(`${BASE}/learn/grades`);
+  await sp.locator('[data-testid="practice-all"]').click();
+  await sp.waitForURL(/\/learn\/practice$/);
+  await sp.waitForSelector('[data-testid="practice"] button.tile', { timeout: 15000 });
+  log("student practice: wrong-word random test 1/1 (100%), all-wrong practice opens, no DB writes");
 
   // ── 결과/재시험 화면 (둘 다 통과(92%)이므로 재시험 없음) → 통과 기준 경계 확인 후 재시험 케이스: 정정 채점으로 미달 만들기
   await page.goto(`${BASE}/app/results`);

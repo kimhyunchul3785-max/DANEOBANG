@@ -4,6 +4,7 @@ import { attemptResultForStudent, ApiError } from "@/lib/attempts";
 import { notFound } from "next/navigation";
 import { Ring } from "@/components/Viz";
 import { CountUp } from "@/components/Motion";
+import { SpeakButton } from "@/components/Speak";
 
 export default async function LearnResultPage({ params }: { params: Promise<{ id: string }> }) {
   const user = await requireUser();
@@ -62,13 +63,24 @@ export default async function LearnResultPage({ params }: { params: Promise<{ id
             <p className="muted">틀린 문항이 없습니다.</p>
           ) : (
             <>
-              <a className="btn-secondary mb-3 w-full" href={`/api/files/wrong-note/${id}?scope=attempt`} target="_blank">
-                오답노트 PDF
-              </a>
+              <div className="mb-3 grid grid-cols-[1fr_auto] gap-2">
+                <Link href={`/learn/practice/${id}`} className="btn-primary py-3" data-testid="practice-link">
+                  틀린 단어 연습 · random
+                </Link>
+                <a className="btn-secondary py-3" href={`/api/files/wrong-note/${id}?scope=attempt`} target="_blank">
+                  PDF
+                </a>
+              </div>
+              <p className="muted mb-1" style={{ fontSize: 11.5 }}>
+                연습은 나만 보는 개인 학습입니다. 선생님 화면에는 표시되지 않습니다.
+              </p>
               <ul>
                 {r.wrongItems.map((w) => (
                   <li key={w.position} className="py-3" style={{ borderTop: "1px solid var(--line)" }}>
-                    <div className="num-md">{w.prompt}</div>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="num-md">{w.prompt}</div>
+                      <SpeakButton text={w.prompt} size={30} />
+                    </div>
                     <ul className="mt-2 space-y-1 text-[13.5px]">
                       {w.options.map((o, i) => (
                         <li key={i} className={o.correct ? "font-medium" : o.chosen ? "line-through" : ""} style={{ color: o.correct ? "var(--ok)" : o.chosen ? "var(--accent)" : "var(--ink-2)" }}>

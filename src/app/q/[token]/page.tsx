@@ -164,13 +164,13 @@ export default async function QrPage({ params }: { params: Promise<{ token: stri
           <div className="digital-lg">GRADING…</div>
           <div className="mt-2 text-[14px] font-semibold">채점 중입니다</div>
           <p className="mt-1 text-[12px]" style={{ color: "rgba(255,244,240,0.85)" }}>
-            보통 10초 안에 끝납니다. 끝나면 이 화면과 학생 앱 알림에 점수가 표시됩니다.
+            보통 10초 안에 끝납니다.
           </p>
         </div>
       ) : (
         <div className="card card-body mt-3 anim-fade-up">
           <div className="lbl">Submit · 사진 제출</div>
-          <div className="mt-1 text-[15px] font-semibold">{missing.length === page.print.pages.length ? "시험을 다 풀었으면 사진을 찍어 제출하세요" : `${missing.join(", ")}페이지 사진이 더 필요합니다`}</div>
+          <div className="mt-1 text-[15px] font-semibold">{missing.length === page.print.pages.length ? "다 풀었으면 사진을 찍어 올리세요" : `${missing.join(", ")}페이지 사진이 더 필요합니다`}</div>
           {lastFail && (
             <p className="mt-1 text-[12.5px]" style={{ color: "var(--accent)" }}>
               지난 제출: {lastFail.reviewNotes ?? "인식 실패"} · {fmtMDHM(lastFail.createdAt)}

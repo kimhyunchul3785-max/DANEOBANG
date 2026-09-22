@@ -221,9 +221,9 @@ export function NewExamForm({ books, defaultBookId, defaultDays, classes }: { bo
               </div>
               <div>
                 <label className="label">정답·오답노트 공개</label>
-                <select className="input" name="answerVisibility" defaultValue="after_release">
+                <select className="input" name="answerVisibility" defaultValue="immediate">
+                  <option value="immediate">제출 직후 (학생이 바로 오답 확인)</option>
                   <option value="after_release">선생님 공개 후</option>
-                  <option value="immediate">제출 직후</option>
                 </select>
               </div>
               <div className="sm:col-span-3">

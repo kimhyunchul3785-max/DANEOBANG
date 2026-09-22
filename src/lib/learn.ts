@@ -24,6 +24,7 @@ export async function studentRetakes(userId: string) {
       const retakeAssignment = t.retakeExamId ? assignments.find((a) => a.exam.id === t.retakeExamId) ?? null : null;
       return {
         id: t.id,
+        sourceAttemptId: t.sourceAttemptId,
         status: t.status,
         scheduledAt: t.scheduledAt,
         dueAt: t.dueAt,

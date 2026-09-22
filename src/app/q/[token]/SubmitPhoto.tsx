@@ -40,7 +40,7 @@ export function SubmitPhoto({ token, compact }: { token?: string; compact?: bool
       <button type="button" className={compact ? "btn-primary btn-sm" : "btn-accent w-full py-4 text-[14px]"} disabled={busy} onClick={() => input.current?.click()} data-testid="submit-photo">
         {busy ? "올리는 중…" : compact ? "사진 제출" : "📷 시험지 사진 찍어 제출"}
       </button>
-      {!compact && <p className="muted text-center text-[12px]">시험지 네 모서리와 QR 이 모두 나오게, 밝은 곳에서 정면으로.</p>}
+      {!compact && <p className="muted text-center text-[12px]">네 모서리와 QR이 다 나오게 정면에서.</p>}
       {msg && (
         <p className="text-[13px]" style={{ color: "var(--ink-2)" }} role="status">
           {msg}

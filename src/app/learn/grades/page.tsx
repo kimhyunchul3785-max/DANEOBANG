@@ -82,9 +82,21 @@ export default async function GradesPage() {
         </div>
       )}
 
+      {grades.length > 0 && (
+        <Link href="/learn/practice" className="card-dark flex w-full items-center justify-between gap-3 rounded-full px-5 py-3" data-testid="practice-all">
+          <span className="flex items-center gap-3">
+            <span className="lbl" style={{ color: "rgba(236,233,227,0.55)" }}>
+              Practice
+            </span>
+            <span className="text-[13px] font-semibold">틀린 단어 모아 연습</span>
+          </span>
+          <span className="digital">RANDOM →</span>
+        </Link>
+      )}
+
       <section className="card card-body">
         <div className="mb-1 flex items-center justify-between">
-          <div className="lbl">History</div>
+          <div className="lbl">History · 시험지를 누르면 틀린 문항과 연습</div>
           <span className="digital">{grades.length}</span>
         </div>
         {grades.length === 0 && <p className="muted">공개된 성적이 없습니다.</p>}

@@ -11,7 +11,7 @@ const TABS = [
 
 export function LearnTabs() {
   const p = usePathname() ?? "/learn";
-  if (p.startsWith("/learn/attempts") || p.startsWith("/learn/results")) return null;
+  if (p.startsWith("/learn/attempts") || p.startsWith("/learn/results") || p.startsWith("/learn/practice")) return null;
   return (
     <nav className="seg mb-3 w-full justify-between" aria-label="학생 메뉴">
       {TABS.map(([href, en, ko]) => {

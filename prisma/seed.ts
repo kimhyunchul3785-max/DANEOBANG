@@ -173,7 +173,7 @@ async function seedWeeklyExam(academyId: string, createdById: string) {
   if (!book) return;
   const dayIds = book.days.filter((d) => d.dayNo === 14 || d.dayNo === 15).map((d) => d.id);
   const exam = await prisma.exam.create({
-    data: { academyId, bookId: book.id, createdById, title, questionCount: 20, passScore: 90, scoreVisibility: "immediate", answerVisibility: "after_release", scopes: { create: dayIds.map((dayId) => ({ dayId })) } },
+    data: { academyId, bookId: book.id, createdById, title, questionCount: 20, passScore: 90, scoreVisibility: "immediate", answerVisibility: "immediate", scopes: { create: dayIds.map((dayId) => ({ dayId })) } },
   });
   const { createFormForExam } = await import("../src/lib/exam-gen");
   const { form } = await createFormForExam(exam.id);

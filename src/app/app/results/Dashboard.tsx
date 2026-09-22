@@ -155,7 +155,7 @@ export async function GradesDashboard({ ctx, sp }: { ctx: AcademyContext; sp: Da
               {group === "week" ? `${weeks.length} WEEKS` : `${groupRows.length} GROUPS`} · {students.length} STUDENTS
             </span>
           </div>
-          <div className="mt-4 grid grid-cols-4 gap-3">
+          <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
             <div>
               <div className="num-lg">
                 <CountUp value={kpi.avg} placeholder="–" />
