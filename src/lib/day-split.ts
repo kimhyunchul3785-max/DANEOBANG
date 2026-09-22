@@ -1,17 +1,17 @@
 import { prisma } from "./db";
 import { planDays, distribution, type PlanItem, type SplitMode } from "./day-plan";
 
-export { planDays, distribution, DEFAULT_SPLIT_DAYS } from "./day-plan";
+export { planDays, distribution, parseSizes, DEFAULT_SPLIT_DAYS } from "./day-plan";
 export type { PlanItem, PlannedDay, SplitMode } from "./day-plan";
 
 /**
  * 단어장의 단어를 다시 DAY 로 나눈다. 단어 순서는 sortOrder(원문 순서) 기준.
  * 이미 발행된 시험의 문항은 스냅샷이라 바뀌지 않는다.
  */
-export async function applyDaySplit(bookId: string, mode: Exclude<SplitMode, "doc"> | "doc", n: number, docDays?: (number | null)[]) {
+export async function applyDaySplit(bookId: string, mode: Exclude<SplitMode, "doc"> | "doc", n: number, docDays?: (number | null)[], sizes?: number[]) {
   const words = await prisma.word.findMany({ where: { bookId }, orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }], select: { id: true, section: true } });
   const items: PlanItem[] = words.map((w, i) => ({ dayNo: docDays?.[i] ?? null, section: w.section }));
-  const plan = planDays(items, mode, n);
+  const plan = planDays(items, mode, n, 0, sizes);
   const dist = distribution(plan);
   await prisma.$transaction(async (tx) => {
     const dayIds = new Map<number, string>();

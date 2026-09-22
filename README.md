@@ -1,6 +1,6 @@
 # 단어방 (DANEOBANG) — 1차 MVP
 
-학원이 가입해 사용하는 단어 테스트 관리 SaaS. 학원(테넌트) → 선생님 → 담당 학생 구조, 구글/카카오/이메일 로그인, 단어장 파일(HWPX·DOCX·PDF) 등록·검수, DAY별 무작위 사지선다, 온라인 응시, 종이 시험지(QR·마킹) 사진 채점, 성적·재시험·오답노트, 플랫폼 관리자.
+학원이 가입해 사용하는 단어 테스트 관리 SaaS. 학원(테넌트) → 선생님 → 담당 학생 구조, 구글/카카오/이메일/휴대폰 로그인, 단어장 파일(HWPX·DOCX·PDF·사진/스캔 OCR) 등록·검수, DAY별 무작위 사지선다, 온라인 응시, 종이 시험지(QR·마킹) 사진 채점, 성적·재시험·오답노트, 플랫폼 관리자.
 
 ## 빠른 시작 (Windows)
 
@@ -16,6 +16,15 @@
 
 구글/카카오 로그인은 `.env` 에 `GOOGLE_CLIENT_ID/SECRET`, `KAKAO_CLIENT_ID` 를 넣으면 활성화됩니다 (리디렉션 URI: `http://localhost:3000/api/auth/callback/google`, `/kakao`).
 
+## .env 로 켜고 끄는 것
+
+| 변수 | 기본 | 설명 |
+|---|---|---|
+| `BILLING_ENABLED` | `false` | 결제·Seat 과금 화면. 꺼져 있으면 체험(무료·무제한)으로 가입이 4단계로 줄고 요금제 메뉴가 숨습니다. 로직은 그대로라 `true` 로 켜면 v4.2 흐름 |
+| `OPENAI_API_KEY`, `OPENAI_MODEL` | – / `gpt-5.6-luna` | 사진·스캔 PDF 단어장 OCR. `OPENAI_CONCURRENCY`(4) 병렬 수, `OCR_PAGES_PER_CHUNK`(3) PDF 묶음 쪽수 |
+| `SMS_PROVIDER` | – | 학생 휴대폰 인증번호 발송. 없으면 `log/sms.log` 와 화면에 번호가 표시됩니다 |
+| `SMTP_URL`, `MAIL_FROM` | – | 초대·인증 메일. 없으면 `log/mail.log` 와 화면에 링크가 표시됩니다 |
+
 ## 폴더
 
 ```
@@ -24,7 +33,7 @@ src/app/         페이지·서버 액션·API (app=교사, learn=학생, admin=
 src/lib/         auth, scope(테넌트 경계), exam-gen, grading, attempts, parsers/, omr/, jobs
 assets/fonts/    PDF 용 Noto Sans KR 서브셋
 fixtures/        파서·OMR 테스트 파일
-scripts/         db-init, gen-sqlite-ddl, test-parsers, test-omr, e2e, e2e-linked, e2e-signup, qa-shots
+scripts/         db-init, gen-sqlite-ddl, test-parsers, test-omr, test-ocr, e2e, e2e-linked, e2e-signup, e2e-trial, qa-shots
 docs/            PRD.md, MVP.md, TECH_STACK.md
 storage/         업로드·PDF·사진 (자동 생성, git 제외)
 ```
@@ -38,6 +47,8 @@ npm run test:parsers   # HWPX/DOCX/PDF 추출 테스트
 npm run test:omr       # 합성 OMR 판독 테스트
 npx tsx scripts/e2e.ts # 브라우저 E2E (서버 실행 + playwright 설치 필요)
 npm run e2e:linked     # 연동 계정(학원장·선생님1·학생01) E2E → ../log 에 로그·스크린샷
+npm run e2e:trial      # 체험 가입 → 선생님 초대 → 학생 휴대폰 인증번호 가입 → 시험 상세 3단계
+npm run test:ocr       # OCR 파이프라인(모의 OpenAI) 테스트
 node scripts/gen-sqlite-ddl.cjs   # schema.prisma 변경 후 init.sql 재생성 (@prisma/internals 필요)
 ```
 
@@ -47,6 +58,7 @@ node scripts/gen-sqlite-ddl.cjs   # schema.prisma 변경 후 init.sql 재생성 
 
 ## 문서
 
+- `docs/IA_REVIEW_v4.md` §5 — v4.3 결제 분리(체험)·휴대폰 인증번호 가입·OCR 단어장·시험 상세 3단계·출제 화면 정리
 - `docs/PRD_B2B_SIGNUP.md` — v4.2 B2B 가입·Seat 과금 (학원 단위 결제, 선생님 초대 기반 가입, 학생 계정 설정 링크, 요금제 화면, 모의 결제·메일 개발 모드)
 - `docs/IA_REVIEW_v4.md` — v4 계정별 IA 검수 (소셜 로그인, 엑셀 등록, 학생/성적 탭 재정의, 게임형 응시, 종이 시험 학생 제출·QR)
 - `docs/QA_REPORT_v3.md` — IA·UX 개선 v3 (업로드 자동 저장·DAY 나누기, 그룹 대시보드, 1화면 출제, 재시험→보강 흐름) QA 결과

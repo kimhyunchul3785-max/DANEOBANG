@@ -9,8 +9,9 @@ import { saveFile } from "@/lib/storage";
 import { enqueueJob } from "@/lib/jobs";
 import { sha256 } from "@/lib/util";
 import { FILE_LIMITS } from "@/lib/constants";
-import { detectFormat, PARSER_ERRORS } from "@/lib/parsers";
-import { applyDaySplit, DEFAULT_SPLIT_DAYS, type SplitMode } from "@/lib/day-split";
+import { detectImage, detectFormat, PARSER_ERRORS } from "@/lib/parsers";
+import { ocrConfigured } from "@/lib/ocr";
+import { applyDaySplit, parseSizes, DEFAULT_SPLIT_DAYS, type SplitMode } from "@/lib/day-split";
 import type { ActionResult } from "../students/actions";
 
 export async function archiveBookAction(bookId: string): Promise<ActionResult> {
@@ -37,18 +38,39 @@ export async function renameBookAction(form: FormData): Promise<ActionResult> {
 /** 파일 업로드 → Import 생성 → 분석·자동 저장 job */
 export async function uploadDocumentAction(form: FormData): Promise<ActionResult> {
   const ctx = await requireAcademy();
-  const file = form.get("file");
+  const files = form.getAll("file").filter((f): f is File => f instanceof File && f.size > 0);
   const bookId = String(form.get("bookId") ?? "") || null;
-  if (!(file instanceof File) || file.size === 0) return { ok: false, message: "파일을 선택하세요." };
-  if (file.size > FILE_LIMITS.documentMaxBytes) return { ok: false, message: "파일이 50MB를 초과합니다." };
+  if (!files.length) return { ok: false, message: "파일을 선택하세요." };
   if (bookId) {
     const b = await assertBook(ctx, bookId).catch(() => null);
     if (!b) return { ok: false, message: "단어장을 찾을 수 없습니다." };
   }
-  const buf = Buffer.from(await file.arrayBuffer());
-  const fmt = detectFormat(buf, file.name);
+  // 사진 여러 장 → 하나의 업로드(OCR). 문서는 한 번에 하나
+  const bufs = await Promise.all(files.map(async (f) => ({ f, buf: Buffer.from(await f.arrayBuffer()) })));
+  const fmts = bufs.map(({ f, buf }) => detectFormat(buf, f.name));
+  if (fmts.some((x) => x === "image")) {
+    if (!fmts.every((x) => x === "image")) return { ok: false, message: "사진은 사진끼리만 올릴 수 있습니다. 문서 파일은 따로 올려주세요." };
+    if (!ocrConfigured()) return { ok: false, message: PARSER_ERRORS.ocr_not_configured };
+    if (bufs.length > 40) return { ok: false, message: "사진은 한 번에 40장까지 올릴 수 있습니다." };
+    if (bufs.some(({ buf }) => buf.length > FILE_LIMITS.imageMaxBytes)) return { ok: false, message: "사진 한 장이 20MB를 초과합니다." };
+    const rels: string[] = [];
+    for (const { buf } of bufs) rels.push(await saveFile("uploads", ctx.member.academyId, detectImage(buf) ?? "jpg", buf));
+    const total = bufs.reduce((s, x) => s + x.buf.length, 0);
+    const imp = await prisma.import.create({
+      data: { academyId: ctx.member.academyId, bookId, createdById: ctx.user.id, fileName: bufs.length === 1 ? files[0].name : `${files[0].name} 외 ${bufs.length - 1}장`, fileType: "images", filePath: rels[0], fileSize: total, sha256: sha256(Buffer.concat(bufs.map((x) => x.buf))), meta: JSON.stringify({ files: rels, names: files.map((f) => f.name), images: bufs.length }) },
+    });
+    await enqueueJob("import", imp.id, ctx.member.academyId);
+    await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "import.create", target: imp.id, detail: `${bufs.length} images (ocr)` });
+    revalidatePath("/app/vocabulary");
+    return { ok: true, message: `사진 ${bufs.length}장을 올렸습니다. OCR 로 읽어 단어장을 만듭니다 (병렬 처리, 보통 1분 안).`, data: { id: imp.id } };
+  }
+  if (files.length > 1) return { ok: false, message: "문서 파일은 한 번에 하나만 올릴 수 있습니다 (사진은 여러 장 가능)." };
+  const file = files[0];
+  const buf = bufs[0].buf;
+  if (file.size > FILE_LIMITS.documentMaxBytes) return { ok: false, message: "파일이 50MB를 초과합니다." };
+  const fmt = fmts[0];
   if (fmt === "hwp") return { ok: false, message: PARSER_ERRORS.hwp_not_supported };
-  if (fmt === "unknown" || fmt === "zip") return { ok: false, message: PARSER_ERRORS.unknown_format };
+  if (fmt === "unknown" || fmt === "zip" || fmt === "image") return { ok: false, message: PARSER_ERRORS.unknown_format };
   const ext = file.name.split(".").pop() ?? fmt;
   const rel = await saveFile("uploads", ctx.member.academyId, ext, buf);
   const imp = await prisma.import.create({
@@ -73,7 +95,7 @@ export async function retryImportAction(importId: string): Promise<ActionResult>
 /** DAY 다시 나누기: 일수(기본 7) · 하루 단어 수 · 지문별 · 문서 표기대로 */
 export async function resplitBookAction(form: FormData): Promise<ActionResult> {
   const ctx = await requireAcademy();
-  const parsed = z.object({ bookId: z.string(), mode: z.enum(["days", "perDay", "section", "doc"]), n: z.coerce.number().int().min(1).max(500).optional() }).safeParse(Object.fromEntries(form));
+  const parsed = z.object({ bookId: z.string(), mode: z.enum(["days", "perDay", "section", "doc", "custom"]), n: z.coerce.number().int().min(1).max(500).optional(), sizes: z.string().max(2000).optional() }).safeParse(Object.fromEntries(form));
   if (!parsed.success) return { ok: false, message: "입력을 확인하세요." };
   const b = await assertBook(ctx, parsed.data.bookId).catch(() => null);
   if (!b) return { ok: false, message: "권한이 없습니다." };
@@ -89,8 +111,10 @@ export async function resplitBookAction(form: FormData): Promise<ActionResult> {
     if (!rows.some((r) => r.dayNo)) return { ok: false, message: "문서에 DAY 표기가 없습니다." };
     docDays = rows.map((r) => r.dayNo);
   }
-  const dist = await applyDaySplit(b.id, mode, n, docDays);
-  await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "book.resplit", target: b.id, detail: `${mode}:${n} → ${dist.length} days` });
+  const sizes = mode === "custom" ? parseSizes(parsed.data.sizes ?? "") : undefined;
+  if (mode === "custom" && !sizes?.length) return { ok: false, message: "DAY별 단어 수를 쉼표로 적어주세요 (예: 40, 40, 30)." };
+  const dist = await applyDaySplit(b.id, mode, n, docDays, sizes);
+  await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "book.resplit", target: b.id, detail: `${mode}:${sizes ? sizes.join("/") : n} → ${dist.length} days` });
   revalidatePath(`/app/vocabulary/${b.id}`);
   revalidatePath("/app/vocabulary");
   return { ok: true, message: `DAY ${dist.length}개로 나눴습니다.`, data: { days: dist.length } };

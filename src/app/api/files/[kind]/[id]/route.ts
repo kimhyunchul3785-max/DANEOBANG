@@ -33,6 +33,32 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ kind
     const buf = await readFile(p.pdfPath);
     return pdfResponse(buf, `${p.attempt.assignment.exam.title}_${p.attempt.assignment.student.name}.pdf`);
   }
+  if (kind === "print-zip") {
+    // id = examId. 이 시험의 활성 종이 시험지 PDF 전부(학생별 QR 다름)를 zip 으로
+    if (!ctx) return NextResponse.json({ error: "forbidden" }, { status: 403 });
+    const prints = await prisma.printInstance.findMany({
+      where: { status: "active", attempt: { assignment: { examId: id, exam: { academyId: ctx.member.academyId }, student: studentScope(ctx) } } },
+      include: { attempt: { include: { assignment: { include: { student: { include: { classRoom: true } }, exam: { select: { title: true } } } } } } },
+      orderBy: { createdAt: "asc" },
+    });
+    if (!prints.length) return NextResponse.json({ error: "not_found", message: "발급된 시험지가 없습니다." }, { status: 404 });
+    const JSZip = (await import("jszip")).default;
+    const zip = new JSZip();
+    const safe = (t: string) => t.replace(/[\\/:*?"<>|]+/g, " ").trim();
+    const title = safe(prints[0].attempt.assignment.exam.title);
+    const seen = new Map<string, number>();
+    for (const p of prints) {
+      const st = p.attempt.assignment.student;
+      let name = `${st.classRoom?.name ? safe(st.classRoom.name) + "_" : ""}${safe(st.name)}`;
+      const n = (seen.get(name) ?? 0) + 1;
+      seen.set(name, n);
+      if (n > 1) name += `_${n}`;
+      zip.file(`${name}_${title}.pdf`, await readFile(p.pdfPath));
+    }
+    const buf = await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" });
+    await prisma.auditLog.create({ data: { academyId: ctx.member.academyId, userId: user.id, action: "file.print_zip", target: id, detail: `${prints.length} pdf` } });
+    return new NextResponse(new Uint8Array(buf), { headers: { ...NO_STORE, "content-type": "application/zip", "content-disposition": `attachment; filename*=UTF-8''${encodeURIComponent(`${title}_시험지_${prints.length}명.zip`)}` } });
+  }
   if (kind === "answer-key") {
     if (!ctx) return NextResponse.json({ error: "forbidden" }, { status: 403 });
     const form = await prisma.examForm.findFirst({ where: { id, exam: { academyId: ctx.member.academyId } }, include: { exam: { include: { scopes: true, academy: true } }, items: { orderBy: { position: "asc" }, include: { options: { orderBy: { position: "asc" } } } } } });

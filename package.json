@@ -16,7 +16,9 @@
     "e2e:linked": "tsx scripts/e2e-linked.ts",
     "qa:shots": "tsx scripts/qa-shots.ts",
     "e2e:setup": "playwright install chromium",
-    "e2e:signup": "tsx scripts/e2e-signup.ts"
+    "e2e:signup": "tsx scripts/e2e-signup.ts",
+    "test:ocr": "tsx scripts/test-ocr.ts",
+    "e2e:trial": "tsx scripts/e2e-trial.ts"
   },
   "dependencies": {
     "@libsql/client": "^0.18.0",
@@ -31,6 +33,7 @@
     "jszip": "3.10.1",
     "next": "15.5.4",
     "nodemailer": "^7.0.13",
+    "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^4.10.38",
     "pdfkit": "0.17.1",
     "qrcode": "1.5.4",

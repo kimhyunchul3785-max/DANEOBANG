@@ -5,8 +5,8 @@ import type { SeatUsage } from "@/lib/seats";
 
 /** ⑥ 선생님 초대 — 남은 자리만큼 이메일 입력. 초대 링크로 비밀번호만 설정하면 참여 완료 */
 export function InviteStep({ academyName, usage, mailOn }: { academyName: string; usage: SeatUsage; mailOn: boolean }) {
-  const n = Math.max(0, usage.available);
-  const [emails, setEmails] = useState<string[]>(Array.from({ length: Math.min(n, 5) }, () => ""));
+  const n = usage.unlimited ? 50 : Math.max(0, usage.available);
+  const [emails, setEmails] = useState<string[]>(Array.from({ length: Math.min(n, usage.unlimited ? 2 : 5) }, () => ""));
   const [sent, setSent] = useState<{ email: string; devLink?: string }[] | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [pending, start] = useTransition();
@@ -24,14 +24,14 @@ export function InviteStep({ academyName, usage, mailOn }: { academyName: string
   return (
     <section className="card card-body anim-fade-up" data-testid="invite-step">
       <div className="flex items-center justify-between">
-        <div className="lbl">06 · Invite</div>
+        <div className="lbl">Invite · 선생님 초대</div>
         <span className="digital" data-testid="seat-usage">
-          {usage.used + usage.pending} / {usage.quantity} SEATS
+          {usage.unlimited ? `${usage.used} TEACHERS` : `${usage.used + usage.pending} / ${usage.quantity} SEATS`}
         </span>
       </div>
       <h1 className="h1 mt-1">{academyName}이(가) 준비되었습니다</h1>
       <p className="muted mt-1">
-        선생님 {usage.quantity}명 플랜 · 월 {usage.monthly.toLocaleString("ko-KR")}원 · 현재 {usage.used} / {usage.quantity} 사용 중{usage.pending ? ` · 초대 대기 ${usage.pending}` : ""}
+        {usage.unlimited ? `체험 기간 · 선생님 수 제한 없음 · 현재 선생님 ${usage.used}명${usage.pending ? ` · 초대 대기 ${usage.pending}` : ""}` : `선생님 ${usage.quantity}명 플랜 · 월 ${usage.monthly.toLocaleString("ko-KR")}원 · 현재 ${usage.used} / ${usage.quantity} 사용 중${usage.pending ? ` · 초대 대기 ${usage.pending}` : ""}`}
       </p>
 
       {sent ? (
@@ -59,7 +59,7 @@ export function InviteStep({ academyName, usage, mailOn }: { academyName: string
         </div>
       ) : (
         <div className="mt-4 grid gap-2">
-          <div className="lbl">함께 사용할 선생님을 초대해주세요 · 남은 자리 {n}</div>
+          <div className="lbl">함께 사용할 선생님을 초대해주세요{usage.unlimited ? "" : ` · 남은 자리 ${n}`}</div>
           {emails.map((e, i) => (
             <input key={i} className="input" type="email" placeholder="선생님 이메일" value={e} onChange={(ev) => setEmails(emails.map((x, j) => (j === i ? ev.target.value : x)))} data-testid={`invite-email-${i}`} />
           ))}

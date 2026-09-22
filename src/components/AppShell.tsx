@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { AcademyContext } from "@/lib/auth";
 import { SideNav } from "./SideNav";
 import { Logo } from "./Logo";
+import { billingEnabled } from "@/lib/billing";
 
 /**
  * 앱 셸. 메뉴는 역할별로 다르다 (보이는 것이 곧 권한).
@@ -29,7 +30,7 @@ export function AppShell({ ctx, children }: { ctx: AcademyContext; children: Rea
             switch
           </Link>
         </div>
-        <SideNav isOwner={ctx.isOwner} />
+        <SideNav isOwner={ctx.isOwner} billing={billingEnabled()} />
         <form action="/api/auth/logout" method="post" className="hidden px-6 pb-6 md:mt-auto md:block">
           <button className="lbl hover:text-[var(--ink)]">Sign out</button>
         </form>

@@ -3232,6 +3232,9 @@ export const StudentScalarFieldEnum = {
   inviteTokenHash: 'inviteTokenHash',
   inviteExpiresAt: 'inviteExpiresAt',
   inviteSentAt: 'inviteSentAt',
+  phoneCodeHash: 'phoneCodeHash',
+  phoneCodeExpiresAt: 'phoneCodeExpiresAt',
+  phoneCodeSentAt: 'phoneCodeSentAt',
   status: 'status',
   createdAt: 'createdAt'
 } as const

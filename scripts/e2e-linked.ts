@@ -131,12 +131,11 @@ async function main() {
     for (const d of [16, 17]) await t1.locator(`label.chip[data-day="${d}"]`).click();
     await t1.fill('input[aria-label="문항 수 직접 입력"]', "10");
     await t1.locator('label.chip[data-class="테스트 A반"]').click();
-    await t1.locator("summary", { hasText: "More" }).click();
     await t1.selectOption('select[name="answerVisibility"]', "after_release");
     await t1.fill('input[name="title"]', RUN_TITLE);
-    await t1.waitForSelector("ol", { timeout: 15000 }); // 미리보기 문항
+    await t1.waitForSelector("[data-testid='preview-next']", { timeout: 15000 }); // 학생 화면형 미리보기 문항
     await shot(t1, "t1-compose");
-    await t1.click('button:has-text("발행 ·")');
+    await t1.click('button:has-text("출제 ·")');
     await t1.waitForURL(/\/app\/tests\/(?!new)[a-z0-9]+\?published=1/, { timeout: 30000 });
     const banner = await t1.locator("text=시험을 발행했습니다").innerText();
     expect(banner.includes("5명"), "A반 5명 자동 배정 기대: " + banner);
@@ -157,7 +156,8 @@ async function main() {
     await shot(s1, "s01-learn-home");
   });
   await check("학생01: 선생님1 시험 응시 (9/10 정답) → 결과 90점", async () => {
-    await s1.locator("div, .pill", { hasText: RUN_TITLE }).locator('button:has-text("응시 시작"), button:has-text("시작")').first().click();
+    // 학생 앱은 오래된 순이므로 제목으로 정확히 그 카드(다음 차례 카드 또는 대기열 행)를 찾아 시작
+    await s1.locator("[data-testid='next-card'], [data-testid='queue-item']", { hasText: RUN_TITLE }).first().locator('button:has-text("응시 시작"), button:has-text("시작")').first().click();
     await s1.waitForURL(/\/learn\/attempts\//);
     attemptId = s1.url().split("/").pop()!;
     const at = await prisma.attempt.findUnique({ where: { id: attemptId }, include: { assignment: { include: { form: { include: { items: { include: { options: true }, orderBy: { position: "asc" } } } } } } } });
@@ -196,15 +196,15 @@ async function main() {
   // ── 5. 학원장: 학생02 종이 시험지 발급 → 로고 인쇄 확인
   await check("학원장: 학생02 종이 시험지 발급 → PDF 에 로고 포함", async () => {
     const exam = await prisma.exam.findFirst({ where: { title: RUN_TITLE } });
-    await owner.goto(`${BASE}/app/tests/${exam!.id}`);
-    await owner.click('button:has-text("종이 시험지 발급")');
+    await owner.goto(`${BASE}/app/tests/${exam!.id}?step=3`);
+    await owner.click("[data-testid='print-open']");
     for (const n of ["01", "03", "04", "05"]) {
       const cb = owner.locator("label", { hasText: `테스터 학생${n}` }).locator('input[name="assignmentIds"]');
       if (await cb.count()) await cb.uncheck();
     }
-    await owner.click('button:has-text("선택 학생 시험지 생성")');
-    await owner.waitForSelector('a:has-text("PDF (")', { timeout: 30000 });
-    const href = await owner.locator('a:has-text("PDF (")').first().getAttribute("href");
+    await owner.click("[data-testid='print-issue']");
+    await owner.waitForSelector("a[data-testid='print-pdf']", { timeout: 30000 });
+    const href = await owner.locator("a[data-testid='print-pdf']").first().getAttribute("href");
     const r = await ownerCtx.request.get(`${BASE}${href}`);
     expect(r.status() === 200, "pdf " + r.status());
     const pdf = Buffer.from(await r.body());
@@ -293,7 +293,7 @@ async function main() {
   // ── 6. 선생님1 정답 공개 → 학생01 오답 확인
   await check("선생님1 정답 공개 → 학생01 오답 복습·오답노트 PDF 열람", async () => {
     const exam = await prisma.exam.findFirst({ where: { title: RUN_TITLE } });
-    await t1.goto(`${BASE}/app/tests/${exam!.id}`);
+    await t1.goto(`${BASE}/app/tests/${exam!.id}?step=3`);
     await t1.click('button:has-text("정답·오답노트 공개")');
     await t1.waitForSelector("text=공개했습니다", { timeout: 10000 });
     await s1.reload();

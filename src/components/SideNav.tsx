@@ -18,9 +18,9 @@ const NAV: Item[] = [
 ];
 
 /** 현재 경로를 클라이언트에서 읽어 활성 표시 — 클라이언트 내비게이션에서도 즉시 따라온다. */
-export function SideNav({ isOwner }: { isOwner: boolean }) {
+export function SideNav({ isOwner, billing = false }: { isOwner: boolean; billing?: boolean }) {
   const pathname = usePathname() ?? "/app";
-  const items = NAV.filter((n) => !n.owner || isOwner).map((n) => (isOwner && n.href === "/app" ? { ...n, en: "Overview", ko: "학원 현황" } : n));
+  const items = NAV.filter((n) => (!n.owner || isOwner) && (n.href !== "/app/billing" || billing)).map((n) => (isOwner && n.href === "/app" ? { ...n, en: "Overview", ko: "학원 현황" } : n));
   const active = (href: string) => {
     if (href === "/app") return pathname === "/app";
     if (href === "/app/vocabulary") return pathname.startsWith("/app/vocabulary") || pathname.startsWith("/app/imports");

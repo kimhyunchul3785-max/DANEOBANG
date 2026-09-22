@@ -241,6 +241,21 @@ async function TeacherToday({ ctx }: { ctx: AcademyContext }) {
     examCount.set(a.examId, e);
   }
   const weekExam = [...examCount.entries()].sort((a, b) => b[1].total - a[1].total)[0];
+  // 마감이 가까운 시험부터: 아직 안 친 배정이 있는 발행 시험을 마감 오름차순으로 (마감 없음은 뒤)
+  const openAssign = await prisma.assignment.findMany({ where: { exam: { academyId, status: "published" }, student: scope, status: { in: ["assigned", "in_progress"] } }, select: { examId: true, dueAt: true, exam: { select: { title: true, isRetake: true } } } });
+  const dueMap = new Map<string, { title: string; due: Date | null; remaining: number; isRetake: boolean }>();
+  for (const a of openAssign) {
+    const e = dueMap.get(a.examId) ?? { title: a.exam.title, due: a.dueAt, remaining: 0, isRetake: a.exam.isRetake };
+    e.remaining++;
+    if (a.dueAt && (!e.due || a.dueAt < e.due)) e.due = a.dueAt;
+    dueMap.set(a.examId, e);
+  }
+  // 마감 임박 순: 아직 남은 시험(가까운 마감부터) → 마감 없는 시험 → 이미 지난 시험(경과)
+  const rank = (d: Date | null) => (d === null ? 1 : d.getTime() >= now.getTime() ? 0 : 2);
+  const dueSoon = [...dueMap.entries()]
+    .sort((x, y) => rank(x[1].due) - rank(y[1].due) || (x[1].due?.getTime() ?? 0) - (y[1].due?.getTime() ?? 0))
+    .slice(0, 5);
+  const dday = (d: Date | null) => (d ? Math.ceil((d.getTime() - now.getTime()) / 86400e3) : null);
   const weekGrades = first.filter((g) => g.at >= week.start);
   const byDay = Array.from({ length: 7 }, (_, i) => weekGrades.filter((g) => Math.floor((g.at.getTime() - week.start.getTime()) / 86400e3) === i).length);
   // 학생별 평균·추세
@@ -298,24 +313,36 @@ async function TeacherToday({ ctx }: { ctx: AcademyContext }) {
           </div>
         </Link>
 
-        <div className="card-accent span-2 card-body flex min-h-[220px] flex-col justify-between">
+        <div className="card-accent span-2 card-body flex min-h-[220px] flex-col justify-between" data-testid="due-soon">
           <div className="flex items-start justify-between">
-            <div className="lbl-on">This week</div>
+            <div className="lbl-on">Due soon · 마감 임박 순</div>
             <span className="digital">{weekExam ? `${weekExam[1].done}/${weekExam[1].total}` : "--"}</span>
           </div>
           <div>
-            {weekExam ? (
-              <>
-                <div className="text-[18px] font-semibold leading-tight">{weekExam[1].title}</div>
-                <div className="lbl-on mt-2">
-                  {weekExam[1].total - weekExam[1].done} 명 남음 · 평균 {avg(weekGrades.map((g) => g.score)) ?? "--"}
-                </div>
-              </>
-            ) : (
+            {dueSoon.length === 0 ? (
               <>
                 <div className="num-lg">--</div>
-                <div className="lbl-on mt-2">이번 주 배정된 시험 없음</div>
+                <div className="lbl-on mt-2">안 친 시험이 없습니다</div>
               </>
+            ) : (
+              <ul className="mt-1">
+                {dueSoon.map(([id, e]) => {
+                  const d = dday(e.due);
+                  return (
+                    <li key={id} className="flex items-center justify-between gap-2 py-1.5" style={{ borderTop: "1px solid rgba(255,244,240,0.2)" }}>
+                      <Link href={d !== null && d < 0 ? `/app/tests/${id}?step=3#due` : `/app/tests/${id}`} className="min-w-0 truncate text-[13.5px] font-semibold hover:underline" title={d !== null && d < 0 ? "기한 경과 · 마감기한 변경" : undefined}>
+                        {e.title}
+                      </Link>
+                      <span className="flex shrink-0 items-center gap-2">
+                        <span className="lbl-on">{e.remaining}명 남음</span>
+                        <span className="digital" style={{ color: d !== null && d <= 1 ? "#ffd9cc" : undefined, opacity: d !== null && d < 0 ? 0.7 : 1 }}>
+                          {d === null ? "NO DUE" : d < 0 ? `경과 ${-d}일` : d === 0 ? "D-DAY" : `D-${d}`}
+                        </span>
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
             )}
           </div>
           <PulseBars values={byDay} labels={["월", "화", "수", "목", "금", "토", "일"]} color="#fff4f0" dim="rgba(255,244,240,0.3)" height={34} />

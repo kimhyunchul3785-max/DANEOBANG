@@ -1,7 +1,8 @@
 import { prisma } from "./db";
 import { registerJobHandler, PermanentJobError } from "./jobs";
 import { readFile } from "./storage";
-import { extractDocument, PARSER_ERRORS, type ExtractedRow } from "./parsers";
+import { extractDocument, detectFormat, detectImage, PARSER_ERRORS, type ExtractedRow, type ExtractResult } from "./parsers";
+import { ocrConfigured, ocrImages, ocrPdf } from "./ocr";
 import { planDays, distribution, DEFAULT_SPLIT_DAYS, type SplitMode } from "./day-split";
 import { writeLog } from "./logger";
 
@@ -71,8 +72,35 @@ registerJobHandler("import", async ({ resourceId }) => {
   if (!imp) throw new PermanentJobError("import_not_found");
   await prisma.import.update({ where: { id: imp.id }, data: { status: "processing" } });
   try {
-    const buf = await readFile(imp.filePath);
-    const { type, result } = await extractDocument(buf, imp.fileName);
+    let type: string;
+    let result: ExtractResult;
+    if (imp.fileType === "images") {
+      // 사진 여러 장 → OCR (병렬)
+      if (!ocrConfigured()) throw new Error("ocr_not_configured");
+      const meta = JSON.parse(imp.meta || "{}") as { files?: string[]; names?: string[] };
+      const files = meta.files ?? [imp.filePath];
+      const images = await Promise.all(files.map(async (rel, i) => {
+        const buf = await readFile(rel);
+        const kind = detectImage(buf) ?? "jpg";
+        return { buf, mime: kind === "png" ? "image/png" : kind === "webp" ? "image/webp" : "image/jpeg", name: meta.names?.[i] ?? rel };
+      }));
+      type = "images";
+      result = await ocrImages(images);
+    } else {
+      const buf = await readFile(imp.filePath);
+      try {
+        const r = await extractDocument(buf, imp.fileName);
+        type = r.type;
+        result = r.result;
+      } catch (e) {
+        // 텍스트 층이 없는 PDF(사진을 합친 스캔본) → OCR 로 자동 전환
+        if (e instanceof Error && e.message === "no_text" && detectFormat(buf, imp.fileName) === "pdf" && ocrConfigured()) {
+          writeLog({ kind: "job", academy: imp.academyId, event: "import:ocr_fallback", detail: { importId: imp.id } });
+          type = "pdf";
+          result = await ocrPdf(buf);
+        } else throw e;
+      }
+    }
     if (!result.rows.length) {
       await prisma.import.update({
         where: { id: imp.id },
@@ -109,10 +137,10 @@ registerJobHandler("import", async ({ resourceId }) => {
   } catch (e) {
     const code = e instanceof Error ? e.message : "unknown";
     if (code === "no_rows") throw e;
-    const known = PARSER_ERRORS[code];
+    const known = PARSER_ERRORS[code] ?? (code.startsWith("ocr_") ? `OCR 실패: ${code.replace(/^ocr_(api|failed):?\s*/, "")}` : undefined);
     await prisma.import.update({
       where: { id: imp.id },
-      data: { status: "failed", errorCode: code, warnings: JSON.stringify([known ?? `분석 실패: ${code}`]) },
+      data: { status: "failed", errorCode: code.slice(0, 60), warnings: JSON.stringify([known ?? `분석 실패: ${code}`]) },
     });
     throw new PermanentJobError(code);
   }

@@ -20,7 +20,7 @@ function seoulDate(d = new Date()) {
 }
 
 export type LogEntry = {
-  kind: "action" | "api" | "job" | "client" | "page" | "e2e" | "error" | "mail" | "billing";
+  kind: "action" | "api" | "job" | "client" | "page" | "e2e" | "error" | "mail" | "billing" | "sms";
   at?: string;
   user?: string | null;
   academy?: string | null;

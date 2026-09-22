@@ -2,7 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requireOwner } from "@/lib/auth";
 import { seatUsage } from "@/lib/seats";
-import { billingProvider, won, subscriptionLabel } from "@/lib/billing";
+import { billingProvider, billingEnabled, won, subscriptionLabel } from "@/lib/billing";
 import { fmtDate } from "@/lib/util";
 import { CountUp } from "@/components/Motion";
 import { ActionButton } from "@/components/ActionForm";
@@ -23,6 +23,20 @@ export default async function BillingPage() {
     prisma.payment.findMany({ where: { subscription: { academyId } }, orderBy: { createdAt: "desc" }, take: 12 }),
   ]);
   const status = ctx.member.academy.status;
+  if (!billingEnabled()) {
+    return (
+      <div className="mx-auto max-w-[560px]">
+        <div className="kicker">Billing · 요금제 및 결제</div>
+        <h1 className="h1 mt-1 mb-3">체험 기간 · 결제 준비 중</h1>
+        <div className="card card-body text-[14px]">
+          <p>지금은 결제 없이 모든 기능을 쓸 수 있습니다. 선생님 수 제한도 없습니다.</p>
+          <p className="muted mt-2">
+            서비스화할 때 <code>.env</code>에 <code>BILLING_ENABLED=&quot;true&quot;</code>를 넣으면 가입 단계의 선생님 수·결제, 요금제 화면, Seat 제한이 그대로 켜집니다 (선생님 1명당 월 {won(9900)}). 현재 선생님 {usage.used}명{usage.pending ? ` · 초대 대기 ${usage.pending}` : ""}.
+          </p>
+        </div>
+      </div>
+    );
+  }
   const needsPayment = status === "pending_payment" || status === "past_due" || !sub || sub.status === "pending" || sub.status === "past_due";
 
   if (needsPayment) {

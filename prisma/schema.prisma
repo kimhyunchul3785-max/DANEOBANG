@@ -189,6 +189,9 @@ model Student {
   inviteTokenHash  String?   @unique
   inviteExpiresAt  DateTime?
   inviteSentAt     DateTime?
+  phoneCodeHash    String?   // 휴대폰 인증번호(6자리) 해시 — 학생이 /join 에서 번호+인증번호로 가입
+  phoneCodeExpiresAt DateTime?
+  phoneCodeSentAt  DateTime?
   status           String    @default("active") // active | inactive(퇴원·차단)
   createdAt        DateTime  @default(now())
 

@@ -23,7 +23,7 @@ export async function listStudentAssignments(userId: string) {
       attempts: { include: { grades: { where: { current: true } } }, orderBy: { attemptNo: "desc" } },
       student: { select: { id: true, name: true } },
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: { createdAt: "asc" }, // 출제된 순서(옛날 → 현재). 학생은 안 친 것을 차례대로 친다
   });
   const now = Date.now();
   return assignments.map((a) => {

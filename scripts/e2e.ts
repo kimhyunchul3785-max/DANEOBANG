@@ -93,31 +93,39 @@ async function main() {
   }
   for (const d of [14, 17, 20]) await page.locator(`label.chip[data-day="${d}"]`).click();
   await page.fill('input[aria-label="문항 수 직접 입력"]', "12");
-  await page.locator("summary", { hasText: "More" }).click();
   await page.selectOption('select[name="answerVisibility"]', "after_release");
   await page.fill('input[name="title"]', RUN_TITLE);
   await page.click('button:has-text("초안만 저장")');
   await page.waitForURL(/\/app\/tests\/(?!new)[a-z0-9]+$/, { timeout: 20000 });
   const examUrl = page.url();
-  await page.waitForSelector("text=문항 버전");
+  await page.waitForSelector("[data-testid='step-items']");
   const publishBtn = page.locator('button:has-text("발행")').first();
   await publishBtn.click();
-  await page.waitForSelector("text=✓ 발행", { timeout: 10000 });
-  log("exam composed (draft) and form v1 published");
+  // 발행되면 (대상이 아직 없으므로) 2단계 응시 대상으로 자동 이동, 헤더는 "발행됨"
+  await page.waitForSelector("[data-testid='exam-detail'][data-step='2']", { timeout: 10000 });
+  await page.waitForSelector("text=발행됨", { timeout: 10000 });
+  log("exam composed (draft) and form v1 published → moved to step 2");
 
-  // ── 배정: 박학생(온라인) + 김민준(종이)
-  if (await page.locator('button:has-text("전체 해제")').count()) await page.click('button:has-text("전체 해제")');
+  // ── 응시 대상(2단계): 박학생(온라인) + 김민준(종이) 추가
+  await page.goto(`${examUrl}?step=2`);
+  await page.waitForSelector("[data-testid='assign-panel']");
+  await page.click("[data-testid='assign-toggle-list']");
   for (const n of ["박학생", "김민준"]) await page.locator("label", { hasText: n }).locator('input[name="studentIds"]').check();
-  await page.click('button:has-text("배정")');
+  await page.click("[data-testid='assign-add']");
   await page.waitForSelector("text=2명에게 배정", { timeout: 10000 });
-  log("assigned 2 students");
+  await page.waitForSelector("[data-testid='target-row']:has-text('김민준')", { timeout: 10000 });
+  log("assigned 2 students (step 2 · 응시 대상)");
 
-  // ── 종이 시험지: 김민준만
-  await page.click('button:has-text("종이 시험지 발급")');
+  // ── 종이 시험지(3단계): 김민준만
+  await page.goto(`${examUrl}?step=3`);
+  await page.click("[data-testid='print-open']");
   await page.locator("label", { hasText: "박학생" }).locator('input[name="assignmentIds"]').uncheck();
-  await page.click('button:has-text("선택 학생 시험지 생성")');
-  await page.waitForSelector('a:has-text("PDF (")', { timeout: 30000 });
-  const pdfHref = await page.locator('a:has-text("PDF (")').first().getAttribute("href");
+  await page.click("[data-testid='print-issue']");
+  await page.waitForSelector("a[data-testid='print-pdf']", { timeout: 30000 });
+  const pdfHref = await page.locator("a[data-testid='print-pdf']").first().getAttribute("href");
+  // 전체 zip
+  const zipRes = await ctx.request.get(`${BASE}/api/files/print-zip/${examUrl.split("/").pop()}`);
+  if (zipRes.status() !== 200 || !(zipRes.headers()["content-type"] ?? "").includes("zip")) fail("print zip " + zipRes.status());
   const pdfRes = await ctx.request.get(`${BASE}${pdfHref}`);
   if (pdfRes.status() !== 200) fail("pdf download " + pdfRes.status());
   const pdfBuf = Buffer.from(await pdfRes.body());
@@ -199,7 +207,7 @@ async function main() {
   await login(sp, "student@daneobang.dev");
   await sp.goto(`${BASE}/learn`);
   // 이번 E2E 시험(제목 일치) 카드/필의 시작 버튼을 누른다 (이전 실행의 다른 시험이 먼저 보일 수 있음)
-  const e2eCard = sp.locator("div", { hasText: RUN_TITLE }).filter({ has: sp.locator("button") }).last();
+  const e2eCard = sp.locator("[data-testid='next-card'], [data-testid='queue-item']", { hasText: RUN_TITLE }).first();
   await e2eCard.locator('button:has-text("응시 시작"), button:has-text("시작")').first().click();
   await sp.waitForURL(/\/learn\/attempts\//);
   await sp.waitForSelector(".digital-lg >> text=/12");
@@ -246,7 +254,7 @@ async function main() {
   log("resubmit idempotent (1 grade revision)");
 
   // ── 교사: 정답 공개 → 학생 오답노트 열람 가능
-  await page.goto(examUrl, { waitUntil: "networkidle" });
+  await page.goto(`${examUrl}?step=3`, { waitUntil: "networkidle" });
   const releaseBtn = page.locator('button:has-text("정답·오답노트 공개")');
   try {
     await releaseBtn.waitFor({ timeout: 30000 });

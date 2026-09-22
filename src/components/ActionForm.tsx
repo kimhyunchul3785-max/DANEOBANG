@@ -59,12 +59,16 @@ export function ActionButton({
   className = "btn-secondary btn-sm",
   confirm: confirmText,
   onDone,
+  style,
+  testId,
 }: {
   action: () => Promise<ActionResult>;
   children: React.ReactNode;
   className?: string;
   confirm?: string;
   onDone?: (r: ActionResult) => void;
+  style?: React.CSSProperties;
+  testId?: string;
 }) {
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState<string | null>(null);
@@ -74,6 +78,8 @@ export function ActionButton({
       <button
         type="button"
         className={className}
+        style={style}
+        data-testid={testId}
         disabled={pending}
         onClick={() => {
           if (confirmText && !window.confirm(confirmText)) return;

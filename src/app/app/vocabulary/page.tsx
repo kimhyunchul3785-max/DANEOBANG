@@ -5,6 +5,7 @@ import { fmtDate, parseJSON } from "@/lib/util";
 import { ActionButton } from "@/components/ActionForm";
 import { uploadDocumentAction, archiveBookAction } from "./actions";
 import { UploadForm } from "./UploadForm";
+import { ocrConfigured } from "@/lib/ocr";
 import { CountUp } from "@/components/Motion";
 
 const IMPORT_STATUS: Record<string, [string, string]> = {
@@ -132,7 +133,7 @@ export default async function VocabularyPage() {
             <div className="flex items-center justify-between">
               <div className="lbl-on">Upload</div>
               <span className="digital" style={{ color: "rgba(255,244,240,0.8)" }}>
-                HWPX · DOCX · PDF
+                HWPX · DOCX · PDF · 사진
               </span>
             </div>
             <div className="mt-2 flex items-center gap-2">
@@ -142,18 +143,20 @@ export default async function VocabularyPage() {
                   i
                 </span>
                 <span className="tip-box" role="tooltip">
-                  <b>HWPX · DOCX · 텍스트 PDF</b>
+                  <b>HWPX · DOCX · PDF · 사진(여러 장)</b>
                   <br />
                   번호형 단어장(001 / 표제어 / 품사 뜻)과 DAY·표 양식을 자동으로 읽어 단어장을 만듭니다.
                   <br />
-                  DAY 표기가 없으면 기본 7일로 나눕니다 (단어장 화면에서 다시 나눌 수 있음).
+                  사진을 여러 장 고르면 OCR(OpenAI, 병렬)로 읽고, 사진을 합친 스캔 PDF 도 자동으로 알아봐 OCR 로 읽습니다{ocrConfigured() ? "" : " (.env 에 OPENAI_API_KEY 필요)"}.
+                  <br />
+                  DAY 표기가 있으면 그대로, 없으면 기본 7일로 나눕니다 (단어장 화면에서 직접 다시 나눌 수 있음).
                   <br />
                   <span style={{ color: "rgba(236,233,227,0.6)" }}>.hwp 는 한글에서 HWPX 로 다시 저장해 주세요. 최대 50MB.</span>
                 </span>
               </span>
             </div>
             <div className="mt-4">
-              <UploadForm action={uploadDocumentAction} books={active.map((b) => ({ id: b.id, title: b.title }))} />
+              <UploadForm action={uploadDocumentAction} books={active.map((b) => ({ id: b.id, title: b.title }))} ocr={ocrConfigured()} />
             </div>
           </div>
         </div>

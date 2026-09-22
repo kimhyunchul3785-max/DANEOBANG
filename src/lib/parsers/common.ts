@@ -271,8 +271,16 @@ export function blocksToRows(blocks: DocBlock[]): { rows: ExtractedRow[]; warnin
   return { rows, warnings, profile: "table" };
 }
 
-export function detectFormat(buf: Buffer, fileName: string): "hwpx" | "docx" | "pdf" | "hwp" | "zip" | "unknown" {
+export function detectImage(buf: Buffer): "jpg" | "png" | "webp" | null {
+  if (buf[0] === 0xff && buf[1] === 0xd8 && buf[2] === 0xff) return "jpg";
+  if (buf[0] === 0x89 && buf[1] === 0x50 && buf[2] === 0x4e && buf[3] === 0x47) return "png";
+  if (buf.subarray(0, 4).toString("latin1") === "RIFF" && buf.subarray(8, 12).toString("latin1") === "WEBP") return "webp";
+  return null;
+}
+
+export function detectFormat(buf: Buffer, fileName: string): "hwpx" | "docx" | "pdf" | "hwp" | "zip" | "image" | "unknown" {
   const head = buf.subarray(0, 8);
+  if (detectImage(buf)) return "image";
   if (head[0] === 0xd0 && head[1] === 0xcf && head[2] === 0x11 && head[3] === 0xe0) return "hwp"; // OLE(HWP 5.x)
   if (buf.subarray(0, 17).toString("latin1").startsWith("HWP Document File")) return "hwp"; // HWP 3.x
   if (buf.subarray(0, 5).toString("latin1") === "%PDF-") return "pdf";

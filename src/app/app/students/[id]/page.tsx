@@ -213,8 +213,8 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
               <input className="input" name="grade" defaultValue={student.grade ?? ""} placeholder="학년" />
             </div>
             <div className="flex gap-2">
-              <input className="input" name="email" type="email" defaultValue={student.email ?? ""} placeholder="이메일 (계정 설정 링크 발송)" />
-              <input className="input" name="phone" defaultValue={student.phone ?? ""} placeholder="연락처" />
+              <input className="input" name="phone" inputMode="tel" defaultValue={student.phone ?? ""} placeholder="휴대폰 (인증번호 발송)" />
+              <input className="input" name="email" type="email" defaultValue={student.email ?? ""} placeholder="이메일 (선택)" />
             </div>
             <select className="input" name="classId" defaultValue={student.classId ?? ""}>
               <option value="">반 없음</option>
@@ -234,7 +234,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         </section>
         <div className="span-3 space-y-4">
           <StudentTools
-            student={{ id: student.id, name: student.name, email: student.email, userId: student.userId, userEmail: student.user?.email ?? null, hasInvite: !!student.inviteTokenHash, inviteExpiresAt: student.inviteExpiresAt?.toISOString() ?? null, inviteSentAt: student.inviteSentAt?.toISOString() ?? null }}
+            student={{ id: student.id, name: student.name, email: student.email, phone: student.phone, userId: student.userId, userEmail: student.user?.email ?? null, hasInvite: !!student.inviteTokenHash, inviteExpiresAt: student.inviteExpiresAt?.toISOString() ?? null, inviteSentAt: student.inviteSentAt?.toISOString() ?? null, codeSent: !!student.phoneCodeHash && (!student.phoneCodeExpiresAt || student.phoneCodeExpiresAt > new Date()), codeExpiresAt: student.phoneCodeExpiresAt?.toISOString() ?? null }}
             linkRequests={student.linkRequests.map((r) => ({ id: r.id, user: linkUsers.find((u) => u.id === r.userId) ?? null, createdAt: r.createdAt.toISOString() }))}
             isOwner={ctx.isOwner}
             members={members.map((m) => ({ id: m.id, name: m.user.name, role: m.role }))}

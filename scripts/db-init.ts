@@ -33,6 +33,9 @@ const MIGRATIONS: { table: string; column: string; ddl: string }[] = [
   { table: "Student", column: "phone", ddl: 'ALTER TABLE "Student" ADD COLUMN "phone" TEXT' },
   { table: "Student", column: "inviteSentAt", ddl: 'ALTER TABLE "Student" ADD COLUMN "inviteSentAt" DATETIME' },
   { table: "SignupSession", column: "verifyTokenDev", ddl: 'ALTER TABLE "SignupSession" ADD COLUMN "verifyTokenDev" TEXT' },
+  { table: "Student", column: "phoneCodeHash", ddl: 'ALTER TABLE "Student" ADD COLUMN "phoneCodeHash" TEXT' },
+  { table: "Student", column: "phoneCodeExpiresAt", ddl: 'ALTER TABLE "Student" ADD COLUMN "phoneCodeExpiresAt" DATETIME' },
+  { table: "Student", column: "phoneCodeSentAt", ddl: 'ALTER TABLE "Student" ADD COLUMN "phoneCodeSentAt" DATETIME' },
 ];
 
 // 데이터 보정 (멱등): 상태값 통일, 기존 사용자 이메일 인증 처리, 기존 학원에 기본 구독(활성 선생님 수만큼) 생성

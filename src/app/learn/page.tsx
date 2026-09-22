@@ -20,9 +20,9 @@ export default async function LearnHome() {
     prisma.studentLinkRequest.count({ where: { userId: user.id, status: "pending" } }),
   ]);
   const week = seoulWeekRange();
+  // 안 친 시험은 출제된 순서(옛날 → 현재)대로. 맨 위(primary)가 가장 먼저 나온 시험, 그 아래가 다음 차례
   const open = list.filter((a) => a.status !== "completed" && a.status !== "expired");
-  const inWeek = (a: (typeof list)[number]) => (a.dueAt ? new Date(a.dueAt) >= week.start && new Date(a.dueAt) < week.end : true);
-  const todo = [...open.filter(inWeek), ...open.filter((a) => !inWeek(a))];
+  const todo = open;
   const [primary, ...rest] = todo;
   const doneThisWeek = list.filter((a) => a.status === "completed" && a.dueAt && new Date(a.dueAt) >= week.start && new Date(a.dueAt) < week.end).length;
   const dday = (d: Date | null) => (d ? Math.max(0, Math.ceil((new Date(d).getTime() - Date.now()) / 86400e3)) : null);
@@ -53,7 +53,7 @@ export default async function LearnHome() {
       </div>
 
       {primary ? (
-        <div className="card-accent card-body flex min-h-[210px] flex-col justify-between">
+        <div className="card-accent card-body flex min-h-[210px] flex-col justify-between" data-testid="next-card">
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0">
               <div className="lbl-on">{primary.exam.isRetake ? "Retake" : "Next"}</div>
@@ -90,9 +90,9 @@ export default async function LearnHome() {
         </div>
       )}
 
-      {rest.length > 0 && <div className="lbl px-1 lg:mt-2">Queue · 다음 시험 {rest.length}</div>}
+      {rest.length > 0 && <div className="lbl px-1 lg:mt-2">Queue · 다음 차례 {rest.length} · 오래된 순</div>}
       {rest.map((a) => (
-        <div key={a.assignmentId} className="pill w-full justify-between">
+        <div key={a.assignmentId} className="pill w-full justify-between" data-testid="queue-item">
           <div className="min-w-0">
             <div className="truncate text-[14px] font-medium">{a.exam.title}</div>
             <div className="lbl mt-0.5">{a.dueAt ? `due ${fmtDate(a.dueAt, false).slice(5)}` : "no due"}</div>

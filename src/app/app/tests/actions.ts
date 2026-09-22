@@ -229,6 +229,30 @@ export async function updateAssignmentAction(form: FormData): Promise<ActionResu
   return { ok: true };
 }
 
+/** 마감기한 일괄 변경: 이 시험의 안 친(assigned·in_progress) 배정 전부 또는 기한 경과분만 */
+export async function updateExamDueAction(form: FormData): Promise<ActionResult> {
+  const ctx = await requireAcademy();
+  const examId = String(form.get("examId") ?? "");
+  const exam = await assertExam(ctx, examId).catch(() => null);
+  if (!exam) return { ok: false, message: "권한이 없습니다." };
+  const dueAt = parseSeoulLocal(form.get("dueAt"));
+  const scope = String(form.get("scope") ?? "open"); // open | overdue | all
+  const where = {
+    examId,
+    student: studentScope(ctx),
+    ...(scope === "all" ? {} : { status: { in: ["assigned", "in_progress"] } }),
+    ...(scope === "overdue" ? { dueAt: { lt: new Date() } } : {}),
+  };
+  const r = await prisma.assignment.updateMany({ where, data: { dueAt } });
+  // 진행 중 응시의 마감(deadlineAt)도 함께 (온라인은 단어당 시간으로 별도 계산되지만 상한은 마감)
+  await prisma.attempt.updateMany({ where: { assignment: where, status: "in_progress" }, data: { deadlineAt: dueAt } });
+  await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "exam.due", target: examId, detail: `${scope} → ${dueAt?.toISOString() ?? "none"} (${r.count})` });
+  revalidatePath(`/app/tests/${examId}`);
+  revalidatePath("/app/results");
+  revalidatePath("/app");
+  return { ok: true, message: dueAt ? `${r.count}명의 마감을 ${dueAt.toLocaleString("ko-KR", { timeZone: "Asia/Seoul" })} 로 바꿨습니다.` : `${r.count}명의 마감을 없앴습니다.` };
+}
+
 /** 종이 시험지 발급 (학생별 PDF + manifest) */
 export async function printAssignmentsAction(form: FormData): Promise<ActionResult> {
   const ctx = await requireAcademy();

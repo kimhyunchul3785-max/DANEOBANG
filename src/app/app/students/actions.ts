@@ -8,6 +8,7 @@ import { canAccessStudent } from "@/lib/scope";
 import { hashToken, randomToken } from "@/lib/util";
 import { appUrl } from "@/lib/oauth";
 import { sendMail, studentActivateMail } from "@/lib/mail";
+import { sendSms, studentCodeText, normalizePhone, isPhone } from "@/lib/sms";
 
 export type ActionResult = { ok: boolean; message?: string; data?: unknown };
 
@@ -37,7 +38,7 @@ export async function createStudentAction(form: FormData): Promise<ActionResult>
       grade: grade || null,
       classId: classId || null,
       email: email ? email.toLowerCase() : null,
-      phone: phone || null,
+      phone: phone ? normalizePhone(phone) : null,
       teachers: { create: { memberId: ctx.member.id } },
     },
   });
@@ -66,7 +67,7 @@ export async function updateStudentAction(form: FormData): Promise<ActionResult>
   const d = parsed.data;
   await prisma.student.update({
     where: { id },
-    data: { name: d.name, school: d.school || null, grade: d.grade || null, classId: d.classId || null, memo: d.memo || null, status: d.status ?? "active", email: d.email ? d.email.toLowerCase() : null, phone: d.phone || null },
+    data: { name: d.name, school: d.school || null, grade: d.grade || null, classId: d.classId || null, memo: d.memo || null, status: d.status ?? "active", email: d.email ? d.email.toLowerCase() : null, phone: d.phone ? normalizePhone(d.phone) : null },
   });
   revalidatePath(`/app/students/${id}`);
   revalidatePath("/app/students");
@@ -97,6 +98,56 @@ export async function issueStudentInviteAction(studentId: string): Promise<Actio
   await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "student.invite", target: studentId, detail: mailed ? `mail ${s.email}` : "link" });
   revalidatePath(`/app/students/${studentId}`);
   return { ok: true, message: mailed ? `${s.email} 로 계정 설정 메일을 보냈습니다.` : "계정 설정 링크를 만들었습니다. 학생에게 전달하세요.", data: { url, mailed } };
+}
+
+/**
+ * 학생 휴대폰 인증번호 발송 (6자리, 3일). 학생은 /join 에서 휴대폰 번호 + 인증번호 + 비밀번호로 가입하면 바로 이 명단에 연결된다.
+ * 문자 업체가 없으면(개발 모드) 인증번호를 화면에 돌려주어 선생님이 직접 전달한다.
+ */
+export async function sendStudentCodeAction(studentId: string): Promise<ActionResult> {
+  const ctx = await requireAcademy();
+  if (!(await canAccessStudent(ctx, studentId))) return { ok: false, message: "권한이 없습니다." };
+  const r = await issueStudentCodes(ctx, [studentId]);
+  revalidatePath(`/app/students/${studentId}`);
+  revalidatePath("/app/students");
+  const one = r.results[0];
+  if (!one) return { ok: false, message: r.message };
+  if (one.error) return { ok: false, message: one.error };
+  return { ok: true, message: one.sent ? `${one.phone} 로 인증번호를 보냈습니다.` : `인증번호 ${one.code} — 문자 업체가 없어 직접 전달해주세요.`, data: { results: r.results } };
+}
+
+/** 선택 학생 여러 명에게 인증번호 발송 (명단 일괄 작업) */
+export async function sendStudentCodesBulkAction(ids: string[]): Promise<ActionResult> {
+  const ctx = await requireAcademy();
+  const mine = await ownStudents(ctx, ids);
+  const r = await issueStudentCodes(ctx, mine.map((s) => s.id));
+  revalidatePath("/app/students");
+  return { ok: true, message: r.message, data: { results: r.results } };
+}
+
+export type CodeResult = { studentId: string; name: string; phone: string; code?: string; sent: boolean; error?: string };
+async function issueStudentCodes(ctx: Awaited<ReturnType<typeof requireAcademy>>, ids: string[]): Promise<{ message: string; results: CodeResult[] }> {
+  const students = await prisma.student.findMany({ where: { id: { in: ids }, academyId: ctx.member.academyId }, include: { academy: { select: { name: true } } } });
+  const results: CodeResult[] = [];
+  let sentN = 0;
+  for (const s of students) {
+    if (s.userId) {
+      results.push({ studentId: s.id, name: s.name, phone: s.phone ?? "", sent: false, error: "이미 계정이 연결됨" });
+      continue;
+    }
+    if (!s.phone || !isPhone(s.phone)) {
+      results.push({ studentId: s.id, name: s.name, phone: s.phone ?? "", sent: false, error: "휴대폰 번호가 없거나 형식이 다릅니다" });
+      continue;
+    }
+    const code = String(Math.floor(100000 + Math.random() * 900000));
+    const r = await sendSms(s.phone, studentCodeText(s.academy.name, s.name, code, `${appUrl()}/join`), code);
+    await prisma.student.update({ where: { id: s.id }, data: { phone: normalizePhone(s.phone), phoneCodeHash: hashToken(code), phoneCodeExpiresAt: new Date(Date.now() + 3 * 86400e3), phoneCodeSentAt: r.sent ? new Date() : null } });
+    await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "student.code", target: s.id, detail: r.sent ? "sms" : "dev" });
+    if (r.sent) sentN++;
+    results.push({ studentId: s.id, name: s.name, phone: s.phone, code: r.sent ? undefined : r.devCode, sent: r.sent, error: r.error });
+  }
+  const dev = results.filter((x) => x.code).length;
+  return { message: `${students.length}명 처리 · 문자 발송 ${sentN}명${dev ? ` · 직접 전달 ${dev}명` : ""}`, results };
 }
 
 export async function revokeStudentInviteAction(studentId: string): Promise<ActionResult> {
@@ -262,16 +313,20 @@ export async function uploadRosterAction(form: FormData): Promise<ActionResult> 
   const perClass: string[] = [];
   for (const ws of wb.worksheets) {
     const className = ws.name.trim();
-    const rows: { name: string; school: string; grade: string; email: string }[] = [];
+    const rows: { name: string; school: string; grade: string; phone: string; email: string }[] = [];
     ws.eachRow((row, idx) => {
       const name = cell(row.getCell(1).value);
       const school = cell(row.getCell(2).value);
       const grade = cell(row.getCell(3).value);
-      const email = cell(row.getCell(4).value).toLowerCase();
+      const c4 = cell(row.getCell(4).value);
+      const c5 = cell(row.getCell(5).value);
+      // 4열 휴대폰 · 5열 이메일 (구 양식처럼 4열에 이메일이 있어도 인식)
+      const phone = isPhone(c4) ? normalizePhone(c4) : isPhone(c5) ? normalizePhone(c5) : "";
+      const emailRaw = [c4, c5].map((x) => x.toLowerCase()).find((x) => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(x)) ?? "";
       if (!name) return;
       if (idx === 1 && /^(이름|name)$/i.test(name)) return; // 머리글
       if (/^예시\)/.test(name)) return; // 양식의 예시 행
-      rows.push({ name: name.slice(0, 30), school: school.slice(0, 40), grade: grade.slice(0, 20), email: /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email) ? email : "" });
+      rows.push({ name: name.slice(0, 30), school: school.slice(0, 40), grade: grade.slice(0, 20), phone, email: emailRaw });
     });
     if (!rows.length) continue;
     const noClass = /^(sheet\d*|시트\d*|반 없음|없음)$/i.test(className);
@@ -292,7 +347,7 @@ export async function uploadRosterAction(form: FormData): Promise<ActionResult> 
         continue;
       }
       seen.add(key);
-      await prisma.student.create({ data: { academyId: ctx.member.academyId, name: r.name, school: r.school || null, grade: r.grade || null, email: r.email || null, classId, teachers: { create: { memberId: ctx.member.id } } } });
+      await prisma.student.create({ data: { academyId: ctx.member.academyId, name: r.name, school: r.school || null, grade: r.grade || null, phone: r.phone || null, email: r.email || null, classId, teachers: { create: { memberId: ctx.member.id } } } });
       created++;
       n++;
     }

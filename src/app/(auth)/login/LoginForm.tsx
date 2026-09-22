@@ -9,8 +9,8 @@ export function LoginForm({ next }: { next?: string }) {
     <form action={action} className="space-y-3">
       <input type="hidden" name="next" value={next ?? ""} />
       <div>
-        <label className="label">Email</label>
-        <input className="input" name="email" type="email" required autoComplete="email" />
+        <label className="label">이메일 또는 휴대폰 번호</label>
+        <input className="input" name="email" type="text" required autoComplete="username" placeholder="example@naver.com · 010-1234-5678" />
       </div>
       <div>
         <label className="label">Password</label>
@@ -25,7 +25,10 @@ export function LoginForm({ next }: { next?: string }) {
         <Link className="text-blue-600 underline" href="/start">
           학원 시작하기
         </Link>
-        <span className="mx-1">·</span>선생님·학생은 초대 링크로 참여합니다
+        <span className="mx-1">·</span>
+        <Link className="text-blue-600 underline" href="/join">
+          학생 가입 (인증번호)
+        </Link>
       </p>
       <p className="card-2 p-3 text-[11.5px] leading-relaxed" style={{ color: "var(--ink-3)" }}>
         데모 (비밀번호 <b>password</b>): owner@ · teacher@ · student@ · admin@daneobang.dev

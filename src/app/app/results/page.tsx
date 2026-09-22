@@ -20,7 +20,7 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
     return (
       <div>
         <h1 className="h1 mb-4">미응시 · 기한 경과</h1>
-        <p className="muted mb-3">기한이 지났지만 시작하지 않은 배정입니다. 0점 평균에 포함하지 않습니다.</p>
+        <p className="muted mb-3">기한이 지났지만 시작하지 않은 배정입니다. 0점 평균에 포함하지 않습니다. <b>MISSED</b>를 누르면 시험을 열어 마감기한을 바꿀 수 있고, 학생 이름을 누르면 이행률·성적 추이가 보입니다.</p>
         <div className="card">
           <table className="tbl">
             <thead>
@@ -33,16 +33,22 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
             </thead>
             <tbody>
               {overdue.map((a) => (
-                <tr key={a.id}>
-                  <td>{a.student.name}</td>
+                <tr key={a.id} data-testid="overdue-row">
                   <td>
-                    <Link href={`/app/tests/${a.examId}`} className="text-blue-700 hover:underline">
+                    <Link href={`/app/students/${a.studentId}`} className="font-medium hover:underline">
+                      {a.student.name}
+                    </Link>
+                  </td>
+                  <td>
+                    <Link href={`/app/tests/${a.examId}?step=3`} className="hover:underline">
                       {a.exam.title}
                     </Link>
                   </td>
                   <td className="text-xs">{fmtDate(a.dueAt)}</td>
                   <td>
-                    <StatusBadge s="expired" />
+                    <Link href={`/app/tests/${a.examId}?step=3#due`} title="시험을 열어 마감기한 수정">
+                      <StatusBadge s="expired" />
+                    </Link>
                   </td>
                 </tr>
               ))}

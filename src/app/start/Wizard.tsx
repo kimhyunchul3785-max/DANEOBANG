@@ -12,8 +12,10 @@ const won = (n: number) => `${n.toLocaleString("ko-KR")}원`;
  * ①~④ 는 브라우저 상태로만 진행하고, ④ 계정에서 한 번에 서버로 보낸다.
  * 이미 로그인한 사용자(구글·카카오 등)는 ④ 에서 계정 입력 없이 그 계정으로 학원을 만든다.
  */
-export function Wizard({ loggedIn, mailOn }: { loggedIn: { name: string; email: string } | null; mailOn: boolean }) {
+export function Wizard({ loggedIn, mailOn, billing }: { loggedIn: { name: string; email: string } | null; mailOn: boolean; billing: boolean }) {
+  // 결제 꺼짐: ① 학원 정보 → ③ 원장 여부 → ④ 계정 (내부 step 번호는 결제 버전 기준으로 유지하고 표시만 바꾼다)
   const [step, setStep] = useState(1);
+  const shown = billing ? step : step === 1 ? 1 : step === 3 ? 2 : 3;
   const [d, setD] = useState({ academyName: "", representativeName: "", phone: "", region: "", teacherCount: 1, ownerIsTeacher: "yes" as "yes" | "no", ownerName: "", email: "", password: "", password2: "" });
   const [err, setErr] = useState<string | null>(null);
   const [verify, setVerify] = useState<{ email: string; devLink?: string; message?: string } | null>(null);
@@ -24,8 +26,9 @@ export function Wizard({ loggedIn, mailOn }: { loggedIn: { name: string; email: 
   const next = () => {
     setErr(null);
     if (step === 1 && (d.academyName.trim().length < 2 || !d.representativeName.trim())) return setErr("학원명(2자 이상)과 대표자명을 입력해주세요.");
-    setStep(step + 1);
+    setStep(step === 1 && !billing ? 3 : step + 1);
   };
+  const prev = (to: number) => setStep(to === 2 && !billing ? 1 : to);
   const submit = () => {
     setErr(null);
     const fd = new FormData();
@@ -40,14 +43,14 @@ export function Wizard({ loggedIn, mailOn }: { loggedIn: { name: string; email: 
 
   if (verify) return (
     <>
-      <StepBar step={4} />
+      <StepBar step={billing ? 4 : 3} billing={billing} />
       <VerifyStep email={verify.email} academyName={d.academyName} mailOn={mailOn} devLink={verify.devLink} note={verify.message} />
     </>
   );
 
   return (
-    <div data-testid="wizard" data-step={step}>
-      <StepBar step={step} />
+    <div data-testid="wizard" data-step={shown}>
+      <StepBar step={shown} billing={billing} />
       {step === 1 && (
         <section className="card card-body anim-fade-up">
           <div className="lbl">01 · Academy</div>
@@ -122,13 +125,13 @@ export function Wizard({ loggedIn, mailOn }: { loggedIn: { name: string; email: 
 
       {step === 3 && (
         <section className="card card-body anim-fade-up">
-          <div className="lbl">03 · Owner</div>
+          <div className="lbl">{billing ? "03" : "02"} · Owner</div>
           <h1 className="h1 mt-1">원장님도 직접 학생을 지도하시나요?</h1>
           <div className="mt-4 grid gap-2" role="radiogroup">
             {(
               [
-                ["yes", "네, 저도 선생님으로 사용합니다.", `구매한 선생님 자리 ${d.teacherCount}개 중 1개를 원장님이 사용합니다. 초대 가능 ${Math.max(0, d.teacherCount - 1)}명`],
-                ["no", "아니요, 관리자 기능만 사용합니다.", `원장 계정은 자리를 쓰지 않습니다. 초대 가능 ${d.teacherCount}명`],
+                ["yes", "네, 저도 선생님으로 사용합니다.", billing ? `구매한 선생님 자리 ${d.teacherCount}개 중 1개를 원장님이 사용합니다. 초대 가능 ${Math.max(0, d.teacherCount - 1)}명` : "학생 담당·출제·채점을 직접 합니다. 선생님 화면과 학원 관리 화면을 모두 씁니다."],
+                ["no", "아니요, 관리자 기능만 사용합니다.", billing ? `원장 계정은 자리를 쓰지 않습니다. 초대 가능 ${d.teacherCount}명` : "학원 현황·선생님·설정만 관리합니다. 나중에 요금제·내 계정에서 켤 수 있습니다."],
               ] as const
             ).map(([v, l, sub]) => (
               <button key={v} type="button" role="radio" aria-checked={d.ownerIsTeacher === v} onClick={() => set("ownerIsTeacher", v)} className="tile flex w-full items-start gap-3 rounded-[18px] px-4 py-3 text-left" style={d.ownerIsTeacher === v ? { background: "var(--ink)", color: "var(--surface-2)" } : { background: "var(--surface-2)", color: "var(--ink)" }} data-testid={`owner-${v}`}>
@@ -143,7 +146,7 @@ export function Wizard({ loggedIn, mailOn }: { loggedIn: { name: string; email: 
             ))}
           </div>
           <div className="mt-5 grid grid-cols-[auto_1fr] gap-2">
-            <button type="button" className="btn-secondary py-3" onClick={() => setStep(2)}>
+            <button type="button" className="btn-secondary py-3" onClick={() => prev(2)}>
               이전
             </button>
             <button type="button" className="btn-primary py-3" onClick={next} data-testid="next">
@@ -155,7 +158,7 @@ export function Wizard({ loggedIn, mailOn }: { loggedIn: { name: string; email: 
 
       {step === 4 && (
         <section className="card card-body anim-fade-up">
-          <div className="lbl">04 · Account</div>
+          <div className="lbl">{billing ? "04" : "03"} · Account</div>
           <h1 className="h1 mt-1">{loggedIn ? "이 계정으로 학원을 만듭니다" : "학원을 관리할 계정을 만들어주세요"}</h1>
           {loggedIn ? (
             <div className="card-sm card-body mt-4">
@@ -182,7 +185,7 @@ export function Wizard({ loggedIn, mailOn }: { loggedIn: { name: string; email: 
                   <input className="input" type="password" value={d.password2} onChange={(e) => set("password2", e.target.value)} data-testid="password2" />
                 </label>
               </div>
-              <p className="muted">가입 후 이메일 인증 → 결제 순서로 진행됩니다. 선생님은 여기서 가입하지 않고, 원장님의 초대 링크로 참여합니다.</p>
+              <p className="muted">{billing ? "가입 후 이메일 인증 → 결제 순서로 진행됩니다." : "가입 후 이메일 인증만 하면 바로 시작합니다."} 다른 선생님은 여기서 가입하지 않고, 이 계정의 초대 링크로 참여합니다.</p>
             </div>
           )}
           <div className="card-sm card-body mt-4 text-[13px]">
@@ -191,8 +194,8 @@ export function Wizard({ loggedIn, mailOn }: { loggedIn: { name: string; email: 
               <span className="muted">대표 {d.representativeName}</span>
             </div>
             <div className="mt-1 flex justify-between">
-              <span>선생님 {d.teacherCount}명 · 원장 {d.ownerIsTeacher === "yes" ? "수업함" : "관리만"}</span>
-              <span className="font-semibold">월 {won(monthly)}</span>
+              <span>{billing ? `선생님 ${d.teacherCount}명 · ` : ""}원장 {d.ownerIsTeacher === "yes" ? "수업함" : "관리만"}</span>
+              <span className="font-semibold">{billing ? `월 ${won(monthly)}` : "체험 · 무료"}</span>
             </div>
           </div>
           {err && <p className="mt-3 text-[13px]" style={{ color: "var(--accent)" }}>{err}</p>}
@@ -201,7 +204,7 @@ export function Wizard({ loggedIn, mailOn }: { loggedIn: { name: string; email: 
               이전
             </button>
             <button type="button" className="btn-primary py-3" onClick={submit} disabled={pending} data-testid="create-account">
-              {pending ? "처리 중…" : loggedIn ? "학원 만들고 결제로" : "계정 만들기"}
+              {pending ? "처리 중…" : loggedIn ? (billing ? "학원 만들고 결제로" : "학원 만들기") : "계정 만들기"}
             </button>
           </div>
         </section>

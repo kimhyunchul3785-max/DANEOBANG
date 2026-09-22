@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { getSignupSession } from "@/lib/signup";
 import { seatUsage } from "@/lib/seats";
 import { mailConfigured } from "@/lib/mail";
-import { billingProvider } from "@/lib/billing";
+import { billingProvider, billingEnabled } from "@/lib/billing";
 import { appUrl } from "@/lib/oauth";
 import { Logo } from "@/components/Logo";
 import { Wizard } from "./Wizard";
@@ -23,6 +23,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
   const sp = await searchParams;
   const user = await getCurrentUser();
   const s = await getSignupSession();
+  const billing = billingEnabled();
   const verifyNotice =
     sp.verify === "invalid" ? "인증 링크가 잘못되었거나 이미 사용되었습니다." : sp.verify === "expired" ? "인증 링크가 만료되었습니다(24시간). 아래에서 다시 보내주세요." : sp.verify === "failed" ? `가입을 마치지 못했습니다. ${sp.reason ?? ""}` : null;
   const shell = (step: number | null, children: React.ReactNode) => (
@@ -33,7 +34,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
           {user ? "내 학원" : "이미 사용 중이신가요? 로그인"}
         </Link>
       </div>
-      {step !== null && <StepBar step={step} />}
+      {step !== null && <StepBar step={step} billing={billing} />}
       {verifyNotice && (
         <div className="card-accent card-body mb-3 text-[13px]" data-testid="verify-notice">
           {verifyNotice}
@@ -45,7 +46,7 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
 
   // 결제 대기 학원이 있는 원장 → ⑤ 결제
   if (user) {
-    const pending = await prisma.academyMember.findFirst({ where: { userId: user.id, role: "OWNER", status: "active", academy: { status: "pending_payment" } }, include: { academy: { include: { subscription: true } } }, orderBy: { createdAt: "desc" } });
+    const pending = billing ? await prisma.academyMember.findFirst({ where: { userId: user.id, role: "OWNER", status: "active", academy: { status: "pending_payment" } }, include: { academy: { include: { subscription: true } } }, orderBy: { createdAt: "desc" } }) : null;
     if (pending) {
       const sub = pending.academy.subscription;
       return shell(5, <PayForm academyId={pending.academyId} academyName={pending.academy.name} seats={sub?.seatQuantity ?? 1} unitPrice={sub?.unitPrice ?? 9900} lastError={sub?.lastPaymentError ?? null} mock={billingProvider() === "mock"} />);
@@ -56,16 +57,16 @@ export default async function StartPage({ searchParams }: { searchParams: Promis
       const academy = await prisma.academy.findUnique({ where: { id: session.academyId }, select: { name: true, status: true } });
       if (academy?.status === "active") {
         const usage = await seatUsage(session.academyId);
-        return shell(6, <InviteStep academyName={academy.name} usage={usage} mailOn={mailConfigured()} />);
+        return shell(billing ? 6 : 4, <InviteStep academyName={academy.name} usage={usage} mailOn={mailConfigured()} />);
       }
     }
   }
 
   // 계정 만들고 인증 대기 중 → ④ 인증
   if (s && s.step === 4 && s.email && !s.verifiedAt) {
-    return shell(4, <VerifyStep email={s.email} academyName={s.academyName ?? ""} mailOn={mailConfigured()} devLink={!mailConfigured() && s.verifyTokenDev ? `${appUrl()}/start/verify/${s.verifyTokenDev}` : undefined} />);
+    return shell(billing ? 4 : 3, <VerifyStep email={s.email} academyName={s.academyName ?? ""} mailOn={mailConfigured()} devLink={!mailConfigured() && s.verifyTokenDev ? `${appUrl()}/start/verify/${s.verifyTokenDev}` : undefined} />);
   }
   if (s?.academyId && !user) redirect(`/login?next=/start`);
 
-  return shell(null, <Wizard loggedIn={user ? { name: user.name, email: user.email } : null} mailOn={mailConfigured()} />);
+  return shell(null, <Wizard loggedIn={user ? { name: user.name, email: user.email } : null} mailOn={mailConfigured()} billing={billing} />);
 }

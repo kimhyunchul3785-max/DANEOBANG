@@ -18,6 +18,15 @@ export function billingProvider() {
   return process.env.BILLING_PROVIDER || "mock";
 }
 
+/**
+ * 결제 기능 켜짐 여부. 기본 꺼짐(BILLING_ENABLED 미설정) — 체험 기간에는 가입 단계에서 결제를 빼고
+ * Seat 제한 없이 쓴다. 로직·화면은 그대로 두었으므로 .env 에 BILLING_ENABLED="true" 를 넣으면 전부 돌아온다.
+ */
+export function billingEnabled() {
+  return process.env.BILLING_ENABLED === "true";
+}
+export const TRIAL_SEATS = 999;
+
 export type CardInput = { number: string; expiry?: string; cvc?: string; holder?: string };
 export type ChargeResult = { ok: true; ref: string; last4: string } | { ok: false; error: string };
 

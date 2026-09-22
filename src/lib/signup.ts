@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { prisma } from "./db";
 import { hashToken, slugify, RESERVED_SLUGS } from "./util";
 import { createWebSession, setAcademyCookie, audit } from "./auth";
-import { UNIT_PRICE } from "./billing";
+import { UNIT_PRICE, billingEnabled, TRIAL_SEATS } from "./billing";
 
 export type StartResult = { ok: boolean; message?: string; devLink?: string; step?: number };
 
@@ -39,10 +39,12 @@ export async function finalizeAccount(sessionId: string): Promise<StartResult> {
       const u = await tx.user.create({ data: { email: s.email!, name: s.ownerName ?? s.representativeName ?? "원장", provider: "email", passwordHash: s.passwordHash, emailVerifiedAt: new Date() } });
       userId = u.id;
     }
-    const a = await tx.academy.create({ data: { name: s.academyName!, slug, representativeName: s.representativeName, phone: s.phone, region: s.region, status: "pending_payment", plan: "seat" } });
+    // 결제 기능이 꺼져 있으면(체험) 바로 활성 + 체험 구독, 켜져 있으면 결제 대기
+    const billing = billingEnabled();
+    const a = await tx.academy.create({ data: { name: s.academyName!, slug, representativeName: s.representativeName, phone: s.phone, region: s.region, status: billing ? "pending_payment" : "active", plan: billing ? "seat" : "trial" } });
     await tx.academyMember.create({ data: { academyId: a.id, userId, role: "OWNER", isTeacher: s.ownerIsTeacher, status: "active" } });
-    await tx.subscription.create({ data: { academyId: a.id, seatQuantity: s.teacherCount, unitPrice: UNIT_PRICE, status: "pending" } });
-    await tx.signupSession.update({ where: { id: s.id }, data: { userId, academyId: a.id, verifiedAt: s.verifiedAt ?? new Date(), step: 5 } });
+    await tx.subscription.create({ data: billing ? { academyId: a.id, seatQuantity: s.teacherCount, unitPrice: UNIT_PRICE, status: "pending" } : { academyId: a.id, seatQuantity: TRIAL_SEATS, unitPrice: 0, status: "active", provider: "trial" } });
+    await tx.signupSession.update({ where: { id: s.id }, data: { userId, academyId: a.id, verifiedAt: s.verifiedAt ?? new Date(), step: billing ? 5 : 6 } });
     return { userId, academyId: a.id };
   }, { timeout: 15000 }).catch((e: Error) => ({ error: e.message }));
   if ("error" in result) return { ok: false, message: result.error === "email_taken" ? "그 사이 같은 이메일로 가입된 계정이 있습니다. 로그인한 뒤 진행해주세요." : "학원을 만들지 못했습니다." };

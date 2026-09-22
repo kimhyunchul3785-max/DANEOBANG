@@ -37,6 +37,11 @@ export default async function TeachersPage() {
           <h1 className="h1 mt-1">선생님</h1>
           <p className="muted mt-1">담당 학생은 학생 상세에서 지정합니다. 선생님은 담당 학생만 봅니다.</p>
         </div>
+        {usage.unlimited ? (
+          <span className="digital" data-testid="seat-summary">
+            {usage.used} TEACHERS{usage.pending ? ` · ${usage.pending} INVITED` : ""}
+          </span>
+        ) : (
         <Link href="/app/billing" className="card-sm card-body flex items-center gap-4 !py-2.5" data-testid="seat-summary" title="요금제 및 결제">
           <span>
             <span className="lbl">이용 중인 선생님</span>
@@ -51,6 +56,7 @@ export default async function TeachersPage() {
             {usage.available > 0 ? `추가 가능 ${usage.available}명` : "자리 없음 · 선생님 수 늘리기 →"}
           </span>
         </Link>
+        )}
       </header>
 
       <div className="grid gap-4 lg:grid-cols-3">
@@ -122,12 +128,12 @@ export default async function TeachersPage() {
               Invite · 선생님 초대
             </div>
             <p className="mt-2 text-[13px]" style={{ color: "rgba(236,233,227,0.8)" }}>
-              선생님은 따로 가입하지 않습니다. 초대 메일의 링크에서 이름·비밀번호만 정하면 참여가 끝납니다. 초대는 7일간 유효하고, 보내는 순간 자리를 예약합니다.
+              선생님은 따로 가입하지 않습니다. 초대 메일의 링크에서 이름·비밀번호만 정하면 참여가 끝납니다. 초대는 7일간 유효합니다.{usage.unlimited ? "" : " 보내는 순간 자리를 예약합니다."}
             </p>
             <div className="mt-3">
               <InviteBox available={usage.available} />
             </div>
-            {usage.available <= 0 && (
+            {!usage.unlimited && usage.available <= 0 && (
               <Link href="/app/billing" className="btn mt-3 w-full py-2.5" style={{ background: "var(--accent)", color: "var(--accent-ink)" }}>
                 사용 가능한 자리가 없습니다 · 선생님 수 늘리기
               </Link>

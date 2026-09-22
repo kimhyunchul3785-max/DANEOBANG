@@ -45,23 +45,23 @@ const shot = async (page: Page, name: string) => {
     await shot(p, "00-landing");
     const text = await p.locator("main").innerText();
     check("landing has no feature cards / description", !text.includes("학원(테넌트)") && !text.includes("HWPX/DOCX/PDF"));
-    check("landing: B2B copy + 학원 시작하기 CTA", text.includes("월 9,900원") && (await p.locator("[data-testid='cta-start']").count()) === 1);
-    // 가입 위저드 ①~④ (제출은 하지 않음 — E2E-SIGNUP 이 검증)
+    check("landing: 학원 시작하기 CTA + 학생 인증번호 가입 링크 (결제 문구 없음 = 체험)", (await p.locator("[data-testid='cta-start']").count()) === 1 && (await p.locator("[data-testid='cta-join']").count()) === 1 && !text.includes("9,900"));
+    // 가입 위저드 (체험: ① 학원 정보 → ② 원장 여부 → ③ 계정. 선생님 수·결제 단계 없음) — 제출은 E2E-SIGNUP 이 검증
     await p.click("[data-testid='cta-start']");
     await p.waitForSelector("[data-testid='wizard']");
     await p.fill("[data-testid='academyName']", "QA영어학원");
     await p.fill("[data-testid='representativeName']", "김원장");
     await shot(p, "01-start-academy");
     await p.click("[data-testid='next']");
-    await p.click("[data-testid='seat-plus']");
-    await p.click("[data-testid='seat-plus']");
-    await shot(p, "02-start-teachers");
-    check("wizard: seat count × 9,900 computed live", (await p.locator("[data-testid='monthly']").innerText()).includes("29,700"));
+    await shot(p, "02-start-owner");
+    check("wizard: no seat/payment step when billing is off", (await p.locator("[data-testid='seat-plus']").count()) === 0 && (await p.locator("[data-testid='stepbar'] li").count()) === 4);
     await p.click("[data-testid='next']");
-    await shot(p, "03-start-owner");
-    await p.click("[data-testid='next']");
-    await shot(p, "04-start-account");
-    check("wizard: 4 client steps then account (no public signup form)", (await p.locator("[data-testid='wizard']").getAttribute("data-step")) === "4" && (await p.locator("[data-testid='create-account']").count()) === 1);
+    await shot(p, "03-start-account");
+    check("wizard: account step is the 3rd (no public signup form)", (await p.locator("[data-testid='wizard']").getAttribute("data-step")) === "3" && (await p.locator("[data-testid='create-account']").count()) === 1);
+    await p.goto(`${BASE}/join`);
+    await p.waitForSelector("[data-testid='code-join']");
+    await shot(p, "04-student-join-code");
+    check("student join page: phone + code + password", (await p.locator("[data-testid='join-phone']").count()) === 1 && (await p.locator("[data-testid='join-code']").count()) === 1);
     const r1 = await p.goto(`${BASE}/signup`);
     check("/signup redirects to /start", r1!.url().endsWith("/start"));
     await ctx.close();
@@ -179,7 +179,8 @@ const shot = async (page: Page, name: string) => {
     await p.goto(`${BASE}/app/billing`);
     await p.waitForLoadState("networkidle");
     await shot(p, "16b-owner-billing");
-    check("billing page: monthly, seat usage, seat control, owner teacher toggle", (await p.locator("[data-testid='monthly']").count()) === 1 && (await p.locator("[data-testid='seat-usage']").count()) === 1 && (await p.locator("[data-testid='seat-control']").count()) === 1 && (await p.locator("button:has-text('선생님 기능')").count()) >= 1);
+    check("billing page (trial): notice instead of payment; logic kept behind BILLING_ENABLED", (await p.locator("main").innerText()).includes("체험 기간") && (await p.locator("[data-testid='seat-control']").count()) === 0);
+    check("nav: 요금제 hidden in trial", !(await p.locator("nav[aria-label='주 메뉴'] a").allInnerTexts()).some((t) => t.includes("요금제")));
     await p.goto(`${BASE}/app/settings`);
     await p.waitForLoadState("networkidle");
     await shot(p, "17-owner-settings");
@@ -236,15 +237,19 @@ const shot = async (page: Page, name: string) => {
     await p.waitForTimeout(1200);
     await shot(p, "24-teacher-compose");
     check("compose preselects DAY 1", (await p.locator("label.chip.on").count()) >= 1);
-    check("compose: timer toggle 7초(기본) / 12초 visible", (await p.locator("[data-testid='timer-toggle'] [role='radio']").count()) === 2 && (await p.locator("[data-testid='timer-toggle'] [role='radio'][aria-checked='true']").innerText()).includes("7초"));
-    await p.click("[data-testid='timer-toggle'] [role='radio']:has-text('12초')");
-    check("compose: 12초 selected → summary shows 12s/word", (await p.locator("main").innerText()).toLowerCase().includes("12s/word"));
-    await p.click("[data-testid='timer-toggle'] [role='radio']:has-text('7초')");
+    check("compose: timer stepper default 7s with arrows", (await p.locator("[data-testid='timer-input']").inputValue()) === "7" && (await p.locator("[data-testid='timer-up']").count()) === 1);
+    await p.click("[data-testid='timer-up']");
+    await p.click("[data-testid='timer-up']");
+    check("compose: ▲ twice → 9s reflected in student-style preview", (await p.locator("[data-testid='timer-input']").inputValue()) === "9" && (await p.locator("[data-testid='preview-runner']").innerText()).toLowerCase().includes("9s / word"));
+    await p.fill("[data-testid='timer-input']", "7");
+    check("compose: options section expanded by default (no More)", (await p.locator("[data-testid='options']").count()) === 1 && (await p.locator("summary:has-text('More')").count()) === 0);
+    check("compose: preview renders like the student runner (word + 4 tiles)", (await p.locator("[data-testid='preview-runner'] .digital-lg").count()) === 1);
     await p.click("label.chip:has-text('테스트 A반')");
     await p.waitForTimeout(800);
-    const previewItems = await p.locator("ol").count();
-    check("compose shows preview items", previewItems >= 1, `items=${previewItems}`);
-    await p.click("button:has-text('발행 ·')");
+    const previewNext = await p.locator("[data-testid='preview-next']").count();
+    check("compose: preview has example question + next button", previewNext === 1, `next=${previewNext}`);
+    check("compose: summary shows targets after picking a class", /대상 \d+명/.test(await p.locator("main").innerText()));
+    await p.click("button:has-text('출제 ·')");
     await p.waitForURL(/\/app\/tests\/[a-z0-9]+\?published=1/, { timeout: 30000 });
     check("publish+assign in one click", p.url().includes("assigned=5"), p.url());
     await shot(p, "25-teacher-exam-published");
@@ -296,12 +301,19 @@ const shot = async (page: Page, name: string) => {
     // History → 시험지 → 틀린 문항(스피커) → 틀린 단어 연습(random)
     await p.goto(`${BASE}/learn/grades`);
     await p.waitForLoadState("networkidle");
-    const hist = p.locator("section:has-text('History') li a").first();
-    await hist.click();
-    await p.waitForURL(/\/learn\/results\//);
-    await p.waitForLoadState("networkidle");
+    // 정답 즉시 공개 시험의 결과를 찾는다 (공개 전 시험은 오답노트가 잠겨 있으므로 최근 6개 중 첫 공개 결과)
+    const histCount = Math.min(6, await p.locator("section:has-text('History') li a").count());
+    let resultTxt = "";
+    for (let i = 0; i < histCount; i++) {
+      await p.goto(`${BASE}/learn/grades`);
+      await p.waitForLoadState("networkidle");
+      await p.locator("section:has-text('History') li a").nth(i).click();
+      await p.waitForURL(/\/learn\/results\//);
+      await p.waitForLoadState("networkidle");
+      resultTxt = await p.locator("main").innerText();
+      if (/WRONG/.test(resultTxt)) break;
+    }
     await shot(p, "34-student-result-wrong-items");
-    const resultTxt = await p.locator("main").innerText();
     check("student result shows wrong items immediately", /WRONG/.test(resultTxt) && (await p.locator("[data-testid='speak']").count()) > 0, resultTxt.match(/\d+ WRONG/)?.[0]);
     const practiceLink = p.locator("[data-testid='practice-link']");
     check("student result has practice link", (await practiceLink.count()) === 1);
@@ -329,10 +341,16 @@ const shot = async (page: Page, name: string) => {
     // 온라인 시험 러너: 우측 상단 스피커 (이번 주 시험이 열려 있을 때만)
     await p.goto(`${BASE}/learn`);
     await p.waitForLoadState("networkidle");
-    const startBtn = p.locator("button:has-text('응시 시작'), button:has-text('이어서 응시')").first();
+    const startBtn = p.locator("[data-testid='next-card'] button:has-text('응시 시작'), [data-testid='next-card'] button:has-text('이어서 응시')").first();
     if (await startBtn.count()) {
+      await p.waitForTimeout(600); // hydration
       await startBtn.click();
-      await p.waitForURL(/\/learn\/attempts\//);
+      try {
+        await p.waitForURL(/\/learn\/attempts\//, { timeout: 8000 });
+      } catch {
+        await startBtn.click(); // 첫 클릭이 hydration 전이면 한 번 더
+        await p.waitForURL(/\/learn\/attempts\//, { timeout: 15000 });
+      }
       await p.waitForSelector("[data-testid='runner'] button.tile", { timeout: 15000 });
       await p.waitForTimeout(400);
       await p.screenshot({ path: path.join(OUT, "38-student-test-runner.png"), fullPage: true });

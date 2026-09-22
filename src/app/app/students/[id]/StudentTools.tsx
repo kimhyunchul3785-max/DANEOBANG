@@ -2,7 +2,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ActionButton } from "@/components/ActionForm";
-import { issueStudentInviteAction, revokeStudentInviteAction, decideLinkRequestAction, unlinkStudentAction, setStudentTeachersAction } from "../actions";
+import { issueStudentInviteAction, revokeStudentInviteAction, decideLinkRequestAction, unlinkStudentAction, setStudentTeachersAction, sendStudentCodeAction, type CodeResult } from "../actions";
+import { fmtPhone } from "@/lib/phone";
 
 export function StudentTools({
   student,
@@ -11,7 +12,7 @@ export function StudentTools({
   members,
   assignedMemberIds,
 }: {
-  student: { id: string; name: string; email: string | null; userId: string | null; userEmail: string | null; hasInvite: boolean; inviteExpiresAt: string | null; inviteSentAt: string | null };
+  student: { id: string; name: string; email: string | null; phone: string | null; userId: string | null; userEmail: string | null; hasInvite: boolean; inviteExpiresAt: string | null; inviteSentAt: string | null; codeSent: boolean; codeExpiresAt: string | null };
   linkRequests: { id: string; user: { name: string; email: string } | null; createdAt: string }[];
   isOwner: boolean;
   members: { id: string; name: string; role: string }[];
@@ -19,7 +20,8 @@ export function StudentTools({
 }) {
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
   const [mailed, setMailed] = useState(false);
-  const accountState = student.userId ? "active" : student.hasInvite ? "invited" : "registered";
+  const [code, setCode] = useState<CodeResult | null>(null);
+  const accountState = student.userId ? "active" : student.hasInvite || student.codeSent ? "invited" : "registered";
   const [sel, setSel] = useState<string[]>(assignedMemberIds);
   const [pending, start] = useTransition();
   const router = useRouter();
@@ -42,10 +44,41 @@ export function StudentTools({
           </div>
         ) : (
           <div className="space-y-2 text-sm">
-            <p className="muted">학원이 먼저 등록하고, 학생은 계정 설정 링크에서 <b>비밀번호만</b> 정하면 바로 연결됩니다. 학교·학년·반은 다시 묻지 않습니다.{student.email ? ` 링크는 ${student.email} 로 보냅니다.` : " 이메일을 적어 두면 메일로 보낼 수 있습니다."}</p>
+            {/* 1순위: 휴대폰 인증번호 */}
+            <div className="card-2 rounded-xl p-3">
+              <div className="flex items-center justify-between gap-2">
+                <div>
+                  <div className="font-semibold">휴대폰 인증번호로 가입</div>
+                  <div className="muted text-[12px]">{student.phone ? `${fmtPhone(student.phone)} 로 6자리 인증번호를 보냅니다. 학생은 /join 에서 번호·인증번호·비밀번호만 입력.` : "휴대폰 번호를 먼저 정보에 입력해주세요."}</div>
+                </div>
+                <ActionButton
+                  action={sendStudentCodeAction.bind(null, student.id)}
+                  className="btn-primary btn-sm whitespace-nowrap"
+                  onDone={(r) => {
+                    const d = r.data as { results?: CodeResult[] } | undefined;
+                    setCode(d?.results?.[0] ?? null);
+                  }}
+                >
+                  {student.codeSent ? "인증번호 다시 보내기" : "인증번호 보내기"}
+                </ActionButton>
+              </div>
+              {code && !code.error && (
+                <div className="mt-2 flex items-center justify-between rounded-lg px-3 py-2" style={{ background: "var(--surface)" }} data-testid="student-code">
+                  <span className="muted text-[12px]">{code.sent ? "문자를 보냈습니다" : "문자 업체가 없어 직접 전달하세요 (3일 유효)"}</span>
+                  {!code.sent && (
+                    <span className="digital" style={{ fontSize: 20, letterSpacing: "0.25em" }}>
+                      {code.code}
+                    </span>
+                  )}
+                </div>
+              )}
+              {!code && student.codeSent && <p className="muted mt-2 text-[12px]">인증번호를 보냈습니다 (만료 {student.codeExpiresAt ? new Date(student.codeExpiresAt).toLocaleDateString("ko-KR") : "-"}). 학생이 아직 가입하지 않았습니다.</p>}
+            </div>
+            <div className="lbl mt-3">또는 · 이메일 링크</div>
+            <p className="muted">계정 설정 링크에서 <b>비밀번호만</b> 정하면 바로 연결됩니다.{student.email ? ` 링크는 ${student.email} 로 보냅니다.` : " 이메일을 적어 두면 메일로 보낼 수 있습니다."}</p>
             <ActionButton
               action={issueStudentInviteAction.bind(null, student.id)}
-              className="btn-primary btn-sm"
+              className="btn-secondary btn-sm"
               onDone={(r) => {
                 const d = r.data as { url?: string; mailed?: boolean } | undefined;
                 if (d?.url) setInviteUrl(d.url);
