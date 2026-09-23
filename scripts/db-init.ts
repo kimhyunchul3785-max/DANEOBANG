@@ -42,6 +42,7 @@ const MIGRATIONS: { table: string; column: string; ddl: string }[] = [
   { table: "ClassRoom", column: "joinCode", ddl: 'ALTER TABLE "ClassRoom" ADD COLUMN "joinCode" TEXT' },
   { table: "StudentLinkRequest", column: "classId", ddl: 'ALTER TABLE "StudentLinkRequest" ADD COLUMN "classId" TEXT' },
   { table: "StudentLinkRequest", column: "name", ddl: 'ALTER TABLE "StudentLinkRequest" ADD COLUMN "name" TEXT' },
+  { table: "ClassRoom", column: "teacherMemberId", ddl: 'ALTER TABLE "ClassRoom" ADD COLUMN "teacherMemberId" TEXT' },
 ];
 
 /**

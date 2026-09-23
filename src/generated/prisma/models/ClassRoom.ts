@@ -30,6 +30,7 @@ export type ClassRoomMinAggregateOutputType = {
   name: string | null
   archived: boolean | null
   joinCode: string | null
+  teacherMemberId: string | null
   createdAt: Date | null
 }
 
@@ -39,6 +40,7 @@ export type ClassRoomMaxAggregateOutputType = {
   name: string | null
   archived: boolean | null
   joinCode: string | null
+  teacherMemberId: string | null
   createdAt: Date | null
 }
 
@@ -48,6 +50,7 @@ export type ClassRoomCountAggregateOutputType = {
   name: number
   archived: number
   joinCode: number
+  teacherMemberId: number
   createdAt: number
   _all: number
 }
@@ -59,6 +62,7 @@ export type ClassRoomMinAggregateInputType = {
   name?: true
   archived?: true
   joinCode?: true
+  teacherMemberId?: true
   createdAt?: true
 }
 
@@ -68,6 +72,7 @@ export type ClassRoomMaxAggregateInputType = {
   name?: true
   archived?: true
   joinCode?: true
+  teacherMemberId?: true
   createdAt?: true
 }
 
@@ -77,6 +82,7 @@ export type ClassRoomCountAggregateInputType = {
   name?: true
   archived?: true
   joinCode?: true
+  teacherMemberId?: true
   createdAt?: true
   _all?: true
 }
@@ -159,6 +165,7 @@ export type ClassRoomGroupByOutputType = {
   name: string
   archived: boolean
   joinCode: string | null
+  teacherMemberId: string | null
   createdAt: Date
   _count: ClassRoomCountAggregateOutputType | null
   _min: ClassRoomMinAggregateOutputType | null
@@ -189,6 +196,7 @@ export type ClassRoomWhereInput = {
   name?: Prisma.StringFilter<"ClassRoom"> | string
   archived?: Prisma.BoolFilter<"ClassRoom"> | boolean
   joinCode?: Prisma.StringNullableFilter<"ClassRoom"> | string | null
+  teacherMemberId?: Prisma.StringNullableFilter<"ClassRoom"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ClassRoom"> | Date | string
   academy?: Prisma.XOR<Prisma.AcademyScalarRelationFilter, Prisma.AcademyWhereInput>
   students?: Prisma.StudentListRelationFilter
@@ -200,6 +208,7 @@ export type ClassRoomOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   archived?: Prisma.SortOrder
   joinCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  teacherMemberId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   academy?: Prisma.AcademyOrderByWithRelationInput
   students?: Prisma.StudentOrderByRelationAggregateInput
@@ -214,6 +223,7 @@ export type ClassRoomWhereUniqueInput = Prisma.AtLeast<{
   academyId?: Prisma.StringFilter<"ClassRoom"> | string
   name?: Prisma.StringFilter<"ClassRoom"> | string
   archived?: Prisma.BoolFilter<"ClassRoom"> | boolean
+  teacherMemberId?: Prisma.StringNullableFilter<"ClassRoom"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ClassRoom"> | Date | string
   academy?: Prisma.XOR<Prisma.AcademyScalarRelationFilter, Prisma.AcademyWhereInput>
   students?: Prisma.StudentListRelationFilter
@@ -225,6 +235,7 @@ export type ClassRoomOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   archived?: Prisma.SortOrder
   joinCode?: Prisma.SortOrderInput | Prisma.SortOrder
+  teacherMemberId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.ClassRoomCountOrderByAggregateInput
   _max?: Prisma.ClassRoomMaxOrderByAggregateInput
@@ -240,6 +251,7 @@ export type ClassRoomScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"ClassRoom"> | string
   archived?: Prisma.BoolWithAggregatesFilter<"ClassRoom"> | boolean
   joinCode?: Prisma.StringNullableWithAggregatesFilter<"ClassRoom"> | string | null
+  teacherMemberId?: Prisma.StringNullableWithAggregatesFilter<"ClassRoom"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ClassRoom"> | Date | string
 }
 
@@ -248,6 +260,7 @@ export type ClassRoomCreateInput = {
   name: string
   archived?: boolean
   joinCode?: string | null
+  teacherMemberId?: string | null
   createdAt?: Date | string
   academy: Prisma.AcademyCreateNestedOneWithoutClassesInput
   students?: Prisma.StudentCreateNestedManyWithoutClassRoomInput
@@ -259,6 +272,7 @@ export type ClassRoomUncheckedCreateInput = {
   name: string
   archived?: boolean
   joinCode?: string | null
+  teacherMemberId?: string | null
   createdAt?: Date | string
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutClassRoomInput
 }
@@ -268,6 +282,7 @@ export type ClassRoomUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherMemberId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   academy?: Prisma.AcademyUpdateOneRequiredWithoutClassesNestedInput
   students?: Prisma.StudentUpdateManyWithoutClassRoomNestedInput
@@ -279,6 +294,7 @@ export type ClassRoomUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherMemberId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   students?: Prisma.StudentUncheckedUpdateManyWithoutClassRoomNestedInput
 }
@@ -289,6 +305,7 @@ export type ClassRoomCreateManyInput = {
   name: string
   archived?: boolean
   joinCode?: string | null
+  teacherMemberId?: string | null
   createdAt?: Date | string
 }
 
@@ -297,6 +314,7 @@ export type ClassRoomUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherMemberId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -306,6 +324,7 @@ export type ClassRoomUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherMemberId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -325,6 +344,7 @@ export type ClassRoomCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   archived?: Prisma.SortOrder
   joinCode?: Prisma.SortOrder
+  teacherMemberId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -334,6 +354,7 @@ export type ClassRoomMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   archived?: Prisma.SortOrder
   joinCode?: Prisma.SortOrder
+  teacherMemberId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -343,6 +364,7 @@ export type ClassRoomMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   archived?: Prisma.SortOrder
   joinCode?: Prisma.SortOrder
+  teacherMemberId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
 
@@ -414,6 +436,7 @@ export type ClassRoomCreateWithoutAcademyInput = {
   name: string
   archived?: boolean
   joinCode?: string | null
+  teacherMemberId?: string | null
   createdAt?: Date | string
   students?: Prisma.StudentCreateNestedManyWithoutClassRoomInput
 }
@@ -423,6 +446,7 @@ export type ClassRoomUncheckedCreateWithoutAcademyInput = {
   name: string
   archived?: boolean
   joinCode?: string | null
+  teacherMemberId?: string | null
   createdAt?: Date | string
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutClassRoomInput
 }
@@ -461,6 +485,7 @@ export type ClassRoomScalarWhereInput = {
   name?: Prisma.StringFilter<"ClassRoom"> | string
   archived?: Prisma.BoolFilter<"ClassRoom"> | boolean
   joinCode?: Prisma.StringNullableFilter<"ClassRoom"> | string | null
+  teacherMemberId?: Prisma.StringNullableFilter<"ClassRoom"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ClassRoom"> | Date | string
 }
 
@@ -469,6 +494,7 @@ export type ClassRoomCreateWithoutStudentsInput = {
   name: string
   archived?: boolean
   joinCode?: string | null
+  teacherMemberId?: string | null
   createdAt?: Date | string
   academy: Prisma.AcademyCreateNestedOneWithoutClassesInput
 }
@@ -479,6 +505,7 @@ export type ClassRoomUncheckedCreateWithoutStudentsInput = {
   name: string
   archived?: boolean
   joinCode?: string | null
+  teacherMemberId?: string | null
   createdAt?: Date | string
 }
 
@@ -503,6 +530,7 @@ export type ClassRoomUpdateWithoutStudentsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherMemberId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   academy?: Prisma.AcademyUpdateOneRequiredWithoutClassesNestedInput
 }
@@ -513,6 +541,7 @@ export type ClassRoomUncheckedUpdateWithoutStudentsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherMemberId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -521,6 +550,7 @@ export type ClassRoomCreateManyAcademyInput = {
   name: string
   archived?: boolean
   joinCode?: string | null
+  teacherMemberId?: string | null
   createdAt?: Date | string
 }
 
@@ -529,6 +559,7 @@ export type ClassRoomUpdateWithoutAcademyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherMemberId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   students?: Prisma.StudentUpdateManyWithoutClassRoomNestedInput
 }
@@ -538,6 +569,7 @@ export type ClassRoomUncheckedUpdateWithoutAcademyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherMemberId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   students?: Prisma.StudentUncheckedUpdateManyWithoutClassRoomNestedInput
 }
@@ -547,6 +579,7 @@ export type ClassRoomUncheckedUpdateManyWithoutAcademyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   archived?: Prisma.BoolFieldUpdateOperationsInput | boolean
   joinCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  teacherMemberId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -587,6 +620,7 @@ export type ClassRoomSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   name?: boolean
   archived?: boolean
   joinCode?: boolean
+  teacherMemberId?: boolean
   createdAt?: boolean
   academy?: boolean | Prisma.AcademyDefaultArgs<ExtArgs>
   students?: boolean | Prisma.ClassRoom$studentsArgs<ExtArgs>
@@ -599,6 +633,7 @@ export type ClassRoomSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   name?: boolean
   archived?: boolean
   joinCode?: boolean
+  teacherMemberId?: boolean
   createdAt?: boolean
   academy?: boolean | Prisma.AcademyDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["classRoom"]>
@@ -609,6 +644,7 @@ export type ClassRoomSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   name?: boolean
   archived?: boolean
   joinCode?: boolean
+  teacherMemberId?: boolean
   createdAt?: boolean
   academy?: boolean | Prisma.AcademyDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["classRoom"]>
@@ -619,10 +655,11 @@ export type ClassRoomSelectScalar = {
   name?: boolean
   archived?: boolean
   joinCode?: boolean
+  teacherMemberId?: boolean
   createdAt?: boolean
 }
 
-export type ClassRoomOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "academyId" | "name" | "archived" | "joinCode" | "createdAt", ExtArgs["result"]["classRoom"]>
+export type ClassRoomOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "academyId" | "name" | "archived" | "joinCode" | "teacherMemberId" | "createdAt", ExtArgs["result"]["classRoom"]>
 export type ClassRoomInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   academy?: boolean | Prisma.AcademyDefaultArgs<ExtArgs>
   students?: boolean | Prisma.ClassRoom$studentsArgs<ExtArgs>
@@ -647,6 +684,7 @@ export type $ClassRoomPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     name: string
     archived: boolean
     joinCode: string | null
+    teacherMemberId: string | null
     createdAt: Date
   }, ExtArgs["result"]["classRoom"]>
   composites: {}
@@ -1078,6 +1116,7 @@ export interface ClassRoomFieldRefs {
   readonly name: Prisma.FieldRef<"ClassRoom", 'String'>
   readonly archived: Prisma.FieldRef<"ClassRoom", 'Boolean'>
   readonly joinCode: Prisma.FieldRef<"ClassRoom", 'String'>
+  readonly teacherMemberId: Prisma.FieldRef<"ClassRoom", 'String'>
   readonly createdAt: Prisma.FieldRef<"ClassRoom", 'DateTime'>
 }
     

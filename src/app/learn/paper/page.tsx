@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/auth";
+import { requireStudent } from "@/lib/auth";
 import { listStudentAssignments } from "@/lib/attempts";
 import { listStudentScans } from "@/lib/paper";
 import { fmtMDHM } from "@/lib/util";
@@ -17,8 +17,8 @@ const STATUS: Record<string, [string, string]> = {
 
 /** 종이 시험 제출: 사진 찍어 제출 → 채점 중 → 결과. 시간 제한 없음 */
 export default async function PaperPage() {
-  const user = await requireUser();
-  const [list, scans] = await Promise.all([listStudentAssignments(user.id), listStudentScans(user.id)]);
+  const { user, student } = await requireStudent();
+  const [list, scans] = await Promise.all([listStudentAssignments(user.id, student.id), listStudentScans(user.id, student.id)]);
   const paperOpen = list.filter((a) => a.mode === "paper" && a.status !== "completed" && a.status !== "expired");
   const processing = scans.some((s) => s.status === "queued" || s.status === "processing");
   return (

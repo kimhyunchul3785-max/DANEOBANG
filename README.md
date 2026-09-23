@@ -9,7 +9,9 @@
   - 선생님 → `/welcome/new` 학원 이름 하나로 학원 + 학원장 + 기본 반(반 코드) 생성 → `/app`. 초대 링크(`/invite/<token>`)는 로그인 뒤 [참여].
   - 학생 → `/welcome/student` 반 코드 + 이름 / 문자 인증번호(휴대폰 + 6자리) / 초대 링크(`/join/<token>`) → 로그인한 계정에 학생 명단 연결 → `/learn`.
 - 반 코드: 반마다 6자리. 동명 학생이 이미 있으면 바로 붙이지 않고 참여 요청 → 선생님이 [기존 학생과 연결] / [새 학생으로 추가] / [거절].
-- `/switch` 계정 전환: 학원(역할)·학생 자리 중 어디로 들어갈지. 로그인 후 자리 1개면 바로, 여러 개면 마지막 자리 또는 전환 화면.
+- `/switch` 계정 전환: 학원 역할(학원장·선생님)과 **학원별 학생 명단**이 각각 독립된 자리. 학생 화면(`/learn`)은 선택한 학생 자리(`db_student` 쿠키 = Student.id, 본인 계정 소유일 때만) 기준으로만 시험·성적·재시험·연습·종이 제출을 보여준다. 로그인 후 자리 1개면 바로, 여러 개면 마지막 자리 또는 전환 화면. 모바일 API 는 `x-student-id` 헤더.
+- 반 담당 선생님(`ClassRoom.teacherMemberId`): 반 코드로 들어온 학생은 반 담당의 담당 학생이 되고 알림이 간다. 반을 만든 선생님이 기본 담당, 학원장은 반 관리에서 지정. 반 코드·인증번호 대입은 사용자당 실패 5회/5분 잠금, 시간당 20회.
+- 보안: production 에서 `SESSION_SECRET` 이 없거나 개발용 값이면 세션 발급이 실패한다. OAuth 는 공급사가 **검증한 이메일**일 때만 기존 계정에 자동으로 붙는다.
 - 선생님 앱 메뉴: 오늘 · 학생 · 단어장 · 시험(사진 채점 포함) · 성적 · 재시험 | 선생님 · 요금제 · 학원 설정. 학생 앱: 이번 주 · 성적 · 재시험 · 연습.
 
 ## 빠른 시작 (Windows)
@@ -58,7 +60,8 @@ npm run test:parsers   # HWPX/DOCX/PDF 추출 테스트
 npm run test:omr       # 합성 OMR 판독 테스트
 npx tsx scripts/e2e.ts # 브라우저 E2E (서버 실행 + playwright 설치 필요)
 npm run e2e:linked     # 연동 계정(학원장·선생님1·학생01) E2E → ../log 에 로그·스크린샷
-npm run e2e:trial      # (v4.5 가입 위저드 기준 — v4.6 /welcome 흐름으로 아직 갱신 전) e2e:signup 도 동일
+npm run e2e:onboarding # v4.6 온보딩 9단계: /welcome → 학원 생성·반 코드 → 선생님 초대 [참여] → 학생 반 코드(즉시/동명 요청/새 학생 추가) → 학생 자리 2개 분리 → 잠금 → 초대 이메일 불일치
+npm run e2e:trial      # (v4.5 가입 위저드 기준 — 폐지된 /start 흐름이라 실패함. e2e:signup 도 동일. 참고용)
 npm run test:ocr       # OCR 파이프라인(모의 OpenAI) 테스트
 npm run e2e:retake     # 재시험(오답만/같은 범위·마감·알림·2차) · 반복 오답 출제 · 성적 위젯 보드 · 종이 QR 규칙
 node scripts/gen-sqlite-ddl.cjs   # schema.prisma 변경 후 init.sql 재생성 (@prisma/internals 필요)

@@ -15,13 +15,13 @@ export async function POST(req: Request) {
     if (body.provider === "google") {
       const r = await fetch("https://openidconnect.googleapis.com/v1/userinfo", { headers: { authorization: `Bearer ${body.accessToken}` } });
       if (!r.ok) return fail(401, "provider_token_invalid");
-      const j = (await r.json()) as { sub: string; email?: string; name?: string };
-      profile = { providerId: j.sub, email: j.email ?? null, name: j.name || "사용자" };
+      const j = (await r.json()) as { sub: string; email?: string; email_verified?: boolean; name?: string };
+      profile = { providerId: j.sub, email: j.email ?? null, name: j.name || "사용자", emailVerified: j.email_verified === true };
     } else {
       const r = await fetch("https://kapi.kakao.com/v2/user/me", { headers: { authorization: `Bearer ${body.accessToken}` } });
       if (!r.ok) return fail(401, "provider_token_invalid");
-      const j = (await r.json()) as { id: number; kakao_account?: { email?: string; profile?: { nickname?: string } } };
-      profile = { providerId: String(j.id), email: j.kakao_account?.email ?? null, name: j.kakao_account?.profile?.nickname || "카카오 사용자" };
+      const j = (await r.json()) as { id: number; kakao_account?: { email?: string; is_email_valid?: boolean; is_email_verified?: boolean; profile?: { nickname?: string } } };
+      profile = { providerId: String(j.id), email: j.kakao_account?.email ?? null, name: j.kakao_account?.profile?.nickname || "카카오 사용자", emailVerified: j.kakao_account?.is_email_valid === true && j.kakao_account?.is_email_verified === true };
     }
     const user = await upsertOAuthUser(body.provider, profile);
     if (user.status !== "active") return fail(403, "suspended");

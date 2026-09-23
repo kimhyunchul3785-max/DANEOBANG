@@ -50,9 +50,9 @@ export async function submitStudentScan(params: { buf: Buffer; fileName: string;
 }
 
 /** 학생의 최근 제출 사진과 상태 */
-export async function listStudentScans(userId: string) {
+export async function listStudentScans(userId: string, studentId?: string) {
   const scans = await prisma.scanUpload.findMany({
-    where: { uploadedById: userId, source: "student" },
+    where: { uploadedById: userId, source: "student", ...(studentId ? { page: { print: { attempt: { assignment: { studentId } } } } } : {}) },
     include: { page: { include: { print: { include: { attempt: { include: { grades: { where: { current: true } }, assignment: { include: { exam: { select: { id: true, title: true } } } } } } } } } } },
     orderBy: { createdAt: "desc" },
     take: 20,

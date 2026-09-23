@@ -1,13 +1,13 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/auth";
+import { requireStudent } from "@/lib/auth";
 import { practiceSetForAttempt } from "@/lib/practice";
 import { PracticeRunner } from "../PracticeRunner";
 
 /** 시험 한 개의 틀린 단어만 모아 연습. 본인 응시가 아니면 404 처럼 보인다. 기록은 남기지 않는다. */
 export default async function PracticeAttemptPage({ params }: { params: Promise<{ attemptId: string }> }) {
-  const user = await requireUser();
+  const { user, student } = await requireStudent();
   const { attemptId } = await params;
-  const set = await practiceSetForAttempt(attemptId, user.id);
+  const set = await practiceSetForAttempt(attemptId, user.id, student.id);
   if (!set) {
     return (
       <div className="space-y-3">

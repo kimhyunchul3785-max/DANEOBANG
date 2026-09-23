@@ -185,6 +185,7 @@ model ClassRoom {
   name      String
   archived  Boolean  @default(false)
   joinCode  String?  @unique // 반 코드(6자리). 학생이 로그인 뒤 이 코드 + 이름으로 참여. null 이면 꺼짐
+  teacherMemberId String? // 반 담당 선생님 (AcademyMember.id). 반 코드로 들어온 학생은 이 선생님의 담당이 되고 알림이 간다
   createdAt DateTime @default(now())
 
   academy  Academy   @relation(fields: [academyId], references: [id], onDelete: Cascade)

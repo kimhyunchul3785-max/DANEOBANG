@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/auth";
+import { redirect } from "next/navigation";
+import { requireUser, getStudentContext } from "@/lib/auth";
 import { listStudentAssignments } from "@/lib/attempts";
 import { studentRetakes, studentGrades } from "@/lib/learn";
 import { prisma } from "@/lib/db";
@@ -11,12 +12,16 @@ import { CountUp } from "@/components/Motion";
 
 /** 학생 홈: 이번 주 시험 · 보강 일정 · 내 추이 요약 */
 export default async function LearnHome() {
-  const user = await requireUser();
-  const [list, retakes, grades, linked, pending] = await Promise.all([
-    listStudentAssignments(user.id),
-    studentRetakes(user.id),
-    studentGrades(user.id),
-    prisma.student.count({ where: { userId: user.id } }),
+  const user = await requireUser("/learn");
+  // 선택한 학생 자리(학원) 기준으로만 조회. 자리가 여럿인데 안 골랐으면 계정 전환, 하나도 없으면 연결 안내
+  const ctx = await getStudentContext(user);
+  const linked = await prisma.student.count({ where: { userId: user.id, status: "active" } });
+  if (!ctx && linked > 1) redirect("/switch");
+  const sid = ctx?.student.id ?? "__none__";
+  const [list, retakes, grades, pending] = await Promise.all([
+    listStudentAssignments(user.id, sid),
+    studentRetakes(user.id, sid),
+    studentGrades(user.id, sid),
     prisma.studentLinkRequest.count({ where: { userId: user.id, status: "pending" } }),
   ]);
   const week = seoulWeekRange();

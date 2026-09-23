@@ -104,32 +104,33 @@ export function StudentTools({
                 </button>
               </div>
             )}
-            {linkRequests.length > 0 && (
-              <div className="card-accent rounded-2xl p-3" data-testid="link-requests">
-                <div className="lbl-on mb-1">참여 요청</div>
-                {linkRequests.map((r) => (
-                  <div key={r.id} className="py-1.5 text-[13px]">
-                    <div>
-                      <b>{r.name ?? r.user?.name}</b> 학생이 {r.className ? `${r.className} ` : ""}참여를 요청했습니다.
-                      <span className="block text-[12px]" style={{ color: "rgba(255,244,240,0.8)" }}>
-                        계정 {r.user?.name} · {r.user?.email} · 기존 명단 {student.name}
-                      </span>
-                    </div>
-                    <div className="mt-2 flex flex-wrap gap-1.5">
-                      <ActionButton action={decideLinkRequestAction.bind(null, r.id, "link")} className="btn btn-sm" style={{ background: "#fff4f0", color: "var(--accent)" }} testId="link-existing">
-                        기존 학생과 연결
-                      </ActionButton>
-                      <ActionButton action={decideLinkRequestAction.bind(null, r.id, "new")} className="btn btn-sm" style={{ background: "rgba(255,244,240,0.18)", color: "#fff4f0" }} testId="link-new">
-                        새 학생으로 추가
-                      </ActionButton>
-                      <ActionButton action={decideLinkRequestAction.bind(null, r.id, "reject")} className="btn-ghost btn-sm" style={{ color: "rgba(255,244,240,0.8)" }}>
-                        거절
-                      </ActionButton>
-                    </div>
-                  </div>
-                ))}
+          </div>
+        )}
+        {/* 참여 요청은 계정 연결 여부와 상관없이 (이미 연결된 학생에게 동명 요청이 올 수 있다) */}
+        {linkRequests.length > 0 && (
+          <div className="card-accent mt-3 rounded-2xl p-3" data-testid="link-requests">
+            <div className="lbl-on mb-1">참여 요청</div>
+            {linkRequests.map((r) => (
+              <div key={r.id} className="py-1.5 text-[13px]">
+                <div>
+                  <b>{r.name ?? r.user?.name}</b> 학생이 {r.className ? `${r.className} ` : ""}참여를 요청했습니다.
+                  <span className="block text-[12px]" style={{ color: "rgba(255,244,240,0.8)" }}>
+                    계정 {r.user?.name} · {r.user?.email} · 기존 명단 {student.name}
+                  </span>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-1.5">
+                  <ActionButton action={decideLinkRequestAction.bind(null, r.id, "link")} className="btn btn-sm" style={{ background: "#fff4f0", color: "var(--accent)" }} testId="link-existing">
+                    기존 학생과 연결
+                  </ActionButton>
+                  <ActionButton action={decideLinkRequestAction.bind(null, r.id, "new")} className="btn btn-sm" style={{ background: "rgba(255,244,240,0.18)", color: "#fff4f0" }} testId="link-new">
+                    새 학생으로 추가
+                  </ActionButton>
+                  <ActionButton action={decideLinkRequestAction.bind(null, r.id, "reject")} className="btn-ghost btn-sm" style={{ color: "rgba(255,244,240,0.8)" }}>
+                    거절
+                  </ActionButton>
+                </div>
               </div>
-            )}
+            ))}
           </div>
         )}
       </div>

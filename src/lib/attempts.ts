@@ -14,8 +14,9 @@ export class ApiError extends Error {
 }
 
 /** 학생 본인의 배정 목록 */
-export async function listStudentAssignments(userId: string) {
-  const students = await prisma.student.findMany({ where: { userId, status: "active" }, select: { id: true } });
+/** 학생의 배정 목록. studentId 를 주면 그 학생 명단(한 학원)만 — 웹은 항상 선택한 자리 기준, 모바일 API 는 x-student-id 헤더가 없으면 전체 */
+export async function listStudentAssignments(userId: string, studentId?: string) {
+  const students = await prisma.student.findMany({ where: { userId, status: "active", ...(studentId ? { id: studentId } : {}) }, select: { id: true } });
   const assignments = await prisma.assignment.findMany({
     where: { studentId: { in: students.map((s) => s.id) }, exam: { status: "published" } },
     include: {

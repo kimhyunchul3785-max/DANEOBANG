@@ -1,21 +1,23 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { requireUser, listContexts, setAcademyCookie, setLearnCookie } from "@/lib/auth";
+import { requireUser, listContexts, setAcademyCookie, setStudentCookie } from "@/lib/auth";
 import { ROLE_LABEL } from "@/lib/constants";
 import { Logo } from "@/components/Logo";
 import { selectContextAction } from "./actions";
 
 /**
  * 계정 전환 — "어떤 학원에서 어떤 역할로 들어갈지"를 고른다.
- * Workspace·Membership 같은 내부 용어는 보이지 않는다. ?to=member:<academyId> | student 로 바로 전환.
+ * 학원 역할(학원장·선생님)과 학생 명단은 각각 독립된 자리 — 학생도 학원마다 따로 고른다.
+ * Workspace·Membership 같은 내부 용어는 보이지 않는다. ?to=member:<academyId> | student:<studentId> 로 바로 전환.
  */
 export default async function SwitchPage({ searchParams }: { searchParams: Promise<{ to?: string }> }) {
   const user = await requireUser("/switch");
   const sp = await searchParams;
   const { memberships, students, pending } = await listContexts(user.id);
   if (sp.to) {
-    if (sp.to === "student" && students.length) {
-      await setLearnCookie();
+    const studentId = sp.to.startsWith("student:") ? sp.to.slice(8) : null;
+    if (studentId && students.some((s) => s.id === studentId)) {
+      await setStudentCookie(studentId);
       redirect("/learn");
     }
     const academyId = sp.to.startsWith("member:") ? sp.to.slice(7) : null;
@@ -40,22 +42,23 @@ export default async function SwitchPage({ searchParams }: { searchParams: Promi
       </div>
 
       <ul className="mt-6 grid gap-2 anim-fade-up" style={{ animationDelay: "60ms" }} data-testid="context-list">
-        {students.length > 0 && (
-          <li>
+        {students.map((s) => (
+          <li key={s.id}>
             <form action={selectContextAction}>
-              <input type="hidden" name="to" value="student" />
-              <button className="tile card flex w-full items-center justify-between rounded-[20px] px-5 py-4 text-left" data-testid="ctx-student">
+              <input type="hidden" name="to" value={`student:${s.id}`} />
+              <button className="tile card flex w-full items-center justify-between rounded-[20px] px-5 py-4 text-left" data-testid={`ctx-student-${s.id}`}>
                 <span>
-                  <span className="block text-[16px] font-semibold tracking-tight">{students.map((s) => s.academy.name).join(" · ")}</span>
+                  <span className="block text-[16px] font-semibold tracking-tight">{s.academy.name}</span>
                   <span className="block text-[12.5px]" style={{ color: "var(--ink-2)" }}>
-                    학생{students.length > 1 ? ` · ${students.length}곳` : ""}
+                    학생 · {s.name}
+                    {s.classRoom?.name ? ` · ${s.classRoom.name}` : ""}
                   </span>
                 </span>
                 <span className="lbl-ink">→</span>
               </button>
             </form>
           </li>
-        )}
+        ))}
         {memberships.map((m) => (
           <li key={m.id}>
             <form action={selectContextAction}>

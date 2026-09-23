@@ -1,9 +1,11 @@
 import { prisma } from "./db";
-import { audit, setAcademyCookie, setLearnCookie } from "./auth";
+import { audit, setAcademyCookie, setStudentCookie } from "./auth";
 import { hashToken, slugify, RESERVED_SLUGS } from "./util";
 import { UNIT_PRICE, billingEnabled, TRIAL_SEATS } from "./billing";
 import { normalizePhone } from "./phone";
 import { seatUsage } from "./seats";
+import { notifyUser } from "./notify";
+import { checkLimit, recordFailure, recordSuccess, limitMessage } from "./ratelimit";
 import type { User } from "@/generated/prisma/client";
 
 /**
@@ -42,8 +44,8 @@ export async function createAcademy(user: User, name: string): Promise<{ academy
   const billing = billingEnabled();
   const academy = await prisma.$transaction(async (tx) => {
     const a = await tx.academy.create({ data: { name, slug, representativeName: user.name, status: billing ? "pending_payment" : "active", plan: billing ? "seat" : "trial" } });
-    await tx.academyMember.create({ data: { academyId: a.id, userId: user.id, role: "OWNER", isTeacher: true, status: "active" } });
-    await tx.classRoom.create({ data: { academyId: a.id, name: DEFAULT_CLASS_NAME, joinCode } });
+    const owner = await tx.academyMember.create({ data: { academyId: a.id, userId: user.id, role: "OWNER", isTeacher: true, status: "active" } });
+    await tx.classRoom.create({ data: { academyId: a.id, name: DEFAULT_CLASS_NAME, joinCode, teacherMemberId: owner.id } });
     await tx.subscription.create({ data: billing ? { academyId: a.id, seatQuantity: 1, unitPrice: UNIT_PRICE, status: "pending" } : { academyId: a.id, seatQuantity: TRIAL_SEATS, unitPrice: 0, status: "active", provider: "trial" } });
     return a;
   }, { timeout: 15000 });
@@ -58,7 +60,7 @@ export async function acceptTeacherInvite(user: User, token: string): Promise<On
   if (!inv) return { ok: false, message: "유효하지 않은 초대 링크입니다." };
   if (inv.usedAt) return { ok: false, message: "이미 사용된 초대 링크입니다. 로그인하면 학원에 들어갈 수 있습니다.", redirectTo: "/switch" };
   if (inv.revokedAt || inv.expiresAt < new Date()) return { ok: false, message: "만료된 초대입니다 (7일). 학원장에게 다시 요청하세요." };
-  if (inv.email && !userHasEmail(user, inv.email)) return { ok: false, message: `이 초대는 ${inv.email} 계정 전용입니다. 그 이메일로 로그인한 계정에서 열어주세요.` };
+  if (inv.email && !(await userMatchesEmail(user, inv.email))) return { ok: false, message: `이 초대는 ${inv.email} 계정 전용입니다. 그 이메일로 로그인한 계정에서 열어주세요.` };
   if (inv.isTeacher) {
     const usage = await seatUsage(inv.academyId);
     if (usage.used + usage.pending > usage.quantity) return { ok: false, message: "학원의 선생님 자리가 부족합니다. 학원장에게 요금제에서 자리를 늘려 달라고 요청하세요." };
@@ -105,19 +107,29 @@ export async function joinByClassCode(user: User, codeRaw: string, nameRaw: stri
   const name = nameRaw.trim().slice(0, 30);
   if (code.length !== 6) return { ok: false, message: "반 코드는 숫자 6자리입니다." };
   if (!name) return { ok: false, message: "이름을 입력해주세요." };
+  const rl = checkLimit(`join:${user.id}`);
+  if (!rl.ok) return { ok: false, message: limitMessage(rl.retryAfterSec) };
   const cls = await prisma.classRoom.findUnique({ where: { joinCode: code }, include: { academy: { select: { id: true, name: true, status: true } } } });
-  if (!cls || cls.archived) return { ok: false, message: "반 코드가 맞지 않습니다. 선생님에게 다시 확인해주세요." };
+  if (!cls || cls.archived) {
+    recordFailure(`join:${user.id}`);
+    await audit({ userId: user.id, action: "student.join_fail", detail: `code ${code.slice(0, 2)}****` });
+    return { ok: false, message: "반 코드가 맞지 않습니다. 선생님에게 다시 확인해주세요." };
+  }
+  recordSuccess(`join:${user.id}`);
   const academyId = cls.academyId;
   const already = await prisma.student.findFirst({ where: { academyId, userId: user.id } });
   if (already) {
-    await setLearnCookie();
+    await setStudentCookie(already.id);
     return { ok: true, kind: "linked", message: `이미 ${cls.academy.name}에 연결되어 있습니다.`, redirectTo: "/learn" };
   }
   const sameName = await prisma.student.findMany({ where: { academyId, name, status: "active" }, orderBy: { createdAt: "asc" } });
+  const teacher = await classTeacher(cls.id, cls.teacherMemberId);
   if (sameName.length === 0) {
-    const s = await prisma.student.create({ data: { academyId, classId: cls.id, name, userId: user.id, email: user.email.includes("@noemail.") || user.email.includes("@phone.") ? null : user.email, phone: user.phone } });
+    // 새 학생: 반 담당 선생님이 자동으로 담당이 된다 (담당 없는 반이면 학원장만 본다)
+    const s = await prisma.student.create({ data: { academyId, classId: cls.id, name, userId: user.id, email: user.email.includes("@noemail.") || user.email.includes("@phone.") ? null : user.email, phone: user.phone, ...(teacher ? { teachers: { create: { memberId: teacher.id } } } : {}) } });
     await audit({ academyId, userId: user.id, action: "student.join_code", target: s.id, detail: `${cls.name} · new` });
-    await setLearnCookie();
+    if (teacher) await notifyUser(teacher.userId, `${name} 학생이 ${cls.name}에 참여했습니다`, `반 코드로 들어와 담당 학생으로 연결되었습니다.`, `/app/students/${s.id}`);
+    await setStudentCookie(s.id);
     return { ok: true, kind: "linked", message: `${cls.academy.name} ${cls.name}에 참여했습니다.`, redirectTo: "/learn" };
   }
   // 동명 학생이 있으면 선생님 확인
@@ -125,8 +137,19 @@ export async function joinByClassCode(user: User, codeRaw: string, nameRaw: stri
   const pending = await prisma.studentLinkRequest.findFirst({ where: { studentId: target.id, userId: user.id, status: "pending" } });
   if (!pending) await prisma.studentLinkRequest.create({ data: { studentId: target.id, userId: user.id, classId: cls.id, name } });
   await audit({ academyId, userId: user.id, action: "student.join_request", target: target.id, detail: `${cls.name} · ${name}` });
-  await setLearnCookie();
+  // 알림: 반 담당 선생님 + 기존 명단의 담당 선생님 (없으면 학원장)
+  const recipients = new Set<string>();
+  if (teacher) recipients.add(teacher.userId);
+  for (const t of await prisma.teacherStudent.findMany({ where: { studentId: target.id }, include: { member: { select: { userId: true } } } })) recipients.add(t.member.userId);
+  if (!recipients.size) for (const o of await prisma.academyMember.findMany({ where: { academyId, role: "OWNER", status: "active" }, select: { userId: true } })) recipients.add(o.userId);
+  for (const uid of recipients) await notifyUser(uid, `${name} 학생이 ${cls.name} 참여를 요청했습니다`, "같은 이름의 학생이 명단에 있어 확인이 필요합니다. 기존 학생과 연결하거나 새 학생으로 추가하세요.", `/app/students/${target.id}`);
   return { ok: true, kind: "requested", message: "같은 이름의 학생이 이미 명단에 있어요. 선생님이 확인하면 기존 기록과 연결됩니다.", redirectTo: "/learn" };
+}
+
+/** 반 담당 선생님 (활성 구성원일 때만) */
+async function classTeacher(classId: string, memberId: string | null) {
+  if (!memberId) return null;
+  return prisma.academyMember.findFirst({ where: { id: memberId, status: "active" }, select: { id: true, userId: true } });
 }
 
 /** 문자 인증번호(휴대폰 + 6자리)로 연결. 인증번호가 곧 본인 확인이므로 바로 연결한다 */
@@ -135,13 +158,17 @@ export async function linkByPhoneCode(user: User, phoneRaw: string, codeRaw: str
   const code = codeRaw.replace(/\D/g, "");
   if (!/^01\d{8,9}$/.test(phone)) return { ok: false, message: "휴대폰 번호를 확인해주세요." };
   if (code.length !== 6) return { ok: false, message: "인증번호는 숫자 6자리입니다." };
+  const rl = checkLimit(`sms:${user.id}`);
+  if (!rl.ok) return { ok: false, message: limitMessage(rl.retryAfterSec) };
   const candidates = await prisma.student.findMany({ where: { phone, userId: null, phoneCodeHash: { not: null } }, include: { academy: { select: { name: true } } } });
   const student = candidates.find((s) => s.phoneCodeHash === hashToken(code));
   if (!student) {
+    recordFailure(`sms:${user.id}`);
     await audit({ userId: user.id, action: "student.link_fail", detail: `phone ${phone.slice(-4)}` });
     return { ok: false, message: "휴대폰 번호 또는 인증번호가 맞지 않습니다." };
   }
   if (student.phoneCodeExpiresAt && student.phoneCodeExpiresAt < new Date()) return { ok: false, message: "인증번호가 만료되었습니다 (7일). 선생님에게 다시 요청하세요." };
+  recordSuccess(`sms:${user.id}`);
   return linkStudent(user, student.id, "phone code");
 }
 
@@ -163,6 +190,6 @@ async function linkStudent(user: User, studentId: string, how: string): Promise<
     prisma.studentLinkRequest.updateMany({ where: { studentId, status: "pending" }, data: { status: "rejected" } }),
   ]);
   await audit({ academyId: student.academyId, userId: user.id, action: "student.activate", target: studentId, detail: how });
-  await setLearnCookie();
+  await setStudentCookie(studentId);
   return { ok: true, message: `${student.academy.name}에 연결했습니다.`, redirectTo: "/learn" };
 }

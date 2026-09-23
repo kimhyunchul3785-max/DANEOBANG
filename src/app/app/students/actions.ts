@@ -247,7 +247,8 @@ export async function createClassAction(form: FormData): Promise<ActionResult> {
   const name = String(form.get("name") ?? "").trim();
   if (!name || name.length > 30) return { ok: false, message: "반 이름을 확인하세요." };
   const { newJoinCode } = await import("@/lib/onboarding");
-  await prisma.classRoom.create({ data: { academyId: ctx.member.academyId, name, joinCode: await newJoinCode() } });
+  // 만든 사람이 반 담당 (학원장은 담당 미지정 — 반 관리에서 고른다)
+  await prisma.classRoom.create({ data: { academyId: ctx.member.academyId, name, joinCode: await newJoinCode(), teacherMemberId: ctx.isOwner ? null : ctx.member.id } });
   revalidatePath("/app/classes");
   revalidatePath("/app/students");
   return { ok: true };
@@ -338,7 +339,7 @@ export async function uploadRosterAction(form: FormData): Promise<ActionResult> 
       let c = await prisma.classRoom.findFirst({ where: { academyId: ctx.member.academyId, name: className } });
       if (!c) {
         const { newJoinCode } = await import("@/lib/onboarding");
-        c = await prisma.classRoom.create({ data: { academyId: ctx.member.academyId, name: className.slice(0, 30), joinCode: await newJoinCode() } });
+        c = await prisma.classRoom.create({ data: { academyId: ctx.member.academyId, name: className.slice(0, 30), joinCode: await newJoinCode(), teacherMemberId: ctx.isOwner ? null : ctx.member.id } });
         newClasses++;
       } else if (c.archived) await prisma.classRoom.update({ where: { id: c.id }, data: { archived: false } });
       classId = c.id;
@@ -432,6 +433,19 @@ export async function assignTeacherBulkAction(form: FormData): Promise<ActionRes
   await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "student.assign_teacher", detail: `${own.length}명 → ${m.user.name} (${mode})` });
   revalidatePath("/app/students");
   return { ok: true, message: `${own.length}명의 담당을 ${m.user.name} 선생님으로 ${mode === "replace" ? "교체" : "추가"}했습니다.` };
+}
+
+/** 반 담당 선생님 지정 — 학원장만. 반 코드로 들어오는 학생이 이 선생님의 담당이 된다 */
+export async function setClassTeacherAction(classId: string, memberId: string | null): Promise<ActionResult> {
+  const ctx = await requireAcademy();
+  if (!ctx.isOwner) return { ok: false, message: "학원장만 반 담당을 지정할 수 있습니다." };
+  const c = await prisma.classRoom.findFirst({ where: { id: classId, academyId: ctx.member.academyId } });
+  if (!c) return { ok: false };
+  const m = memberId ? await prisma.academyMember.findFirst({ where: { id: memberId, academyId: ctx.member.academyId, status: "active" }, include: { user: { select: { name: true } } } }) : null;
+  if (memberId && !m) return { ok: false, message: "선생님을 찾을 수 없습니다." };
+  await prisma.classRoom.update({ where: { id: classId }, data: { teacherMemberId: m?.id ?? null } });
+  revalidatePath("/app/students");
+  return { ok: true, message: m ? `${c.name} 담당을 ${m.user.name} 선생님으로 정했습니다.` : `${c.name} 담당을 비웠습니다.` };
 }
 
 export async function renameClassAction(form: FormData): Promise<ActionResult> {

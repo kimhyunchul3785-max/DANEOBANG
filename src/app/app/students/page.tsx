@@ -158,7 +158,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
             </div>
             <ul>
               {classes.map((c) => (
-                <ClassRow key={c.id} cls={{ id: c.id, name: c.name, archived: c.archived, count: c._count.students }}>
+                <ClassRow key={c.id} cls={{ id: c.id, name: c.name, archived: c.archived, count: c._count.students, teacherMemberId: c.teacherMemberId }} teachers={ctx.isOwner ? members.map((m) => ({ id: m.id, name: m.user.name })) : null}>
                   <ActionButton action={toggleClassArchiveAction.bind(null, c.id)} className="btn-ghost btn-sm">
                     {c.archived ? "복원" : "보관"}
                   </ActionButton>

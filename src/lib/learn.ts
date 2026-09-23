@@ -3,16 +3,16 @@ import { parseJSON } from "./util";
 import { listStudentAssignments } from "./attempts";
 
 /** 학생 본인의 재시험 목록 (연결된 모든 명단). 출제된 것은 마감 빠른 순 */
-export async function studentRetakes(userId: string) {
+export async function studentRetakes(userId: string, studentId?: string) {
   const tasks = await prisma.retakeTask.findMany({
-    where: { student: { userId, status: "active" } },
+    where: { student: { userId, status: "active", ...(studentId ? { id: studentId } : {}) } },
     include: {
       student: { select: { id: true, name: true, academy: { select: { name: true } } } },
       sourceAttempt: { include: { grades: { where: { current: true } }, assignment: { include: { exam: { select: { id: true, title: true, passScore: true, answersReleased: true, answerVisibility: true } }, form: { select: { id: true } } } } } },
     },
     orderBy: [{ status: "asc" }, { dueAt: { sort: "asc", nulls: "last" } }, { createdAt: "desc" }],
   });
-  const assignments = await listStudentAssignments(userId);
+  const assignments = await listStudentAssignments(userId, studentId);
   const retakeExamIds = tasks.map((t) => t.retakeExamId).filter((x): x is string => !!x);
   const retakeExams = retakeExamIds.length ? await prisma.exam.findMany({ where: { id: { in: retakeExamIds } }, select: { id: true, title: true, questionCount: true, passScore: true } }) : [];
   return Promise.all(
@@ -55,9 +55,9 @@ export async function studentRetakes(userId: string) {
 }
 
 /** 학생 본인의 채점 결과 (점수 공개된 것만), 오래된 순 */
-export async function studentGrades(userId: string) {
+export async function studentGrades(userId: string, studentId?: string) {
   const gs = await prisma.gradeRevision.findMany({
-    where: { current: true, attempt: { assignment: { student: { userId, status: "active" } } } },
+    where: { current: true, attempt: { assignment: { student: { userId, status: "active", ...(studentId ? { id: studentId } : {}) } } } },
     include: { attempt: { select: { id: true, attemptNo: true, submittedAt: true, assignment: { select: { exam: { select: { id: true, title: true, passScore: true, isRetake: true, scoreVisibility: true, answersReleased: true } } } } } } },
     orderBy: { createdAt: "asc" },
   });

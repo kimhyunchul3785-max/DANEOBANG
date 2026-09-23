@@ -11,9 +11,9 @@ export type PracticeSet = { title: string; scope: "attempt" | "all"; attemptId?:
 
 type ItemResult = { itemId: string; optionId: string | null; correct: boolean };
 
-async function wrongWordsFromGrades(userId: string, attemptId?: string): Promise<{ words: PracticeWord[]; meaningPool: Set<string>; englishPool: Set<string>; tests: number; title?: string }> {
+async function wrongWordsFromGrades(userId: string, attemptId?: string, studentId?: string): Promise<{ words: PracticeWord[]; meaningPool: Set<string>; englishPool: Set<string>; tests: number; title?: string }> {
   const gs = await prisma.gradeRevision.findMany({
-    where: { current: true, attempt: { ...(attemptId ? { id: attemptId } : {}), assignment: { student: { userId, status: "active" } } } },
+    where: { current: true, attempt: { ...(attemptId ? { id: attemptId } : {}), assignment: { student: { userId, status: "active", ...(studentId ? { id: studentId } : {}) } } } },
     include: { attempt: { select: { id: true, assignment: { select: { formId: true, exam: { select: { title: true, answerVisibility: true, answersReleased: true } } } } } } },
     orderBy: { createdAt: "desc" },
   });
@@ -52,14 +52,14 @@ async function wrongWordsFromGrades(userId: string, attemptId?: string): Promise
 }
 
 /** 시험 한 개의 틀린 단어. 본인 응시가 아니거나 정답 미공개면 null */
-export async function practiceSetForAttempt(attemptId: string, userId: string): Promise<PracticeSet | null> {
-  const r = await wrongWordsFromGrades(userId, attemptId);
+export async function practiceSetForAttempt(attemptId: string, userId: string, studentId?: string): Promise<PracticeSet | null> {
+  const r = await wrongWordsFromGrades(userId, attemptId, studentId);
   if (!r.title) return null;
   return { title: r.title, scope: "attempt", attemptId, words: r.words, meaningPool: [...r.meaningPool], englishPool: [...r.englishPool], tests: r.tests };
 }
 
 /** 지금까지 틀린 단어 전부 (공개된 시험만, 중복 제거) */
-export async function practiceSetAll(userId: string): Promise<PracticeSet> {
-  const r = await wrongWordsFromGrades(userId);
+export async function practiceSetAll(userId: string, studentId?: string): Promise<PracticeSet> {
+  const r = await wrongWordsFromGrades(userId, undefined, studentId);
   return { title: "지금까지 틀린 단어", scope: "all", words: r.words, meaningPool: [...r.meaningPool], englishPool: [...r.englishPool], tests: r.tests };
 }

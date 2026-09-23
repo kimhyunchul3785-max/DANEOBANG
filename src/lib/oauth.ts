@@ -35,7 +35,8 @@ export function authorizeUrl(p: Provider, state: string) {
   return u.toString();
 }
 
-export type OAuthProfile = { providerId: string; email: string | null; name: string };
+/** emailVerified: 공급사가 이 이메일의 소유를 확인했는지. 검증된 이메일만 기존 계정에 자동으로 붙인다 */
+export type OAuthProfile = { providerId: string; email: string | null; name: string; emailVerified: boolean };
 
 export async function exchangeCode(p: Provider, code: string): Promise<OAuthProfile> {
   if (p === "google") {
@@ -56,8 +57,8 @@ export async function exchangeCode(p: Provider, code: string): Promise<OAuthProf
       headers: { authorization: `Bearer ${tok.access_token}` },
     });
     if (!me.ok) throw new Error("google_userinfo_failed");
-    const j = (await me.json()) as { sub: string; email?: string; name?: string };
-    return { providerId: j.sub, email: j.email ?? null, name: j.name || j.email?.split("@")[0] || "사용자" };
+    const j = (await me.json()) as { sub: string; email?: string; email_verified?: boolean; name?: string };
+    return { providerId: j.sub, email: j.email ?? null, name: j.name || j.email?.split("@")[0] || "사용자", emailVerified: j.email_verified === true };
   }
   const body: Record<string, string> = {
     grant_type: "authorization_code",
@@ -79,20 +80,22 @@ export async function exchangeCode(p: Provider, code: string): Promise<OAuthProf
   if (!me.ok) throw new Error("kakao_userinfo_failed");
   const j = (await me.json()) as {
     id: number;
-    kakao_account?: { email?: string; profile?: { nickname?: string } };
+    kakao_account?: { email?: string; is_email_valid?: boolean; is_email_verified?: boolean; profile?: { nickname?: string } };
   };
   return {
     providerId: String(j.id),
     email: j.kakao_account?.email ?? null,
     name: j.kakao_account?.profile?.nickname || "카카오 사용자",
+    emailVerified: j.kakao_account?.is_email_valid === true && j.kakao_account?.is_email_verified === true,
   };
 }
 
 /**
  * OAuth 프로필 → 사용자. 처음이면 가입, 기존이면 로그인.
  *   1. 같은 (provider, providerId) 로그인 수단이 있으면 그 계정
- *   2. 같은 이메일의 기존 계정(이메일 가입 등)이 있으면 새 계정을 만들지 않고 로그인 수단만 붙인다
- *   3. 없으면 새 계정 + 로그인 수단
+ *   2. 공급사가 검증한 이메일이 기존 계정(이메일 가입 등)과 같으면 새 계정을 만들지 않고 로그인 수단만 붙인다
+ *      (검증되지 않은 이메일로는 자동 병합하지 않는다 — 남의 이메일을 적어 계정을 가로채는 것 방지)
+ *   3. 없으면 새 계정 + 로그인 수단. 검증 안 된 이메일이 이미 다른 계정에 쓰이면 내부용 주소로 만든다
  */
 export async function upsertOAuthUser(p: Provider, profile: OAuthProfile) {
   const idn = await prisma.userIdentity.findUnique({ where: { provider_providerId: { provider: p, providerId: profile.providerId } }, include: { user: true } });
@@ -103,13 +106,17 @@ export async function upsertOAuthUser(p: Provider, profile: OAuthProfile) {
     await prisma.userIdentity.create({ data: { userId: legacy.id, provider: p, providerId: profile.providerId, email: profile.email } });
     return legacy;
   }
-  const email = (profile.email ?? `${p}_${profile.providerId}@noemail.daneobang.local`).toLowerCase();
-  const byEmail = await prisma.user.findUnique({ where: { email } });
+  const placeholder = `${p}_${profile.providerId}@noemail.daneobang.local`;
+  let email = (profile.email ?? placeholder).toLowerCase();
+  const byEmail = profile.email ? await prisma.user.findUnique({ where: { email } }) : null;
   if (byEmail) {
-    await prisma.userIdentity.create({ data: { userId: byEmail.id, provider: p, providerId: profile.providerId, email: profile.email } });
-    return byEmail;
+    if (profile.emailVerified) {
+      await prisma.userIdentity.create({ data: { userId: byEmail.id, provider: p, providerId: profile.providerId, email: profile.email } });
+      return byEmail;
+    }
+    email = placeholder; // 검증 안 된 이메일 — 기존 계정과 합치지 않고 별도 계정
   }
   return prisma.user.create({
-    data: { email, name: profile.name, provider: p, providerId: profile.providerId, emailVerifiedAt: profile.email ? new Date() : null, identities: { create: { provider: p, providerId: profile.providerId, email: profile.email } } },
+    data: { email, name: profile.name, provider: p, providerId: profile.providerId, emailVerifiedAt: profile.email && profile.emailVerified ? new Date() : null, identities: { create: { provider: p, providerId: profile.providerId, email: profile.emailVerified ? profile.email : null } } },
   });
 }

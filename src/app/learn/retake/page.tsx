@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/auth";
+import { requireStudent } from "@/lib/auth";
 import { studentRetakes } from "@/lib/learn";
 import { fmtMDHM } from "@/lib/util";
 import { StartButton } from "../StartButton";
@@ -7,8 +7,8 @@ import { SpeakButton } from "@/components/Speak";
 
 /** 재시험: 출제된 재시험(마감 순) → 시작 · 틀린 단어 연습 · 지난 재시험 결과 */
 export default async function RetakePage() {
-  const user = await requireUser();
-  const retakes = await studentRetakes(user.id);
+  const { user, student } = await requireStudent();
+  const retakes = await studentRetakes(user.id, student.id);
   const open = retakes.filter((r) => r.status === "pending" || r.status === "issued");
   const issued = open.filter((r) => r.retakeAssignment && r.retakeAssignment.status !== "completed");
   const preparing = open.filter((r) => !r.retakeAssignment);

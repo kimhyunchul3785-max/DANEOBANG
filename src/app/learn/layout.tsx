@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { requireUser, getStudentContexts, setLearnCookie } from "@/lib/auth";
+import { prisma } from "@/lib/db";
+import { requireUser, getStudentContext } from "@/lib/auth";
 import { LearnTabs } from "./LearnTabs";
 import { Logo } from "@/components/Logo";
 import { Notifications } from "./Notifications";
@@ -12,9 +13,10 @@ import { Notifications } from "./Notifications";
  */
 export default async function LearnLayout({ children }: { children: React.ReactNode }) {
   const user = await requireUser("/learn");
-  const students = await getStudentContexts(user.id);
-  await setLearnCookie().catch(() => null);
-  const where = students.length ? students.map((s) => s.academy.name).join(" · ") : "학원 연결 전";
+  const ctx = await getStudentContext(user);
+  // 헤더: 선택한 학원 · 학생. 연결 전이면 승인 대기 중인 학원명, 그것도 없으면 "학원 연결 전"
+  const pending = ctx ? null : await prisma.studentLinkRequest.findFirst({ where: { userId: user.id, status: "pending" }, include: { student: { select: { academy: { select: { name: true } } } } } });
+  const where = ctx ? ctx.student.academy.name : pending ? `${pending.student.academy.name} · 확인 대기` : "학원 연결 전";
   return (
     <div className="min-h-screen lg:flex">
       {/* 데스크톱 사이드 */}

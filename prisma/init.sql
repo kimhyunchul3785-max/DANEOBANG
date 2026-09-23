@@ -135,6 +135,7 @@ CREATE TABLE IF NOT EXISTS "ClassRoom" (
   "name" TEXT NOT NULL,
   "archived" BOOLEAN NOT NULL DEFAULT false,
   "joinCode" TEXT,
+  "teacherMemberId" TEXT,
   "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "ClassRoom_academyId_fkey" FOREIGN KEY ("academyId") REFERENCES "Academy" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );

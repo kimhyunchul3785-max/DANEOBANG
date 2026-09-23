@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireUser } from "@/lib/auth";
+import { requireStudent } from "@/lib/auth";
 import { studentGrades } from "@/lib/learn";
 import { fmtDate } from "@/lib/util";
 import { recentWeeks, weeklySeries, weekLabel, avg } from "@/lib/stats";
@@ -9,8 +9,8 @@ import { scoreBins } from "@/lib/stats";
 
 /** 내 성적: 12주 추이 · 평균/통과율 · 분포 · 전체 이력 */
 export default async function GradesPage() {
-  const user = await requireUser();
-  const grades = await studentGrades(user.id);
+  const { user, student } = await requireStudent();
+  const grades = await studentGrades(user.id, student.id);
   const first = grades.filter((g) => !g.isRetake);
   const weeks = recentWeeks(12);
   const series = weeklySeries(first, weeks);

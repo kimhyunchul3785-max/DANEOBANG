@@ -1,14 +1,19 @@
 import { cookies, headers } from "next/headers";
 import { SignJWT, jwtVerify } from "jose";
 import { prisma } from "./db";
-import { ACADEMY_COOKIE, LAST_COOKIE, SESSION_COOKIE } from "./constants";
+import { ACADEMY_COOKIE, LAST_COOKIE, SESSION_COOKIE, STUDENT_COOKIE } from "./constants";
 import { redirect } from "next/navigation";
 import type { AcademyMember, Student, User } from "@/generated/prisma/client";
 import { writeLog } from "./logger";
 
+const DEV_SECRET = "dev-insecure-secret-change-me-please-32chars";
+/** production 에서 SESSION_SECRET 이 없으면(또는 개발용 값이면) 세션을 발급·검증하지 않는다 — 공개된 문자열로 JWT 를 서명하는 사고 방지 */
 const secret = () => {
-  const s = process.env.SESSION_SECRET || "dev-insecure-secret-change-me-please-32chars";
-  return new TextEncoder().encode(s);
+  const s = process.env.SESSION_SECRET;
+  if (process.env.NODE_ENV === "production" && (!s || s === DEV_SECRET || s.length < 16)) {
+    throw new Error("SESSION_SECRET 이 설정되지 않았습니다. .env 에 16자 이상의 비밀 값을 넣고 서버를 다시 시작하세요.");
+  }
+  return new TextEncoder().encode(s || DEV_SECRET);
 };
 
 export type SessionPayload = { uid: string; typ: "web" | "mobile" };
@@ -48,6 +53,7 @@ export async function destroyWebSession() {
   c.delete(SESSION_COOKIE);
   c.delete(ACADEMY_COOKIE);
   c.delete(LAST_COOKIE);
+  c.delete(STUDENT_COOKIE);
 }
 
 /** 쿠키(웹) 또는 Authorization: Bearer(모바일) 에서 현재 사용자 조회 */
@@ -128,10 +134,10 @@ export async function requireOwner(): Promise<AcademyContext> {
 }
 
 /** 학생 컨텍스트: 로그인 사용자에 연결된 학생 명단들 */
-export async function getStudentContexts(userId: string): Promise<(Student & { academy: { id: string; name: string; slug: string } })[]> {
+export async function getStudentContexts(userId: string): Promise<(Student & { academy: { id: string; name: string; slug: string }; classRoom: { name: string } | null })[]> {
   return prisma.student.findMany({
     where: { userId, status: "active" },
-    include: { academy: { select: { id: true, name: true, slug: true } } },
+    include: { academy: { select: { id: true, name: true, slug: true } }, classRoom: { select: { name: true } } },
     orderBy: { createdAt: "asc" },
   });
 }
@@ -152,9 +158,46 @@ export async function setAcademyCookie(academyId: string) {
   c.set(LAST_COOKIE, "app", { httpOnly: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 30 });
 }
 
+/** 학생 자리 선택: 어느 학원의 어느 학생 명단으로 들어가는지 */
+export async function setStudentCookie(studentId: string) {
+  const c = await cookies();
+  c.set(STUDENT_COOKIE, studentId, { httpOnly: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 30 });
+  c.set(LAST_COOKIE, "learn", { httpOnly: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 30 });
+}
+
+/** @deprecated setStudentCookie 를 쓴다. 학생 id 없이 "학생 쪽"만 기억 */
 export async function setLearnCookie() {
   const c = await cookies();
   c.set(LAST_COOKIE, "learn", { httpOnly: true, sameSite: "lax", path: "/", maxAge: 60 * 60 * 24 * 30 });
+}
+
+export type StudentContext = { user: User; student: Student & { academy: { id: string; name: string; slug: string }; classRoom: { name: string } | null } };
+
+/** 학생 화면: 선택한 학생 자리가 없으면 자리가 여럿일 때 /switch, 하나도 없을 때 /learn (연결 안내) */
+export async function requireStudent(): Promise<StudentContext> {
+  const user = await requireUser("/learn");
+  const ctx = await getStudentContext(user);
+  if (!ctx) {
+    const n = await prisma.student.count({ where: { userId: user.id, status: "active" } });
+    redirect(n > 1 ? "/switch" : "/learn");
+  }
+  return ctx;
+}
+
+/**
+ * 현재 선택된 학생 자리. 쿠키의 studentId 가 이 사용자의 것일 때만 유효하고, 쿠키가 없으면 학생 자리가 하나뿐일 때 그것을 쓴다.
+ * 학생 자리가 여럿인데 고르지 않았으면 null (→ /switch).
+ */
+export async function getStudentContext(user?: User | null): Promise<StudentContext | null> {
+  const u = user ?? (await getCurrentUser());
+  if (!u) return null;
+  const c = await cookies();
+  const h = await headers();
+  const wanted = h.get("x-student-id") ?? c.get(STUDENT_COOKIE)?.value;
+  const students = await getStudentContexts(u.id);
+  const student = (wanted && students.find((s) => s.id === wanted)) || (students.length === 1 ? students[0] : null);
+  if (!student) return null;
+  return { user: u, student };
 }
 
 export async function audit(params: { academyId?: string | null; userId?: string | null; action: string; target?: string; detail?: string }) {
@@ -185,18 +228,21 @@ export async function landingAfterLogin(userId: string, next?: string | null): P
   if (next && next.startsWith("/") && !next.startsWith("//") && !["/workspaces", "/switch", "/welcome", "/"].includes(next)) return next;
   const { memberships, students, pending } = await listContexts(userId);
   if (memberships.length === 0 && students.length === 0) return pending.length ? "/learn" : "/welcome";
+  // 자리(학원 역할 + 학생 명단)가 하나면 바로
   if (memberships.length === 1 && students.length === 0) {
     await setAcademyCookie(memberships[0].academyId);
     return "/app";
   }
-  if (memberships.length === 0 && students.length >= 1) {
-    await setLearnCookie();
+  if (memberships.length === 0 && students.length === 1) {
+    await setStudentCookie(students[0].id);
     return "/learn";
   }
+  // 여러 개면 마지막에 쓰던 자리, 기억이 없으면 계정 전환
   const c = await cookies();
   const last = c.get(LAST_COOKIE)?.value;
   const academyId = c.get(ACADEMY_COOKIE)?.value;
+  const studentId = c.get(STUDENT_COOKIE)?.value;
   if (last === "app" && academyId && memberships.some((m) => m.academyId === academyId)) return "/app";
-  if (last === "learn" && students.length) return "/learn";
+  if (last === "learn" && studentId && students.some((s) => s.id === studentId)) return "/learn";
   return "/switch";
 }

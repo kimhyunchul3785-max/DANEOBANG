@@ -3301,6 +3301,7 @@ export const ClassRoomScalarFieldEnum = {
   name: 'name',
   archived: 'archived',
   joinCode: 'joinCode',
+  teacherMemberId: 'teacherMemberId',
   createdAt: 'createdAt'
 } as const
 

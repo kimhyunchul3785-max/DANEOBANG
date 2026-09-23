@@ -6,6 +6,6 @@ export async function GET(req: Request) {
   return handle(async () => {
     const user = await getCurrentUser();
     if (!user) return fail(401, "unauthorized");
-    return ok(await listStudentAssignments(user.id));
+    return ok(await listStudentAssignments(user.id, req.headers.get("x-student-id") ?? undefined));
   }, req);
 }
