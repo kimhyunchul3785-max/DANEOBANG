@@ -398,6 +398,7 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 export const ModelName = {
   User: 'User',
+  UserIdentity: 'UserIdentity',
   Academy: 'Academy',
   AcademyMember: 'AcademyMember',
   Invitation: 'Invitation',
@@ -447,7 +448,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "academy" | "academyMember" | "invitation" | "subscription" | "payment" | "signupSession" | "classRoom" | "student" | "teacherStudent" | "studentLinkRequest" | "vocabBook" | "bookDay" | "word" | "wordRevision" | "import" | "importRow" | "exam" | "examScope" | "examForm" | "formItem" | "formOption" | "assignment" | "attempt" | "attemptAnswer" | "gradeRevision" | "printInstance" | "printPage" | "scanUpload" | "retakeTask" | "job" | "auditLog" | "deviceToken" | "notification" | "usageEvent"
+    modelProps: "user" | "userIdentity" | "academy" | "academyMember" | "invitation" | "subscription" | "payment" | "signupSession" | "classRoom" | "student" | "teacherStudent" | "studentLinkRequest" | "vocabBook" | "bookDay" | "word" | "wordRevision" | "import" | "importRow" | "exam" | "examScope" | "examForm" | "formItem" | "formOption" | "assignment" | "attempt" | "attemptAnswer" | "gradeRevision" | "printInstance" | "printPage" | "scanUpload" | "retakeTask" | "job" | "auditLog" | "deviceToken" | "notification" | "usageEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -522,6 +523,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.UserCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.UserCountAggregateOutputType> | number
+        }
+      }
+    }
+    UserIdentity: {
+      payload: Prisma.$UserIdentityPayload<ExtArgs>
+      fields: Prisma.UserIdentityFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.UserIdentityFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserIdentityPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.UserIdentityFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserIdentityPayload>
+        }
+        findFirst: {
+          args: Prisma.UserIdentityFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserIdentityPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.UserIdentityFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserIdentityPayload>
+        }
+        findMany: {
+          args: Prisma.UserIdentityFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserIdentityPayload>[]
+        }
+        create: {
+          args: Prisma.UserIdentityCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserIdentityPayload>
+        }
+        createMany: {
+          args: Prisma.UserIdentityCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.UserIdentityCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserIdentityPayload>[]
+        }
+        delete: {
+          args: Prisma.UserIdentityDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserIdentityPayload>
+        }
+        update: {
+          args: Prisma.UserIdentityUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserIdentityPayload>
+        }
+        deleteMany: {
+          args: Prisma.UserIdentityDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.UserIdentityUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.UserIdentityUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserIdentityPayload>[]
+        }
+        upsert: {
+          args: Prisma.UserIdentityUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$UserIdentityPayload>
+        }
+        aggregate: {
+          args: Prisma.UserIdentityAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateUserIdentity>
+        }
+        groupBy: {
+          args: Prisma.UserIdentityGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserIdentityGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.UserIdentityCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.UserIdentityCountAggregateOutputType> | number
         }
       }
     }
@@ -3095,6 +3170,18 @@ export const UserScalarFieldEnum = {
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
 
 
+export const UserIdentityScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  provider: 'provider',
+  providerId: 'providerId',
+  email: 'email',
+  createdAt: 'createdAt'
+} as const
+
+export type UserIdentityScalarFieldEnum = (typeof UserIdentityScalarFieldEnum)[keyof typeof UserIdentityScalarFieldEnum]
+
+
 export const AcademyScalarFieldEnum = {
   id: 'id',
   name: 'name',
@@ -3213,6 +3300,7 @@ export const ClassRoomScalarFieldEnum = {
   academyId: 'academyId',
   name: 'name',
   archived: 'archived',
+  joinCode: 'joinCode',
   createdAt: 'createdAt'
 } as const
 
@@ -3255,6 +3343,8 @@ export const StudentLinkRequestScalarFieldEnum = {
   id: 'id',
   studentId: 'studentId',
   userId: 'userId',
+  classId: 'classId',
+  name: 'name',
   status: 'status',
   createdAt: 'createdAt',
   decidedAt: 'decidedAt',
@@ -3828,6 +3918,7 @@ export interface PrismaClientOptionsWithAdapter extends PrismaClientBaseOptions 
 export type PrismaClientOptions = PrismaClientOptionsWithAccelerateUrl | PrismaClientOptionsWithAdapter
 export type GlobalOmitConfig = {
   user?: Prisma.UserOmit
+  userIdentity?: Prisma.UserIdentityOmit
   academy?: Prisma.AcademyOmit
   academyMember?: Prisma.AcademyMemberOmit
   invitation?: Prisma.InvitationOmit

@@ -128,7 +128,7 @@ export default async function TeachersPage() {
               Invite · 선생님 초대
             </div>
             <p className="mt-2 text-[13px]" style={{ color: "rgba(236,233,227,0.8)" }}>
-              선생님은 따로 가입하지 않습니다. 초대 메일의 링크에서 이름·비밀번호만 정하면 참여가 끝납니다. 초대는 7일간 유효합니다.{usage.unlimited ? "" : " 보내는 순간 자리를 예약합니다."}
+              초대 링크를 연 뒤 같은 이메일의 Google·카카오 계정으로 로그인하면 참여됩니다. 7일 유효 · 1회 사용 · 재발급하면 이전 초대는 폐기됩니다.{usage.unlimited ? "" : " 보내는 순간 자리를 예약합니다."}
             </p>
             <div className="mt-3">
               <InviteBox available={usage.available} />

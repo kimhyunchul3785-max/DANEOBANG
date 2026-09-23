@@ -8,10 +8,16 @@ import { Ring, PulseBars, HBars, Donut, Sparkline } from "@/components/Viz";
 import { CountUp } from "@/components/Motion";
 import { StudentRotator } from "./StudentRotator";
 import { loadGrades, avg, rate, recentWeeks, weeklySeries, weekLabel, trendDelta } from "@/lib/stats";
+import { Onboarding } from "./Onboarding";
 
 export default async function HomePage() {
   const ctx = await requireAcademy();
-  return ctx.isOwner ? <OwnerOverview ctx={ctx} /> : <TeacherToday ctx={ctx} />;
+  return (
+    <div className="mx-auto max-w-6xl">
+      <Onboarding ctx={ctx} />
+      {ctx.isOwner ? <OwnerOverview ctx={ctx} /> : <TeacherToday ctx={ctx} />}
+    </div>
+  );
 }
 
 /* ───────────── 학원장: 학원 전체가 잘 돌아가는지 조망 ───────────── */

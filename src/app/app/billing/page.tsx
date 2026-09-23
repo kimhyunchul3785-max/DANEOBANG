@@ -6,7 +6,7 @@ import { billingProvider, billingEnabled, won, subscriptionLabel } from "@/lib/b
 import { fmtDate } from "@/lib/util";
 import { CountUp } from "@/components/Motion";
 import { ActionButton } from "@/components/ActionForm";
-import { PayForm } from "@/app/start/PayForm";
+import { PayForm } from "./PayForm";
 import { SeatControl } from "./SeatControl";
 import { setOwnerTeacherAction } from "./actions";
 

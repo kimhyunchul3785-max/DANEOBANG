@@ -10,7 +10,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ prov
     return NextResponse.redirect(new URL(`/login?error=${p}_not_configured`, req.url));
   }
   const state = randomToken(16);
-  const next = req.nextUrl.searchParams.get("next") || "/workspaces";
+  const next = req.nextUrl.searchParams.get("next") || "";
   const res = NextResponse.redirect(authorizeUrl(p, state));
   res.cookies.set("oauth_state", `${state}|${next}`, { httpOnly: true, sameSite: "lax", path: "/", maxAge: 600 });
   return res;

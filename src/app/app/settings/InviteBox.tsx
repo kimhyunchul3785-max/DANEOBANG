@@ -11,7 +11,7 @@ export function InviteBox({ available }: { available: number }) {
       <ActionForm action={createInvitationAction} className="grid gap-2" onSuccess={(r) => setSent(((r.data as { sent?: { email: string; devLink?: string }[] })?.sent) ?? [])}>
         <textarea className="input" name="emails" rows={2} placeholder={available > 0 ? "선생님 이메일 (여러 명은 줄바꿈)" : "빈 자리가 없습니다 — 요금제에서 선생님 수를 늘려주세요"} disabled={available <= 0} data-testid="invite-emails" />
         <button className="btn whitespace-nowrap py-2.5" style={{ background: "#ece9e3", color: "#1b1a18" }} disabled={available <= 0} data-testid="invite-send">
-          초대 메일 보내기
+          초대 보내기
         </button>
       </ActionForm>
       {sent && sent.length > 0 && (
@@ -21,7 +21,7 @@ export function InviteBox({ available }: { available: number }) {
               <span className="truncate">{s.email}</span>
               {s.devLink ? (
                 <button type="button" className="lbl underline" onClick={() => navigator.clipboard?.writeText(s.devLink!)} title={s.devLink} data-testid="invite-devlink" data-link={s.devLink}>
-                  링크 복사 (메일 서버 없음)
+                  초대 링크 복사
                 </button>
               ) : (
                 <span className="badge-green">발송</span>

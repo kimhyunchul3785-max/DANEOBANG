@@ -13,7 +13,7 @@ export function StudentTools({
   assignedMemberIds,
 }: {
   student: { id: string; name: string; email: string | null; phone: string | null; userId: string | null; userEmail: string | null; hasInvite: boolean; inviteExpiresAt: string | null; inviteSentAt: string | null; codeSent: boolean; codeExpiresAt: string | null };
-  linkRequests: { id: string; user: { name: string; email: string } | null; createdAt: string }[];
+  linkRequests: { id: string; user: { name: string; email: string } | null; createdAt: string; name: string | null; className: string | null }[];
   isOwner: boolean;
   members: { id: string; name: string; role: string }[];
   assignedMemberIds: string[];
@@ -44,12 +44,12 @@ export function StudentTools({
           </div>
         ) : (
           <div className="space-y-2 text-sm">
-            {/* 1순위: 휴대폰 인증번호 */}
+            {/* 1순위: 문자 초대 (링크 + 인증번호) */}
             <div className="card-2 rounded-xl p-3">
               <div className="flex items-center justify-between gap-2">
                 <div>
-                  <div className="font-semibold">휴대폰 인증번호로 가입</div>
-                  <div className="muted text-[12px]">{student.phone ? `${fmtPhone(student.phone)} 로 6자리 인증번호를 보냅니다. 학생은 /join 에서 번호·인증번호·비밀번호만 입력.` : "휴대폰 번호를 먼저 정보에 입력해주세요."}</div>
+                  <div className="font-semibold">문자 초대</div>
+                  <div className="muted text-[12px]">{student.phone ? `${fmtPhone(student.phone)} 로 연결 링크와 인증번호를 보냅니다. 학생은 로그인 뒤 링크를 열거나 번호를 입력.` : "휴대폰 번호를 먼저 정보에 입력해주세요."}</div>
                 </div>
                 <ActionButton
                   action={sendStudentCodeAction.bind(null, student.id)}
@@ -59,12 +59,12 @@ export function StudentTools({
                     setCode(d?.results?.[0] ?? null);
                   }}
                 >
-                  {student.codeSent ? "인증번호 다시 보내기" : "인증번호 보내기"}
+                  {student.codeSent ? "다시 보내기" : "문자 초대"}
                 </ActionButton>
               </div>
               {code && !code.error && (
                 <div className="mt-2 flex items-center justify-between rounded-lg px-3 py-2" style={{ background: "var(--surface)" }} data-testid="student-code">
-                  <span className="muted text-[12px]">{code.sent ? "문자를 보냈습니다" : "문자 업체가 없어 직접 전달하세요 (3일 유효)"}</span>
+                  <span className="muted text-[12px]">{code.sent ? "문자를 보냈습니다" : "문자 업체가 없어 직접 전달하세요 (7일 유효)"}</span>
                   {!code.sent && (
                     <span className="digital" style={{ fontSize: 20, letterSpacing: "0.25em" }}>
                       {code.code}
@@ -72,10 +72,10 @@ export function StudentTools({
                   )}
                 </div>
               )}
-              {!code && student.codeSent && <p className="muted mt-2 text-[12px]">인증번호를 보냈습니다 (만료 {student.codeExpiresAt ? new Date(student.codeExpiresAt).toLocaleDateString("ko-KR") : "-"}). 학생이 아직 가입하지 않았습니다.</p>}
+              {!code && student.codeSent && <p className="muted mt-2 text-[12px]">초대를 보냈습니다 (만료 {student.codeExpiresAt ? new Date(student.codeExpiresAt).toLocaleDateString("ko-KR") : "-"}). 학생이 아직 연결하지 않았습니다.</p>}
             </div>
-            <div className="lbl mt-3">또는 · 이메일 링크</div>
-            <p className="muted">계정 설정 링크에서 <b>비밀번호만</b> 정하면 바로 연결됩니다.{student.email ? ` 링크는 ${student.email} 로 보냅니다.` : " 이메일을 적어 두면 메일로 보낼 수 있습니다."}</p>
+            <div className="lbl mt-3">또는 · 초대 링크</div>
+            <p className="muted">학생이 로그인한 뒤 링크를 열면 바로 연결됩니다.{student.email ? ` 링크는 ${student.email} 로 보냅니다.` : " 이메일을 적어 두면 메일로 보낼 수 있습니다."} 반 코드는 학생 탭에 있습니다.</p>
             <ActionButton
               action={issueStudentInviteAction.bind(null, student.id)}
               className="btn-secondary btn-sm"
@@ -85,7 +85,7 @@ export function StudentTools({
                 setMailed(!!d?.mailed);
               }}
             >
-              {student.hasInvite ? "계정 설정 링크 다시 보내기" : student.email ? "계정 설정 링크 보내기" : "계정 설정 링크 만들기"}
+              {student.hasInvite ? "초대 링크 다시 만들기" : student.email ? "초대 링크 보내기" : "초대 링크 만들기"}
             </ActionButton>
             {student.hasInvite && !inviteUrl && (
               <p className="text-xs text-slate-500">
@@ -105,21 +105,27 @@ export function StudentTools({
               </div>
             )}
             {linkRequests.length > 0 && (
-              <div className="rounded border border-amber-200 bg-amber-50 p-2">
-                <div className="mb-1 text-xs font-semibold text-amber-800">연결 요청</div>
+              <div className="card-accent rounded-2xl p-3" data-testid="link-requests">
+                <div className="lbl-on mb-1">참여 요청</div>
                 {linkRequests.map((r) => (
-                  <div key={r.id} className="flex items-center justify-between py-1 text-xs">
-                    <span>
-                      {r.user?.name} ({r.user?.email})
-                    </span>
-                    <span className="flex gap-1">
-                      <ActionButton action={decideLinkRequestAction.bind(null, r.id, true)} className="btn-primary btn-sm">
-                        승인
+                  <div key={r.id} className="py-1.5 text-[13px]">
+                    <div>
+                      <b>{r.name ?? r.user?.name}</b> 학생이 {r.className ? `${r.className} ` : ""}참여를 요청했습니다.
+                      <span className="block text-[12px]" style={{ color: "rgba(255,244,240,0.8)" }}>
+                        계정 {r.user?.name} · {r.user?.email} · 기존 명단 {student.name}
+                      </span>
+                    </div>
+                    <div className="mt-2 flex flex-wrap gap-1.5">
+                      <ActionButton action={decideLinkRequestAction.bind(null, r.id, "link")} className="btn btn-sm" style={{ background: "#fff4f0", color: "var(--accent)" }} testId="link-existing">
+                        기존 학생과 연결
                       </ActionButton>
-                      <ActionButton action={decideLinkRequestAction.bind(null, r.id, false)} className="btn-ghost btn-sm">
+                      <ActionButton action={decideLinkRequestAction.bind(null, r.id, "new")} className="btn btn-sm" style={{ background: "rgba(255,244,240,0.18)", color: "#fff4f0" }} testId="link-new">
+                        새 학생으로 추가
+                      </ActionButton>
+                      <ActionButton action={decideLinkRequestAction.bind(null, r.id, "reject")} className="btn-ghost btn-sm" style={{ color: "rgba(255,244,240,0.8)" }}>
                         거절
                       </ActionButton>
-                    </span>
+                    </div>
                   </div>
                 ))}
               </div>

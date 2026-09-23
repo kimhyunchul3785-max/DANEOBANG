@@ -38,6 +38,10 @@ const MIGRATIONS: { table: string; column: string; ddl: string }[] = [
   { table: "Student", column: "phoneCodeSentAt", ddl: 'ALTER TABLE "Student" ADD COLUMN "phoneCodeSentAt" DATETIME' },
   // v4.4 — 성적 대시보드 위젯 배치
   { table: "AcademyMember", column: "dashboardLayout", ddl: 'ALTER TABLE "AcademyMember" ADD COLUMN "dashboardLayout" TEXT' },
+  // v4.6 — 계정 하나·역할 여러 개: 반 코드, 반 코드 참여 요청
+  { table: "ClassRoom", column: "joinCode", ddl: 'ALTER TABLE "ClassRoom" ADD COLUMN "joinCode" TEXT' },
+  { table: "StudentLinkRequest", column: "classId", ddl: 'ALTER TABLE "StudentLinkRequest" ADD COLUMN "classId" TEXT' },
+  { table: "StudentLinkRequest", column: "name", ddl: 'ALTER TABLE "StudentLinkRequest" ADD COLUMN "name" TEXT' },
 ];
 
 /**
@@ -76,6 +80,15 @@ const DATA_FIXES: string[] = [
   `UPDATE "RetakeTask" SET "status" = 'issued' WHERE "status" = 'scheduled'`,
   `UPDATE "RetakeTask" SET "issuedAt" = "createdAt" WHERE "issuedAt" IS NULL AND "retakeExamId" IS NOT NULL`,
   `UPDATE "User" SET "emailVerifiedAt" = "createdAt" WHERE "emailVerifiedAt" IS NULL`,
+  // v4.6 — 기존 소셜 로그인 사용자를 UserIdentity 로 옮긴다 (User.provider/providerId 는 그대로 둔다)
+  `INSERT INTO "UserIdentity" ("id", "userId", "provider", "providerId", "email", "createdAt")
+     SELECT 'idn_' || lower(hex(randomblob(10))), u."id", u."provider", u."providerId", u."email", u."createdAt"
+     FROM "User" u WHERE u."providerId" IS NOT NULL AND u."provider" IN ('google', 'kakao')
+       AND NOT EXISTS (SELECT 1 FROM "UserIdentity" i WHERE i."provider" = u."provider" AND i."providerId" = u."providerId")`,
+  // joinCode 유니크 인덱스는 컬럼이 추가된 뒤(MIGRATIONS 다음)에 만들어야 하므로 init.sql 이 아니라 여기서
+  `CREATE UNIQUE INDEX IF NOT EXISTS "ClassRoom_joinCode_key" ON "ClassRoom"("joinCode")`,
+  // 기존 반에 반 코드 부여 (보관된 반 제외)
+  `UPDATE "ClassRoom" SET "joinCode" = printf('%06d', abs(random()) % 1000000) WHERE "joinCode" IS NULL AND "archived" = 0`,
   `INSERT INTO "Subscription" ("id", "academyId", "provider", "seatQuantity", "unitPrice", "status", "currentPeriodStart", "currentPeriodEnd", "createdAt", "updatedAt")
      SELECT 'sub_' || lower(hex(randomblob(10))), a."id", 'legacy',
        MAX(1, (SELECT count(*) FROM "AcademyMember" m WHERE m."academyId" = a."id" AND m."status" = 'active' AND m."isTeacher" = 1)),

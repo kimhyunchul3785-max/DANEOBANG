@@ -58,9 +58,9 @@ export function verifyMail(link: string, academyName: string) {
 }
 
 export function teacherInviteMail(link: string, academyName: string) {
-  return { subject: `[단어방] ${academyName}에서 초대했습니다`, text: `${academyName}에서 단어시험 시스템에 선생님으로 초대했습니다.\n\n아래 링크를 열어 이름과 비밀번호만 설정하면 바로 시작할 수 있습니다.\n\n${link}\n\n링크는 7일 동안 유효합니다.`, link };
+  return { subject: `[단어방] ${academyName}에서 초대했습니다`, text: `${academyName}에서 단어시험 시스템에 선생님으로 초대했습니다.\n\n아래 링크를 열고 이 이메일의 Google 또는 카카오 계정으로 로그인하면 바로 참여됩니다.\n\n${link}\n\n링크는 7일 동안 유효합니다.`, link };
 }
 
 export function studentActivateMail(link: string, academyName: string, studentName: string) {
-  return { subject: `[단어방] ${academyName} 단어시험 계정을 설정하세요`, text: `${studentName} 학생, ${academyName}에서 단어시험 서비스에 등록했습니다.\n\n아래 링크를 열어 비밀번호만 설정하면 시험 일정·점수·재시험을 볼 수 있습니다.\n\n${link}\n\n링크는 7일 동안 유효합니다.`, link };
+  return { subject: `[단어방] ${academyName}에서 ${studentName} 학생을 초대했습니다`, text: `${studentName} 학생, ${academyName}에서 단어시험에 초대했습니다.\n\n아래 링크를 열고 Google 또는 카카오로 로그인하면 바로 연결됩니다.\n\n${link}\n\n링크는 7일 동안 유효합니다.`, link };
 }

@@ -8,7 +8,7 @@ export async function POST(req: NextRequest) {
   try {
     const form = await req.formData();
     const n = String(form.get("next") ?? "");
-    if (n.startsWith("/") && !n.startsWith("//")) next = n.startsWith("/q/") ? `/login?next=${encodeURIComponent(n)}` : n;
+    if (n.startsWith("/") && !n.startsWith("//")) next = n.startsWith("/q/") || n.startsWith("/invite/") || n.startsWith("/join/") ? `/login?next=${encodeURIComponent(n)}` : n;
   } catch {
     /* no body */
   }

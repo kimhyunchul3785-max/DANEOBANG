@@ -14,43 +14,33 @@ export function defaultDueInput(days = 3) {
   return new Date(Date.UTC(l.getUTCFullYear(), l.getUTCMonth(), l.getUTCDate() + days, 23, 59)).toISOString().slice(0, 16);
 }
 
-/** 범위 토글: 오답만 n문항 / 같은 범위 N문항 — 고른 쪽이 검게 칠해지고 아래에 무엇을 골랐는지 문장으로 보인다 */
-export function ModeToggle({ mode, onChange, wrong, same, compact }: { mode: "wrong" | "same"; onChange: (m: "wrong" | "same") => void; wrong: number; same: number; compact?: boolean }) {
+/** 범위 토글: 오답만 n / 같은 범위 N — 고른 쪽이 검게 칠해진다 (숫자 = 문항 수) */
+export function ModeToggle({ mode, onChange, wrong, same }: { mode: "wrong" | "same"; onChange: (m: "wrong" | "same") => void; wrong: number; same: number; compact?: boolean }) {
   return (
-    <div className={compact ? "" : "min-w-0"}>
-      <div className="seg" role="radiogroup" aria-label="재시험 범위">
-        <button type="button" role="radio" aria-checked={mode === "wrong"} className={`seg-item${mode === "wrong" ? " on" : ""}`} onClick={() => onChange("wrong")} disabled={wrong === 0} title={wrong === 0 ? "오답이 없습니다" : undefined} data-testid="retake-mode-wrong">
-          오답만 {wrong}
-        </button>
-        <button type="button" role="radio" aria-checked={mode === "same"} className={`seg-item${mode === "same" ? " on" : ""}`} onClick={() => onChange("same")} data-testid="retake-mode-same">
-          같은 범위 {same}
-        </button>
-      </div>
-      {!compact && (
-        <div className="muted mt-1 text-[12px]" data-testid="retake-mode-summary">
-          {mode === "wrong" ? `틀린 단어 ${wrong}개만 · ${wrong}문항` : `원 시험 범위 전체 · ${same}문항`}
-        </div>
-      )}
+    <div className="seg retake-seg" role="radiogroup" aria-label="재시험 범위">
+      <button type="button" role="radio" aria-checked={mode === "wrong"} className={`seg-item${mode === "wrong" ? " on" : ""}`} onClick={() => onChange("wrong")} disabled={wrong === 0} title={wrong === 0 ? "오답이 없습니다" : `틀린 단어 ${wrong}문항`} data-testid="retake-mode-wrong">
+        오답만 {wrong}
+      </button>
+      <button type="button" role="radio" aria-checked={mode === "same"} className={`seg-item${mode === "same" ? " on" : ""}`} onClick={() => onChange("same")} title={`원 시험 범위 ${same}문항`} data-testid="retake-mode-same">
+        같은 범위 {same}
+      </button>
     </div>
   );
 }
 
-/** 한 명 출제: [오답만 | 같은 범위] + 마감 + 출제 */
+/** 한 명 출제: [오답만 | 같은 범위] + 마감 + 출제 — 한 줄, 높이 32px 로 통일 */
 export function IssueBox({ taskId, wrong, same }: { taskId: string; wrong: number; same: number }) {
   const [mode, setMode] = useState<"wrong" | "same">(wrong > 0 ? "wrong" : "same");
   const [due, setDue] = useState(defaultDueInput());
   const [pending, start] = useTransition();
   const router = useRouter();
   return (
-    <div className="flex flex-wrap items-end gap-3" data-testid="issue-box">
+    <div className="flex flex-wrap items-center gap-2" data-testid="issue-box">
       <ModeToggle mode={mode} onChange={setMode} wrong={wrong} same={same} />
-      <label className="block">
-        <span className="lbl block">마감</span>
-        <input type="datetime-local" className="input mt-1 w-[214px]" value={due} onChange={(e) => setDue(e.target.value)} style={{ padding: "6px 10px", fontSize: 13 }} aria-label="재시험 마감" data-testid="issue-due" />
-      </label>
+      <input type="datetime-local" className="input retake-due w-[200px]" value={due} onChange={(e) => setDue(e.target.value)} aria-label="재시험 마감" title="마감" data-testid="issue-due" />
       <button
         type="button"
-        className="btn-accent btn-sm"
+        className="btn-accent btn-sm retake-btn"
         disabled={pending}
         data-testid="issue-submit"
         onClick={() =>
@@ -81,7 +71,7 @@ export function BulkIssueBar({ selected, onDone }: { selected: { id: string; wro
   const issued = selected.filter((s) => s.issued);
   if (!selected.length) return null;
   return (
-    <div className="card-dark card-body mb-3 flex flex-wrap items-end gap-3" data-testid="bulk-issue">
+    <div className="card-dark card-body mb-3 flex flex-wrap items-center gap-3" data-testid="bulk-issue">
       <div>
         <div className="lbl" style={{ color: "rgba(236,233,227,0.6)" }}>
           선택 {selected.length}명
@@ -93,7 +83,7 @@ export function BulkIssueBar({ selected, onDone }: { selected: { id: string; wro
         </div>
       </div>
       {notIssued.length > 0 && (
-        <div className="seg" role="radiogroup" aria-label="재시험 범위">
+        <div className="seg retake-seg" role="radiogroup" aria-label="재시험 범위">
           <button type="button" role="radio" aria-checked={mode === "wrong"} className={`seg-item${mode === "wrong" ? " on-accent" : ""}`} onClick={() => setMode("wrong")} style={mode !== "wrong" ? { color: "rgba(236,233,227,0.8)" } : undefined}>
             오답만
           </button>
@@ -102,15 +92,10 @@ export function BulkIssueBar({ selected, onDone }: { selected: { id: string; wro
           </button>
         </div>
       )}
-      <label className="block">
-        <span className="lbl block" style={{ color: "rgba(236,233,227,0.6)" }}>
-          마감
-        </span>
-        <input type="datetime-local" className="input mt-1 w-[214px]" value={due} onChange={(e) => setDue(e.target.value)} style={{ padding: "6px 10px", fontSize: 13 }} aria-label="마감" />
-      </label>
+      <input type="datetime-local" className="input retake-due w-[200px]" value={due} onChange={(e) => setDue(e.target.value)} aria-label="마감" title="마감" />
       <button
         type="button"
-        className="btn-accent btn-sm"
+        className="btn-accent btn-sm retake-btn"
         disabled={pending}
         onClick={() =>
           start(async () => {
@@ -151,16 +136,16 @@ export function DueBox({ taskId, dueAt }: { taskId: string; dueAt: string | null
   const router = useRouter();
   if (!open)
     return (
-      <button type="button" className="btn-secondary btn-sm" onClick={() => setOpen(true)} data-testid="due-open">
+      <button type="button" className="btn-secondary btn-sm retake-btn" onClick={() => setOpen(true)} data-testid="due-open">
         마감 변경
       </button>
     );
   return (
-    <span className="inline-flex flex-wrap items-center gap-1">
-      <input type="datetime-local" className="input w-[214px]" value={due} onChange={(e) => setDue(e.target.value)} style={{ padding: "6px 10px", fontSize: 13 }} aria-label="재시험 마감" />
+    <span className="inline-flex flex-wrap items-center gap-2">
+      <input type="datetime-local" className="input retake-due w-[200px]" value={due} onChange={(e) => setDue(e.target.value)} aria-label="재시험 마감" />
       <button
         type="button"
-        className="btn-primary btn-sm"
+        className="btn-primary btn-sm retake-btn"
         disabled={pending}
         onClick={() =>
           start(async () => {
@@ -178,7 +163,7 @@ export function DueBox({ taskId, dueAt }: { taskId: string; dueAt: string | null
       >
         저장
       </button>
-      <button type="button" className="btn-ghost btn-sm" onClick={() => setOpen(false)}>
+      <button type="button" className="btn-ghost btn-sm retake-btn" onClick={() => setOpen(false)}>
         닫기
       </button>
     </span>

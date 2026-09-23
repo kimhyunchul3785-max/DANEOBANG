@@ -27,8 +27,10 @@ export default async function PaperPage() {
       {processing && <AutoRefresh ms={2500} />}
       <div className="flex items-end justify-between px-1">
         <div>
-          <div className="lbl">Paper</div>
-          <div className="mt-1 text-[15px] font-semibold">종이 시험 제출</div>
+          <Link href="/learn" className="lbl hover:underline">
+            ← 이번 주
+          </Link>
+          <div className="mt-1 text-[15px] font-semibold">종이 시험 · 사진 찍어 제출</div>
         </div>
         <span className="digital">{String(paperOpen.length).padStart(2, "0")} OPEN</span>
       </div>

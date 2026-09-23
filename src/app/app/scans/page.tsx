@@ -28,7 +28,10 @@ export default async function ScansPage() {
   return (
     <div>
       {busy && <AutoRefresh ms={2500} />}
-      <h1 className="h1 mb-1">사진 채점</h1>
+      <Link href="/app/tests" className="kicker hover:underline">
+        ← Tests · 시험
+      </Link>
+      <h1 className="h1 mb-1 mt-1">사진 채점</h1>
       <p className="muted mb-4">학생이 마킹한 시험지를 촬영해 올리면 QR로 학생·페이지를 식별하고 마킹을 판독합니다. 판독 결과는 선생님이 확인·수정한 뒤 확정해야 성적에 반영됩니다.</p>
       <div className="grid gap-4 lg:grid-cols-3">
         <div className="card lg:col-span-2">

@@ -3,7 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { Logo } from "@/components/Logo";
 import { billingEnabled } from "@/lib/billing";
 
-/** 로그인 전 첫 화면: 부가 설명 없이 워드마크 · 한 줄 · 진입 버튼만 */
+/** 로그인 전 첫 화면: 워드마크 · 한 줄 · 진입 버튼만. 가입 버튼은 없다 — 로그인이 곧 가입 */
 export default async function Home() {
   const user = await getCurrentUser();
   return (
@@ -13,8 +13,8 @@ export default async function Home() {
         <nav className="flex items-center gap-2">
           {user ? (
             <>
-              <Link className="btn-primary" href="/workspaces">
-                내 학원
+              <Link className="btn-primary" href="/switch">
+                들어가기
               </Link>
               {user.isPlatformAdmin && (
                 <Link className="btn-ghost" href="/admin">
@@ -35,31 +35,23 @@ export default async function Home() {
           <Logo variant="full" height={170} href={null} />
         </h1>
         <p className="mt-3 text-[20px] font-semibold leading-snug" style={{ color: "var(--ink)" }}>
-          영어학원의 단어시험과 재시험을 한 곳에서<span style={{ color: "var(--accent)" }}>.</span>
+          영어 단어 시험을 더 간단하게<span style={{ color: "var(--accent)" }}>.</span>
         </p>
         <p className="mt-2 text-[15px]" style={{ color: "var(--ink-2)" }}>
-          등록 → 출제 → 채점 → 재시험{billingEnabled() ? <> · <span className="digital">월 9,900원 / 선생님</span> · 학생 수 무관</> : <> · <span className="digital">무료 체험 중</span></>}
+          등록 → 출제 → 채점 → 재시험{billingEnabled() ? <> · <span className="digital">월 9,900원 / 선생님</span> · 학생 무료</> : <> · <span className="digital">무료 체험 중</span></>}
         </p>
         <div className="mt-9 flex flex-wrap items-center gap-3">
           {user ? (
-            <Link className="btn-primary px-6 py-3 text-[13px]" href="/workspaces">
-              대시보드로 이동
+            <Link className="btn-primary px-6 py-3 text-[13px]" href="/switch">
+              들어가기
             </Link>
           ) : (
             <>
-              <Link className="btn-primary px-6 py-3 text-[13px]" href="/start" data-testid="cta-start">
-                학원 시작하기
+              <Link className="btn-primary px-6 py-3 text-[13px]" href="/login" data-testid="cta-start">
+                Google · 카카오로 시작하기
               </Link>
               <span className="text-[13px]" style={{ color: "var(--ink-2)" }}>
-                이미 사용 중이신가요?{" "}
-                <Link className="underline" href="/login">
-                  로그인
-                </Link>
-                <span className="mx-2">·</span>
-                학생은{" "}
-                <Link className="underline" href="/join" data-testid="cta-join">
-                  인증번호로 가입
-                </Link>
+                학생도 선생님도 같은 로그인으로 시작해요
               </span>
             </>
           )}

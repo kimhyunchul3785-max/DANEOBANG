@@ -97,7 +97,7 @@ export function RosterTable({ rows, classes, members, isOwner }: { rows: RosterR
                 })
               }
             >
-              인증번호 보내기
+              문자 초대
             </button>
             <span className="mx-1 h-4 w-px" style={{ background: "rgba(236,233,227,0.25)" }} />
             <button type="button" className="btn-ghost btn-sm" style={{ color: "rgba(236,233,227,0.8)" }} disabled={pending} onClick={() => run(setStudentsStatusAction, { status: "inactive" }, "선택 학생을 비활성으로 바꿀까요? 기록은 유지되고 목록·배정에서만 빠집니다.")}>
@@ -113,13 +113,13 @@ export function RosterTable({ rows, classes, members, isOwner }: { rows: RosterR
             )}
           </>
         )}
-        {sel.length === 0 && <span className="muted">체크하면 인증번호 보내기 · 반 이동 · 담당 지정 · 비활성 · 삭제를 할 수 있습니다.</span>}
+        {sel.length === 0 && <span className="muted">체크하면 문자 초대 · 반 이동 · 담당 지정 · 비활성 · 삭제를 할 수 있습니다.</span>}
       </div>
 
       {codes && (
         <div className="card-2 mb-3 rounded-2xl p-3" data-testid="code-results">
           <div className="mb-1 flex items-center justify-between">
-            <span className="lbl">인증번호 · 학생은 /join 에서 휴대폰 번호 + 인증번호 + 비밀번호로 가입</span>
+            <span className="lbl">문자 초대 · 학생은 로그인 뒤 링크를 열거나 휴대폰 번호 + 인증번호로 연결</span>
             <button type="button" className="btn-ghost btn-sm" onClick={() => setCodes(null)}>
               닫기
             </button>
@@ -144,7 +144,7 @@ export function RosterTable({ rows, classes, members, isOwner }: { rows: RosterR
               </li>
             ))}
           </ul>
-          <p className="muted mt-2">문자 업체(SMS_PROVIDER)를 설정하기 전에는 인증번호가 여기에만 표시됩니다. 카톡 등으로 학생에게 전달하세요. 3일간 유효.</p>
+          <p className="muted mt-2">문자 업체(SMS_PROVIDER)를 설정하기 전에는 인증번호가 여기에만 표시됩니다. 카톡 등으로 학생에게 전달하세요. 7일간 유효.</p>
         </div>
       )}
 
@@ -168,7 +168,7 @@ export function RosterTable({ rows, classes, members, isOwner }: { rows: RosterR
           {rows.length === 0 && (
             <tr>
               <td colSpan={6} className="text-center" style={{ color: "var(--ink-3)" }}>
-                학생이 없습니다. 오른쪽에서 양식을 내려받아 올리거나 한 명씩 등록하세요.
+                학생이 없습니다. 반 코드를 학생에게 알려주거나, 오른쪽에서 엑셀·한 명씩 등록하세요.
               </td>
             </tr>
           )}
@@ -190,7 +190,7 @@ export function RosterTable({ rows, classes, members, isOwner }: { rows: RosterR
                 {r.phone ? fmtPhone(r.phone) : <span className="muted">-</span>}
                 {!r.linked && r.status === "active" && (
                   <div className="text-[11px]" style={{ color: "var(--ink-3)" }}>
-                    {r.pending ? `승인 대기 ${r.pending}` : r.invited ? "인증번호 보냄 · 가입 전" : "가입 전"}
+                    {r.pending ? `참여 요청 ${r.pending}` : r.invited ? "초대함 · 연결 전" : "연결 전"}
                   </div>
                 )}
               </td>

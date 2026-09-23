@@ -36,5 +36,5 @@ export async function sendSms(to: string, text: string, code?: string): Promise<
 }
 
 export function studentCodeText(academyName: string, studentName: string, code: string, joinUrl: string) {
-  return `[단어방] ${academyName} ${studentName} 학생 인증번호 ${code}\n${joinUrl} 에서 휴대폰 번호와 인증번호로 가입하세요. (3일간 유효)`;
+  return `[단어방]\n\n${academyName}에서 ${studentName} 학생을 초대했습니다.\n\n바로 연결\n${joinUrl}\n\n인증번호\n${code}\n\n7일 동안 사용할 수 있습니다.`;
 }

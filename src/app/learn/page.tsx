@@ -40,14 +40,25 @@ export default async function LearnHome() {
     <div className="learn-grid">
       <div className="col">
       {linked === 0 && (
-        <div className="card card-body text-[14px]">{pending > 0 ? "선생님 승인을 기다리고 있습니다. 승인되면 시험이 여기에 표시됩니다." : "연결된 학생 명단이 없습니다. 선생님에게 받은 초대 링크를 열어 주세요."}</div>
+        <div className="card card-body text-[14px]" data-testid="learn-unlinked">
+          {pending > 0 ? (
+            "선생님이 확인하면 시험이 여기에 보여요. 조금만 기다려 주세요."
+          ) : (
+            <>
+              아직 학원과 연결되지 않았어요.
+              <Link href="/welcome/student?from=learn" className="btn-primary mt-3 w-full py-3">
+                학원과 연결하기
+              </Link>
+            </>
+          )}
+        </div>
       )}
 
       <div className="flex items-end justify-between px-1">
         <div>
-          <div className="lbl">This week</div>
-          <div className="mt-1 text-[15px] font-semibold">
-            {fmtMD(week.start)} – {fmtMD(new Date(week.end.getTime() - 1))}
+          <div className="text-[18px] font-semibold tracking-tight">안녕하세요, {user.name}님</div>
+          <div className="lbl mt-1">
+            오늘 할 일 · {fmtMD(week.start)} – {fmtMD(new Date(week.end.getTime() - 1))}
           </div>
         </div>
         <span className="digital">
@@ -99,11 +110,11 @@ export default async function LearnHome() {
           <div className="num-lg mt-4" style={{ color: "var(--ink-3)" }}>
             —
           </div>
-          <div className="muted mt-2">이번 주에 응시할 시험이 없습니다.</div>
+          <div className="muted mt-2">지금 할 시험이 없어요.</div>
         </div>
       )}
 
-      {rest.length > 0 && <div className="lbl px-1 lg:mt-2">Queue · 다음 차례 {rest.length} · 오래된 순</div>}
+      {rest.length > 0 && <div className="lbl px-1 lg:mt-2">다음 할 일 {rest.length} · 오래된 순</div>}
       {rest.map((a) => (
         <div key={a.assignmentId} className="pill w-full justify-between" data-testid="queue-item">
           <div className="min-w-0">

@@ -1,31 +1,42 @@
 "use client";
-import { useRef, useState } from "react";
-import { ActionForm } from "@/components/ActionForm";
+import { useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "@/components/Toaster";
 import { uploadRosterAction } from "./actions";
 
-/** 학생 등록 엑셀 업로드 (드롭존) */
+/** 엑셀 등록: 양식 내려받기 → 파일 올리면 끝 (고르는 순간 바로 등록) */
 export function RosterUpload() {
-  const [file, setFile] = useState<File | null>(null);
   const [over, setOver] = useState(false);
+  const [pending, start] = useTransition();
   const input = useRef<HTMLInputElement>(null);
-  const pick = (f: File | null) => {
-    setFile(f);
-    if (input.current && f) {
-      const dt = new DataTransfer();
-      dt.items.add(f);
-      input.current.files = dt.files;
-    }
+  const router = useRouter();
+  const upload = (f: File | null) => {
+    if (!f) return;
+    const fd = new FormData();
+    fd.set("file", f);
+    start(async () => {
+      const r = await uploadRosterAction(fd);
+      toast(r.message ?? (r.ok ? "등록했습니다." : "실패했습니다."), r.ok);
+      if (input.current) input.current.value = "";
+      if (r.ok) router.refresh();
+    });
   };
   return (
-    <ActionForm action={uploadRosterAction} className="space-y-2" onSuccess={() => setFile(null)}>
-      <input ref={input} type="file" name="file" accept=".xlsx" className="sr-only" tabIndex={-1} aria-hidden onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+    <div className="grid grid-cols-2 gap-2" data-testid="roster-upload">
+      <a href="/api/files/roster-template" className="tile flex flex-col items-center justify-center gap-1 rounded-2xl px-3 py-4 text-center" style={{ background: "#fff4f0", color: "var(--accent)" }} download>
+        <span className="digital" style={{ fontSize: 18 }}>
+          1
+        </span>
+        <span className="text-[13px] font-semibold">양식 내려받기</span>
+      </a>
+      <input ref={input} type="file" name="file" accept=".xlsx" className="sr-only" tabIndex={-1} aria-hidden onChange={(e) => upload(e.target.files?.[0] ?? null)} />
       <div
         role="button"
         tabIndex={0}
-        aria-label="학생 등록 엑셀 파일 선택"
-        className={`dropzone${over ? " over" : ""}${file ? " has" : ""}`}
-        style={{ minHeight: 84 }}
-        onClick={() => input.current?.click()}
+        aria-label="작성한 양식 올리기"
+        aria-busy={pending}
+        className={`dropzone !min-h-0 !gap-1 !rounded-2xl !px-3 !py-4${over ? " over" : ""}`}
+        onClick={() => !pending && input.current?.click()}
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
@@ -40,27 +51,15 @@ export function RosterUpload() {
         onDrop={(e) => {
           e.preventDefault();
           setOver(false);
-          const f = e.dataTransfer.files?.[0] ?? null;
-          if (f) pick(f);
+          upload(e.dataTransfer.files?.[0] ?? null);
         }}
+        data-testid="roster-dropzone"
       >
-        {file ? (
-          <>
-            <span className="max-w-full truncate text-[14px] font-semibold">{file.name}</span>
-            <span className="lbl" style={{ color: "rgba(232,67,26,0.7)" }}>
-              다른 파일 선택
-            </span>
-          </>
-        ) : (
-          <>
-            <span className="text-[14px] font-semibold">작성한 양식(.xlsx)을 끌어다 놓거나 클릭</span>
-            <span className="lbl-on">시트 = 반 · 이름 · 학교 · 학년</span>
-          </>
-        )}
+        <span className="digital" style={{ fontSize: 18 }}>
+          2
+        </span>
+        <span className="text-[13px] font-semibold">{pending ? "등록 중…" : "파일 올리기"}</span>
       </div>
-      <button className="btn w-full py-3 text-[13px]" style={file ? { background: "#fff4f0", color: "var(--accent)" } : undefined} disabled={!file}>
-        업로드 · 학생 등록 →
-      </button>
-    </ActionForm>
+    </div>
   );
 }

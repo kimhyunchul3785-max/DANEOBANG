@@ -1,5 +1,7 @@
+import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requireOwner } from "@/lib/auth";
+import { billingEnabled } from "@/lib/billing";
 import { fmtDate } from "@/lib/util";
 import { ActionForm, ActionButton } from "@/components/ActionForm";
 import { updateAcademyAction, uploadLogoAction, removeLogoAction } from "./actions";
@@ -24,6 +26,23 @@ export default async function SettingsPage() {
         <p className="muted mt-1">
           /{academy.slug} · {academy.plan} · 개설 {fmtDate(academy.createdAt, false)}
         </p>
+        <nav className="seg mt-3" aria-label="설정 구분">
+          <span className="seg-item on">학원 정보</span>
+          <Link href="/app/students#classes" className="seg-item">
+            반 관리
+          </Link>
+          <Link href="/app/teachers" className="seg-item">
+            선생님
+          </Link>
+          {billingEnabled() && (
+            <Link href="/app/billing" className="seg-item">
+              요금제
+            </Link>
+          )}
+          <Link href="/switch" className="seg-item">
+            계정
+          </Link>
+        </nav>
       </header>
 
       <div className="bento">

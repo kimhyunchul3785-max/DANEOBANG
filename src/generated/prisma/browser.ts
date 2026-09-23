@@ -23,6 +23,11 @@ export * from './enums';
  */
 export type User = Prisma.UserModel
 /**
+ * Model UserIdentity
+ * 로그인 수단. 계정은 하나, Google·Kakao 는 여러 개를 붙일 수 있다 (기존 이메일 계정에 소셜 로그인을 붙여도 새 User 를 만들지 않는다)
+ */
+export type UserIdentity = Prisma.UserIdentityModel
+/**
  * Model Academy
  * 
  */

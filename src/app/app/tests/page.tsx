@@ -19,9 +19,14 @@ export default async function TestsPage() {
           <h1 className="h1">시험</h1>
           <p className="muted mt-1">시험 {exams.length}개 · 최근 만든 순</p>
         </div>
-        <Link href="/app/tests/new" className="btn-primary">
-          + 시험 만들기
-        </Link>
+        <div className="flex gap-2">
+          <Link href="/app/scans" className="btn-secondary" data-nav="/app/scans">
+            사진 채점
+          </Link>
+          <Link href="/app/tests/new" className="btn-primary">
+            + 시험 만들기
+          </Link>
+        </div>
       </div>
       <div className="card">
         <table className="tbl">

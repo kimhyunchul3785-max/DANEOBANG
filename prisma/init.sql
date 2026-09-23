@@ -15,6 +15,17 @@ CREATE TABLE IF NOT EXISTS "User" (
   "updatedAt" DATETIME NOT NULL
 );
 CREATE UNIQUE INDEX IF NOT EXISTS "User_email_key" ON "User"("email");
+CREATE TABLE IF NOT EXISTS "UserIdentity" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "userId" TEXT NOT NULL,
+  "provider" TEXT NOT NULL,
+  "providerId" TEXT NOT NULL,
+  "email" TEXT,
+  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "UserIdentity_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE UNIQUE INDEX IF NOT EXISTS "UserIdentity_provider_providerId_key" ON "UserIdentity"("provider", "providerId");
+CREATE INDEX IF NOT EXISTS "UserIdentity_userId_idx" ON "UserIdentity"("userId");
 CREATE TABLE IF NOT EXISTS "Academy" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "name" TEXT NOT NULL,
@@ -123,6 +134,7 @@ CREATE TABLE IF NOT EXISTS "ClassRoom" (
   "academyId" TEXT NOT NULL,
   "name" TEXT NOT NULL,
   "archived" BOOLEAN NOT NULL DEFAULT false,
+  "joinCode" TEXT,
   "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "ClassRoom_academyId_fkey" FOREIGN KEY ("academyId") REFERENCES "Academy" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
@@ -164,6 +176,8 @@ CREATE TABLE IF NOT EXISTS "StudentLinkRequest" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "studentId" TEXT NOT NULL,
   "userId" TEXT NOT NULL,
+  "classId" TEXT,
+  "name" TEXT,
   "status" TEXT NOT NULL DEFAULT 'pending',
   "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "decidedAt" DATETIME,

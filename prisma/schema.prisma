@@ -29,9 +29,25 @@ model User {
 
   memberships    AcademyMember[]
   studentLinks   Student[]
+  identities     UserIdentity[]
   auditLogs      AuditLog[]
   deviceTokens   DeviceToken[]
   notifications  Notification[]
+}
+
+/// 로그인 수단. 계정은 하나, Google·Kakao 는 여러 개를 붙일 수 있다 (기존 이메일 계정에 소셜 로그인을 붙여도 새 User 를 만들지 않는다)
+model UserIdentity {
+  id         String   @id @default(cuid())
+  userId     String
+  provider   String   // google | kakao
+  providerId String
+  email      String?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerId])
+  @@index([userId])
 }
 
 model Academy {
@@ -168,6 +184,7 @@ model ClassRoom {
   academyId String
   name      String
   archived  Boolean  @default(false)
+  joinCode  String?  @unique // 반 코드(6자리). 학생이 로그인 뒤 이 코드 + 이름으로 참여. null 이면 꺼짐
   createdAt DateTime @default(now())
 
   academy  Academy   @relation(fields: [academyId], references: [id], onDelete: Cascade)
@@ -222,6 +239,8 @@ model StudentLinkRequest {
   id         String    @id @default(cuid())
   studentId  String
   userId     String
+  classId    String?   // 반 코드로 참여 요청한 반 (선생님이 "새 학생으로 추가"를 고르면 이 반에 만든다)
+  name       String?   // 학생이 입력한 이름
   status     String    @default("pending") // pending | approved | rejected
   createdAt  DateTime  @default(now())
   decidedAt  DateTime?

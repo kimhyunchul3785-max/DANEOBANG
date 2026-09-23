@@ -24,7 +24,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
       classRoom: true,
       user: { select: { id: true, name: true, email: true } },
       teachers: { include: { member: { include: { user: { select: { name: true } } } } } },
-      linkRequests: { where: { status: "pending" }, orderBy: { createdAt: "desc" } },
+      linkRequests: { where: { status: "pending" }, orderBy: { createdAt: "desc" }, include: { student: { select: { id: true } } } },
       assignments: { include: { exam: true, attempts: { include: { grades: { where: { current: true } } }, orderBy: { attemptNo: "asc" } } }, orderBy: { createdAt: "desc" } },
       retakes: { include: { sourceAttempt: { include: { assignment: { include: { exam: true } } } } }, orderBy: [{ status: "asc" }, { dueAt: { sort: "asc", nulls: "last" } }, { createdAt: "desc" }] },
     },
@@ -252,7 +252,7 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         <div className="span-3 space-y-4">
           <StudentTools
             student={{ id: student.id, name: student.name, email: student.email, phone: student.phone, userId: student.userId, userEmail: student.user?.email ?? null, hasInvite: !!student.inviteTokenHash, inviteExpiresAt: student.inviteExpiresAt?.toISOString() ?? null, inviteSentAt: student.inviteSentAt?.toISOString() ?? null, codeSent: !!student.phoneCodeHash && (!student.phoneCodeExpiresAt || student.phoneCodeExpiresAt > new Date()), codeExpiresAt: student.phoneCodeExpiresAt?.toISOString() ?? null }}
-            linkRequests={student.linkRequests.map((r) => ({ id: r.id, user: linkUsers.find((u) => u.id === r.userId) ?? null, createdAt: r.createdAt.toISOString() }))}
+            linkRequests={student.linkRequests.map((r) => ({ id: r.id, user: linkUsers.find((u) => u.id === r.userId) ?? null, createdAt: r.createdAt.toISOString(), name: r.name, className: classes.find((c) => c.id === r.classId)?.name ?? null }))}
             isOwner={ctx.isOwner}
             members={members.map((m) => ({ id: m.id, name: m.user.name, role: m.role }))}
             assignedMemberIds={student.teachers.map((t) => t.memberId)}

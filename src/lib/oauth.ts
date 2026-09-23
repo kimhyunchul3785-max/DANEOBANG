@@ -88,14 +88,28 @@ export async function exchangeCode(p: Provider, code: string): Promise<OAuthProf
   };
 }
 
-/** OAuth 프로필로 사용자 조회/생성. 동일 이메일의 기존 계정이 있으면 연결한다. */
+/**
+ * OAuth 프로필 → 사용자. 처음이면 가입, 기존이면 로그인.
+ *   1. 같은 (provider, providerId) 로그인 수단이 있으면 그 계정
+ *   2. 같은 이메일의 기존 계정(이메일 가입 등)이 있으면 새 계정을 만들지 않고 로그인 수단만 붙인다
+ *   3. 없으면 새 계정 + 로그인 수단
+ */
 export async function upsertOAuthUser(p: Provider, profile: OAuthProfile) {
-  const existing = await prisma.user.findFirst({ where: { provider: p, providerId: profile.providerId } });
-  if (existing) return existing;
-  const email = profile.email ?? `${p}_${profile.providerId}@noemail.daneobang.local`;
+  const idn = await prisma.userIdentity.findUnique({ where: { provider_providerId: { provider: p, providerId: profile.providerId } }, include: { user: true } });
+  if (idn) return idn.user;
+  // 구버전(User.provider/providerId 만 있던 시절) 호환
+  const legacy = await prisma.user.findFirst({ where: { provider: p, providerId: profile.providerId } });
+  if (legacy) {
+    await prisma.userIdentity.create({ data: { userId: legacy.id, provider: p, providerId: profile.providerId, email: profile.email } });
+    return legacy;
+  }
+  const email = (profile.email ?? `${p}_${profile.providerId}@noemail.daneobang.local`).toLowerCase();
   const byEmail = await prisma.user.findUnique({ where: { email } });
   if (byEmail) {
-    return prisma.user.update({ where: { id: byEmail.id }, data: { provider: p, providerId: profile.providerId } });
+    await prisma.userIdentity.create({ data: { userId: byEmail.id, provider: p, providerId: profile.providerId, email: profile.email } });
+    return byEmail;
   }
-  return prisma.user.create({ data: { email, name: profile.name, provider: p, providerId: profile.providerId } });
+  return prisma.user.create({
+    data: { email, name: profile.name, provider: p, providerId: profile.providerId, emailVerifiedAt: profile.email ? new Date() : null, identities: { create: { provider: p, providerId: profile.providerId, email: profile.email } } },
+  });
 }

@@ -2,10 +2,27 @@
 
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
-import { requireOwner, audit } from "@/lib/auth";
+import { requireOwner, getCurrentUser, audit } from "@/lib/auth";
 import { seatUsage } from "@/lib/seats";
-import { changeSeatQuantity, MIN_SEATS, MAX_SEATS, won } from "@/lib/billing";
+import { changeSeatQuantity, activateSubscription, MIN_SEATS, MAX_SEATS, won } from "@/lib/billing";
 import type { ActionResult } from "../students/actions";
+
+/** 결제 (첫 결제 또는 재시도). 성공 → Academy 활성화 */
+export async function payAction(form: FormData): Promise<ActionResult> {
+  const user = await getCurrentUser();
+  if (!user) return { ok: false, message: "로그인이 필요합니다." };
+  const academyId = String(form.get("academyId") ?? "");
+  const member = await prisma.academyMember.findFirst({ where: { academyId, userId: user.id, role: "OWNER", status: "active" }, include: { academy: { include: { subscription: true } } } });
+  if (!member) return { ok: false, message: "학원장만 결제할 수 있습니다." };
+  const seats = Math.max(MIN_SEATS, Math.min(MAX_SEATS, Number(form.get("seats") || member.academy.subscription?.seatQuantity || 1)));
+  const card = { number: String(form.get("card") ?? ""), expiry: String(form.get("expiry") ?? ""), cvc: String(form.get("cvc") ?? ""), holder: String(form.get("holder") ?? "") };
+  const r = await activateSubscription(academyId, seats, card);
+  await audit({ academyId, userId: user.id, action: r.ok ? "billing.paid" : "billing.failed", detail: `${seats} seats · ${r.amount}원${r.ok ? "" : " · " + r.error}` });
+  if (!r.ok) return { ok: false, message: `결제에 실패했습니다. ${r.error}` };
+  revalidatePath("/app");
+  revalidatePath("/app/billing");
+  return { ok: true, message: `월 ${r.amount.toLocaleString("ko-KR")}원 결제가 완료되었습니다.` };
+}
 
 /** Seat 수 변경. 늘리기는 즉시, 줄이기는 활성 선생님 + 초대 대기 이하로만 */
 export async function changeSeatsAction(form: FormData): Promise<ActionResult> {

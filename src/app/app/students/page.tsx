@@ -9,6 +9,7 @@ import { createStudentAction, createClassAction, toggleClassArchiveAction, delet
 import { RosterTable, type RosterRow } from "./RosterTable";
 import { RosterUpload } from "./RosterUpload";
 import { ClassRow } from "./ClassRow";
+import { ClassCodeList } from "./ClassCodeCard";
 
 /**
  * 학생 탭 = 명단 관리.
@@ -68,15 +69,15 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
       <header className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="kicker">Students · {ctx.isOwner ? "학원 전체" : "담당 학생"}</div>
-          <h1 className="h1 mt-1">학생 명단</h1>
+          <h1 className="h1 mt-1">학생</h1>
         </div>
         <div className="flex items-center gap-3">
           <span className="digital">
             <CountUp value={rows.length} /> STUDENTS · <CountUp value={linked} /> ACTIVE
           </span>
-          <Link href="/app/results" className="btn-secondary btn-sm">
-            성적 보기 →
-          </Link>
+          <a href="#add" className="btn-primary btn-sm">
+            학생 추가
+          </a>
         </div>
       </header>
 
@@ -116,20 +117,14 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
         </div>
 
         <div className="space-y-4">
+          {/* 학생 초대: 반 코드 */}
+          <ClassCodeList classes={activeClasses.map((c) => ({ id: c.id, name: c.name, joinCode: c.joinCode, count: c._count.students }))} academyName={ctx.member.academy.name} />
+
           {/* 등록: 엑셀 양식 */}
-          <div className="card-accent card-body">
-            <div className="flex items-center justify-between">
-              <div className="lbl-on">Register · 엑셀로 등록</div>
-              <a href="/api/files/roster-template" className="btn btn-sm" style={{ background: "#fff4f0", color: "var(--accent)" }} download>
-                양식 내려받기 ↓
-              </a>
-            </div>
-            <p className="mt-3 text-[13px] leading-relaxed" style={{ color: "rgba(255,244,240,0.9)" }}>
-              시트 이름 = 반 이름. 각 시트에 <b>이름 · 학교 · 학년 · 휴대폰</b>을 적어 올리세요. 등록 뒤 <b>인증번호 보내기</b>로 학생이 가입합니다.
-            </p>
-            <div className="mt-3">
-              <RosterUpload />
-            </div>
+          <div className="card card-body" id="add">
+            <div className="lbl mb-2">Excel · 엑셀로 등록</div>
+            <RosterUpload />
+            <p className="muted mt-2">시트 = 반 · 열 = 이름 · 학교 · 학년 · 휴대폰</p>
           </div>
 
           {/* 등록: 한 명 */}
@@ -156,7 +151,7 @@ export default async function StudentsPage({ searchParams }: { searchParams: Pro
           </div>
 
           {/* 반 관리 */}
-          <div className="card card-body">
+          <div className="card card-body" id="classes">
             <div className="mb-2 flex items-center justify-between">
               <div className="lbl">Classes · 반 관리</div>
               <span className="digital">{activeClasses.length}</span>

@@ -130,6 +130,11 @@ body {
   .seg-item:hover { color: var(--ink); }
   .seg-item.on { background: var(--ink); color: var(--surface-2); }
   .seg-item.on-accent { background: var(--accent); color: var(--accent-ink); }
+  /* 재시험 출제 줄: 토글·마감·버튼 높이 32px 로 통일 */
+  .retake-seg { height: 32px; align-items: stretch; }
+  .retake-seg .seg-item { display: inline-flex; align-items: center; padding-block: 0; }
+  .retake-due { height: 32px; padding: 0 10px; font-size: 13px; border-radius: 999px; }
+  .retake-btn { height: 32px; padding-block: 0; }
 
   /* 흐름 동작 바: 내용 하단에 붙어 따라오는 검은 알약. 주 동작은 항상 맨 오른쪽·같은 폭 */
   .action-bar { position: sticky; bottom: 12px; z-index: 20; margin-top: 20px; display: flex; align-items: center; gap: 12px; padding: 8px 8px 8px 20px; background: var(--charcoal); color: #ece9e3; border-radius: 999px; box-shadow: 0 10px 30px rgba(27, 26, 24, 0.22); }

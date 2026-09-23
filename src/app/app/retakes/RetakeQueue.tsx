@@ -110,17 +110,17 @@ export function RetakeQueue({ rows }: { rows: RetakeRow[] }) {
 
               {/* 동작 */}
               {isOpen && (
-                <div className="flex w-full flex-wrap items-center gap-3 pl-[25px] sm:w-auto sm:pl-0">
+                <div className="flex w-full flex-wrap items-center gap-2 pl-[25px] sm:w-auto sm:pl-0">
                   {!r.retakeExamId ? (
                     <IssueBox taskId={r.id} wrong={r.wrong} same={r.same} />
                   ) : (
                     <>
                       <DueBox taskId={r.id} dueAt={r.dueAt} />
-                      <Link href={`/app/tests/${r.retakeExamId}?step=3`} className="btn-ghost btn-sm">
+                      <Link href={`/app/tests/${r.retakeExamId}?step=3`} className="btn-ghost btn-sm retake-btn">
                         시험지
                       </Link>
                       {r.retakeAttemptId && (
-                        <Link href={`/app/results/${r.retakeAttemptId}`} className="btn-ghost btn-sm">
+                        <Link href={`/app/results/${r.retakeAttemptId}`} className="btn-ghost btn-sm retake-btn">
                           결과
                         </Link>
                       )}
@@ -128,7 +128,7 @@ export function RetakeQueue({ rows }: { rows: RetakeRow[] }) {
                   )}
                   <button
                     type="button"
-                    className="btn-ghost btn-sm"
+                    className="btn-ghost btn-sm retake-btn"
                     disabled={pending}
                     onClick={() => {
                       if (!confirm("재시험을 취소할까요? 원 시험 결과는 그대로 남습니다.")) return;

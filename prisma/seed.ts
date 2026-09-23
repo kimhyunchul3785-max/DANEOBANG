@@ -123,7 +123,7 @@ async function main() {
     academy = await prisma.academy.create({ data: { name: "한빛영어학원", slug: "hanbit", intro: "데모 학원" } });
     const ownerMember = await prisma.academyMember.create({ data: { academyId: academy.id, userId: owner.id, role: "OWNER" } });
     const teacherMember = await prisma.academyMember.create({ data: { academyId: academy.id, userId: teacher.id, role: "TEACHER" } });
-    const cls = await prisma.classRoom.create({ data: { academyId: academy.id, name: "중2 A반" } });
+    const cls = await prisma.classRoom.create({ data: { academyId: academy.id, name: "중2 A반", joinCode: "482913" } });
     const names = ["박학생", "김민준", "이서연", "정도윤", "최지우"];
     for (const [i, name] of names.entries()) {
       await prisma.student.create({

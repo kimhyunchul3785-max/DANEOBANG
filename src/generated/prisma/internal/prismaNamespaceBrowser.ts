@@ -52,6 +52,7 @@ export const AnyNull = runtime.AnyNull
 
 export const ModelName = {
   User: 'User',
+  UserIdentity: 'UserIdentity',
   Academy: 'Academy',
   AcademyMember: 'AcademyMember',
   Invitation: 'Invitation',
@@ -117,6 +118,18 @@ export const UserScalarFieldEnum = {
 } as const
 
 export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const UserIdentityScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  provider: 'provider',
+  providerId: 'providerId',
+  email: 'email',
+  createdAt: 'createdAt'
+} as const
+
+export type UserIdentityScalarFieldEnum = (typeof UserIdentityScalarFieldEnum)[keyof typeof UserIdentityScalarFieldEnum]
 
 
 export const AcademyScalarFieldEnum = {
@@ -237,6 +250,7 @@ export const ClassRoomScalarFieldEnum = {
   academyId: 'academyId',
   name: 'name',
   archived: 'archived',
+  joinCode: 'joinCode',
   createdAt: 'createdAt'
 } as const
 
@@ -279,6 +293,8 @@ export const StudentLinkRequestScalarFieldEnum = {
   id: 'id',
   studentId: 'studentId',
   userId: 'userId',
+  classId: 'classId',
+  name: 'name',
   status: 'status',
   createdAt: 'createdAt',
   decidedAt: 'decidedAt',

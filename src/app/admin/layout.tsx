@@ -23,7 +23,7 @@ export default async function AdminLayout({ children }: { children: React.ReactN
               {label}
             </Link>
           ))}
-          <Link href="/workspaces" className="whitespace-nowrap rounded-md px-3 py-2 text-sm text-slate-400 hover:bg-slate-800">
+          <Link href="/switch" className="whitespace-nowrap rounded-md px-3 py-2 text-sm text-slate-400 hover:bg-slate-800">
             ← 일반 화면
           </Link>
         </nav>

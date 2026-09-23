@@ -28,6 +28,8 @@ export type StudentLinkRequestMinAggregateOutputType = {
   id: string | null
   studentId: string | null
   userId: string | null
+  classId: string | null
+  name: string | null
   status: string | null
   createdAt: Date | null
   decidedAt: Date | null
@@ -38,6 +40,8 @@ export type StudentLinkRequestMaxAggregateOutputType = {
   id: string | null
   studentId: string | null
   userId: string | null
+  classId: string | null
+  name: string | null
   status: string | null
   createdAt: Date | null
   decidedAt: Date | null
@@ -48,6 +52,8 @@ export type StudentLinkRequestCountAggregateOutputType = {
   id: number
   studentId: number
   userId: number
+  classId: number
+  name: number
   status: number
   createdAt: number
   decidedAt: number
@@ -60,6 +66,8 @@ export type StudentLinkRequestMinAggregateInputType = {
   id?: true
   studentId?: true
   userId?: true
+  classId?: true
+  name?: true
   status?: true
   createdAt?: true
   decidedAt?: true
@@ -70,6 +78,8 @@ export type StudentLinkRequestMaxAggregateInputType = {
   id?: true
   studentId?: true
   userId?: true
+  classId?: true
+  name?: true
   status?: true
   createdAt?: true
   decidedAt?: true
@@ -80,6 +90,8 @@ export type StudentLinkRequestCountAggregateInputType = {
   id?: true
   studentId?: true
   userId?: true
+  classId?: true
+  name?: true
   status?: true
   createdAt?: true
   decidedAt?: true
@@ -163,6 +175,8 @@ export type StudentLinkRequestGroupByOutputType = {
   id: string
   studentId: string
   userId: string
+  classId: string | null
+  name: string | null
   status: string
   createdAt: Date
   decidedAt: Date | null
@@ -194,6 +208,8 @@ export type StudentLinkRequestWhereInput = {
   id?: Prisma.StringFilter<"StudentLinkRequest"> | string
   studentId?: Prisma.StringFilter<"StudentLinkRequest"> | string
   userId?: Prisma.StringFilter<"StudentLinkRequest"> | string
+  classId?: Prisma.StringNullableFilter<"StudentLinkRequest"> | string | null
+  name?: Prisma.StringNullableFilter<"StudentLinkRequest"> | string | null
   status?: Prisma.StringFilter<"StudentLinkRequest"> | string
   createdAt?: Prisma.DateTimeFilter<"StudentLinkRequest"> | Date | string
   decidedAt?: Prisma.DateTimeNullableFilter<"StudentLinkRequest"> | Date | string | null
@@ -205,6 +221,8 @@ export type StudentLinkRequestOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  classId?: Prisma.SortOrderInput | Prisma.SortOrder
+  name?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   decidedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -219,6 +237,8 @@ export type StudentLinkRequestWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.StudentLinkRequestWhereInput | Prisma.StudentLinkRequestWhereInput[]
   studentId?: Prisma.StringFilter<"StudentLinkRequest"> | string
   userId?: Prisma.StringFilter<"StudentLinkRequest"> | string
+  classId?: Prisma.StringNullableFilter<"StudentLinkRequest"> | string | null
+  name?: Prisma.StringNullableFilter<"StudentLinkRequest"> | string | null
   status?: Prisma.StringFilter<"StudentLinkRequest"> | string
   createdAt?: Prisma.DateTimeFilter<"StudentLinkRequest"> | Date | string
   decidedAt?: Prisma.DateTimeNullableFilter<"StudentLinkRequest"> | Date | string | null
@@ -230,6 +250,8 @@ export type StudentLinkRequestOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  classId?: Prisma.SortOrderInput | Prisma.SortOrder
+  name?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   decidedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -246,6 +268,8 @@ export type StudentLinkRequestScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"StudentLinkRequest"> | string
   studentId?: Prisma.StringWithAggregatesFilter<"StudentLinkRequest"> | string
   userId?: Prisma.StringWithAggregatesFilter<"StudentLinkRequest"> | string
+  classId?: Prisma.StringNullableWithAggregatesFilter<"StudentLinkRequest"> | string | null
+  name?: Prisma.StringNullableWithAggregatesFilter<"StudentLinkRequest"> | string | null
   status?: Prisma.StringWithAggregatesFilter<"StudentLinkRequest"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"StudentLinkRequest"> | Date | string
   decidedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"StudentLinkRequest"> | Date | string | null
@@ -255,6 +279,8 @@ export type StudentLinkRequestScalarWhereWithAggregatesInput = {
 export type StudentLinkRequestCreateInput = {
   id?: string
   userId: string
+  classId?: string | null
+  name?: string | null
   status?: string
   createdAt?: Date | string
   decidedAt?: Date | string | null
@@ -266,6 +292,8 @@ export type StudentLinkRequestUncheckedCreateInput = {
   id?: string
   studentId: string
   userId: string
+  classId?: string | null
+  name?: string | null
   status?: string
   createdAt?: Date | string
   decidedAt?: Date | string | null
@@ -275,6 +303,8 @@ export type StudentLinkRequestUncheckedCreateInput = {
 export type StudentLinkRequestUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  classId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -286,6 +316,8 @@ export type StudentLinkRequestUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  classId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -296,6 +328,8 @@ export type StudentLinkRequestCreateManyInput = {
   id?: string
   studentId: string
   userId: string
+  classId?: string | null
+  name?: string | null
   status?: string
   createdAt?: Date | string
   decidedAt?: Date | string | null
@@ -305,6 +339,8 @@ export type StudentLinkRequestCreateManyInput = {
 export type StudentLinkRequestUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  classId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -315,6 +351,8 @@ export type StudentLinkRequestUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   studentId?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  classId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -335,6 +373,8 @@ export type StudentLinkRequestCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  classId?: Prisma.SortOrder
+  name?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   decidedAt?: Prisma.SortOrder
@@ -345,6 +385,8 @@ export type StudentLinkRequestMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  classId?: Prisma.SortOrder
+  name?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   decidedAt?: Prisma.SortOrder
@@ -355,6 +397,8 @@ export type StudentLinkRequestMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   studentId?: Prisma.SortOrder
   userId?: Prisma.SortOrder
+  classId?: Prisma.SortOrder
+  name?: Prisma.SortOrder
   status?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   decidedAt?: Prisma.SortOrder
@@ -406,6 +450,8 @@ export type StudentLinkRequestUncheckedUpdateManyWithoutStudentNestedInput = {
 export type StudentLinkRequestCreateWithoutStudentInput = {
   id?: string
   userId: string
+  classId?: string | null
+  name?: string | null
   status?: string
   createdAt?: Date | string
   decidedAt?: Date | string | null
@@ -415,6 +461,8 @@ export type StudentLinkRequestCreateWithoutStudentInput = {
 export type StudentLinkRequestUncheckedCreateWithoutStudentInput = {
   id?: string
   userId: string
+  classId?: string | null
+  name?: string | null
   status?: string
   createdAt?: Date | string
   decidedAt?: Date | string | null
@@ -453,6 +501,8 @@ export type StudentLinkRequestScalarWhereInput = {
   id?: Prisma.StringFilter<"StudentLinkRequest"> | string
   studentId?: Prisma.StringFilter<"StudentLinkRequest"> | string
   userId?: Prisma.StringFilter<"StudentLinkRequest"> | string
+  classId?: Prisma.StringNullableFilter<"StudentLinkRequest"> | string | null
+  name?: Prisma.StringNullableFilter<"StudentLinkRequest"> | string | null
   status?: Prisma.StringFilter<"StudentLinkRequest"> | string
   createdAt?: Prisma.DateTimeFilter<"StudentLinkRequest"> | Date | string
   decidedAt?: Prisma.DateTimeNullableFilter<"StudentLinkRequest"> | Date | string | null
@@ -462,6 +512,8 @@ export type StudentLinkRequestScalarWhereInput = {
 export type StudentLinkRequestCreateManyStudentInput = {
   id?: string
   userId: string
+  classId?: string | null
+  name?: string | null
   status?: string
   createdAt?: Date | string
   decidedAt?: Date | string | null
@@ -471,6 +523,8 @@ export type StudentLinkRequestCreateManyStudentInput = {
 export type StudentLinkRequestUpdateWithoutStudentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  classId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -480,6 +534,8 @@ export type StudentLinkRequestUpdateWithoutStudentInput = {
 export type StudentLinkRequestUncheckedUpdateWithoutStudentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  classId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -489,6 +545,8 @@ export type StudentLinkRequestUncheckedUpdateWithoutStudentInput = {
 export type StudentLinkRequestUncheckedUpdateManyWithoutStudentInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   userId?: Prisma.StringFieldUpdateOperationsInput | string
+  classId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   decidedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -501,6 +559,8 @@ export type StudentLinkRequestSelect<ExtArgs extends runtime.Types.Extensions.In
   id?: boolean
   studentId?: boolean
   userId?: boolean
+  classId?: boolean
+  name?: boolean
   status?: boolean
   createdAt?: boolean
   decidedAt?: boolean
@@ -512,6 +572,8 @@ export type StudentLinkRequestSelectCreateManyAndReturn<ExtArgs extends runtime.
   id?: boolean
   studentId?: boolean
   userId?: boolean
+  classId?: boolean
+  name?: boolean
   status?: boolean
   createdAt?: boolean
   decidedAt?: boolean
@@ -523,6 +585,8 @@ export type StudentLinkRequestSelectUpdateManyAndReturn<ExtArgs extends runtime.
   id?: boolean
   studentId?: boolean
   userId?: boolean
+  classId?: boolean
+  name?: boolean
   status?: boolean
   createdAt?: boolean
   decidedAt?: boolean
@@ -534,13 +598,15 @@ export type StudentLinkRequestSelectScalar = {
   id?: boolean
   studentId?: boolean
   userId?: boolean
+  classId?: boolean
+  name?: boolean
   status?: boolean
   createdAt?: boolean
   decidedAt?: boolean
   decidedBy?: boolean
 }
 
-export type StudentLinkRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "userId" | "status" | "createdAt" | "decidedAt" | "decidedBy", ExtArgs["result"]["studentLinkRequest"]>
+export type StudentLinkRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "studentId" | "userId" | "classId" | "name" | "status" | "createdAt" | "decidedAt" | "decidedBy", ExtArgs["result"]["studentLinkRequest"]>
 export type StudentLinkRequestInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   student?: boolean | Prisma.StudentDefaultArgs<ExtArgs>
 }
@@ -560,6 +626,8 @@ export type $StudentLinkRequestPayload<ExtArgs extends runtime.Types.Extensions.
     id: string
     studentId: string
     userId: string
+    classId: string | null
+    name: string | null
     status: string
     createdAt: Date
     decidedAt: Date | null
@@ -991,6 +1059,8 @@ export interface StudentLinkRequestFieldRefs {
   readonly id: Prisma.FieldRef<"StudentLinkRequest", 'String'>
   readonly studentId: Prisma.FieldRef<"StudentLinkRequest", 'String'>
   readonly userId: Prisma.FieldRef<"StudentLinkRequest", 'String'>
+  readonly classId: Prisma.FieldRef<"StudentLinkRequest", 'String'>
+  readonly name: Prisma.FieldRef<"StudentLinkRequest", 'String'>
   readonly status: Prisma.FieldRef<"StudentLinkRequest", 'String'>
   readonly createdAt: Prisma.FieldRef<"StudentLinkRequest", 'DateTime'>
   readonly decidedAt: Prisma.FieldRef<"StudentLinkRequest", 'DateTime'>

@@ -126,7 +126,7 @@ export function WidgetBoard({ data, initialLayout }: { data: DashboardData; init
         </div>
       </div>
 
-      <div ref={ref} className="relative" style={cols === 1 ? { display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: GAP_PX } : { height: totalRows * (ROW_PX + GAP_PX) - GAP_PX }} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}>
+      <div ref={ref} className="relative" style={cols === 1 ? { display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: GAP_PX } : { height: totalRows * (ROW_PX + GAP_PX) - GAP_PX, visibility: width === 0 ? "hidden" : undefined }} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}>
         {(cols === 1 ? [...shown].sort((a, b) => a.y - b.y || a.x - b.x) : shown).map((item) => {
           const def = WIDGETS[item.i];
           const compactHead = item.h <= 2;
@@ -140,7 +140,8 @@ export function WidgetBoard({ data, initialLayout }: { data: DashboardData; init
                   top: item.y * (ROW_PX + GAP_PX),
                   width: item.w * colW + (item.w - 1) * GAP_PX,
                   height: item.h * (ROW_PX + GAP_PX) - GAP_PX,
-                  transition: active === item.i ? "none" : "left 160ms ease, top 160ms ease, width 160ms ease, height 160ms ease",
+                  // 편집(끌기)할 때만 자리 이동을 부드럽게. 첫 렌더에서는 폭을 재기 전(0) → 잰 뒤로 옮겨가는 애니메이션이 생기므로 끈다
+                  transition: edit && active !== item.i ? "left 160ms ease, top 160ms ease, width 160ms ease, height 160ms ease" : "none",
                   zIndex: active === item.i ? 5 : 1,
                 };
           // 2칸 높이(숫자 위젯)는 설명 줄을 숨기고 제목 툴팁으로 — 큰 숫자와 설명이 겹치지 않게

@@ -113,7 +113,7 @@ export async function sendStudentCodeAction(studentId: string): Promise<ActionRe
   const one = r.results[0];
   if (!one) return { ok: false, message: r.message };
   if (one.error) return { ok: false, message: one.error };
-  return { ok: true, message: one.sent ? `${one.phone} 로 인증번호를 보냈습니다.` : `인증번호 ${one.code} — 문자 업체가 없어 직접 전달해주세요.`, data: { results: r.results } };
+  return { ok: true, message: one.sent ? `${one.phone} 로 문자 초대를 보냈습니다.` : `인증번호 ${one.code} — 문자 업체가 없어 직접 전달해주세요.`, data: { results: r.results } };
 }
 
 /** 선택 학생 여러 명에게 인증번호 발송 (명단 일괄 작업) */
@@ -140,14 +140,16 @@ async function issueStudentCodes(ctx: Awaited<ReturnType<typeof requireAcademy>>
       continue;
     }
     const code = String(Math.floor(100000 + Math.random() * 900000));
-    const r = await sendSms(s.phone, studentCodeText(s.academy.name, s.name, code, `${appUrl()}/join`), code);
-    await prisma.student.update({ where: { id: s.id }, data: { phone: normalizePhone(s.phone), phoneCodeHash: hashToken(code), phoneCodeExpiresAt: new Date(Date.now() + 3 * 86400e3), phoneCodeSentAt: r.sent ? new Date() : null } });
+    // 초대 링크(7일·1회)와 인증번호는 같은 학생 초대를 가리킨다 — 링크를 열어도, 번호+인증번호를 넣어도 같은 명단에 연결된다
+    const token = randomToken(24);
+    const r = await sendSms(s.phone, studentCodeText(s.academy.name, s.name, code, `${appUrl()}/join/${token}`), code);
+    await prisma.student.update({ where: { id: s.id }, data: { phone: normalizePhone(s.phone), phoneCodeHash: hashToken(code), phoneCodeExpiresAt: new Date(Date.now() + 7 * 86400e3), phoneCodeSentAt: r.sent ? new Date() : null, inviteTokenHash: hashToken(token), inviteExpiresAt: new Date(Date.now() + 7 * 86400e3) } });
     await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "student.code", target: s.id, detail: r.sent ? "sms" : "dev" });
     if (r.sent) sentN++;
     results.push({ studentId: s.id, name: s.name, phone: s.phone, code: r.sent ? undefined : r.devCode, sent: r.sent, error: r.error });
   }
   const dev = results.filter((x) => x.code).length;
-  return { message: `${students.length}명 처리 · 문자 발송 ${sentN}명${dev ? ` · 직접 전달 ${dev}명` : ""}`, results };
+  return { message: `${students.length}명 · 문자 초대 ${sentN}명${dev ? ` · 직접 전달 ${dev}명` : ""}`, results };
 }
 
 export async function revokeStudentInviteAction(studentId: string): Promise<ActionResult> {
@@ -158,32 +160,62 @@ export async function revokeStudentInviteAction(studentId: string): Promise<Acti
   return { ok: true };
 }
 
-export async function decideLinkRequestAction(requestId: string, approve: boolean): Promise<ActionResult> {
+/**
+ * 참여 요청 처리 (반 코드로 들어온 동명 학생).
+ *   link   기존 학생과 연결 — 이 계정을 그 명단에 붙인다 (이미 다른 계정이 붙어 있으면 바꾼다: 선생님이 확인한 것)
+ *   new    새 학생으로 추가 — 요청한 반에 새 명단을 만들어 연결한다 (동명이인)
+ *   reject 거절
+ */
+export async function decideLinkRequestAction(requestId: string, decision: "link" | "new" | "reject" | boolean): Promise<ActionResult> {
   const ctx = await requireAcademy();
+  const mode = decision === true ? "link" : decision === false ? "reject" : decision;
   const r = await prisma.studentLinkRequest.findUnique({ where: { id: requestId }, include: { student: true } });
   if (!r || r.status !== "pending") return { ok: false, message: "요청을 찾을 수 없습니다." };
   if (!(await canAccessStudent(ctx, r.studentId))) return { ok: false, message: "권한이 없습니다." };
-  if (!approve) {
-    await prisma.studentLinkRequest.update({ where: { id: requestId }, data: { status: "rejected", decidedAt: new Date(), decidedBy: ctx.user.id } });
+  const done = { status: "approved", decidedAt: new Date(), decidedBy: ctx.user.id };
+  if (mode === "reject") {
+    await prisma.studentLinkRequest.update({ where: { id: requestId }, data: { ...done, status: "rejected" } });
     revalidatePath(`/app/students/${r.studentId}`);
-    return { ok: true };
+    revalidatePath("/app/students");
+    return { ok: true, message: "요청을 거절했습니다." };
   }
-  try {
-    await prisma.$transaction(async (tx) => {
-      const fresh = await tx.student.findUnique({ where: { id: r.studentId } });
-      if (!fresh || fresh.userId) throw new Error("already_linked");
-      const dup = await tx.student.findFirst({ where: { academyId: fresh.academyId, userId: r.userId } });
-      if (dup) throw new Error("dup_user");
-      await tx.student.update({ where: { id: r.studentId }, data: { userId: r.userId, inviteTokenHash: null, inviteExpiresAt: null } });
-      await tx.studentLinkRequest.update({ where: { id: requestId }, data: { status: "approved", decidedAt: new Date(), decidedBy: ctx.user.id } });
-      await tx.studentLinkRequest.updateMany({ where: { studentId: r.studentId, status: "pending", id: { not: requestId } }, data: { status: "rejected" } });
+  const dup = await prisma.student.findFirst({ where: { academyId: r.student.academyId, userId: r.userId } });
+  if (dup) return { ok: false, message: `이 계정은 이미 ${dup.name} 학생에 연결되어 있습니다.` };
+  if (mode === "new") {
+    const u = await prisma.user.findUnique({ where: { id: r.userId }, select: { name: true, email: true, phone: true } });
+    const s = await prisma.$transaction(async (tx) => {
+      const created = await tx.student.create({ data: { academyId: r.student.academyId, classId: r.classId ?? r.student.classId, name: r.name ?? u?.name ?? r.student.name, userId: r.userId, phone: u?.phone ?? null, teachers: { create: { memberId: ctx.member.id } } } });
+      await tx.studentLinkRequest.update({ where: { id: requestId }, data: done });
+      return created;
     });
-  } catch (e) {
-    return { ok: false, message: e instanceof Error && e.message === "dup_user" ? "이 계정은 이미 다른 학생에 연결되어 있습니다." : "이미 연결된 학생입니다." };
+    await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "student.link_new", target: s.id, detail: `from ${r.studentId}` });
+    revalidatePath("/app/students");
+    revalidatePath(`/app/students/${r.studentId}`);
+    return { ok: true, message: `${s.name} 학생을 새로 추가하고 연결했습니다.` };
   }
+  await prisma.$transaction(async (tx) => {
+    await tx.student.update({ where: { id: r.studentId }, data: { userId: r.userId, inviteTokenHash: null, inviteExpiresAt: null, phoneCodeHash: null, phoneCodeExpiresAt: null } });
+    await tx.studentLinkRequest.update({ where: { id: requestId }, data: done });
+    await tx.studentLinkRequest.updateMany({ where: { studentId: r.studentId, status: "pending", id: { not: requestId } }, data: { status: "rejected" } });
+  });
   await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "student.link", target: r.studentId });
   revalidatePath(`/app/students/${r.studentId}`);
-  return { ok: true, message: "계정을 연결했습니다." };
+  revalidatePath("/app/students");
+  return { ok: true, message: "기존 학생과 연결했습니다." };
+}
+
+/** 반 코드 새로 만들기 / 끄기 */
+export async function setClassJoinCodeAction(classId: string, mode: "new" | "off"): Promise<ActionResult> {
+  const ctx = await requireAcademy();
+  const c = await prisma.classRoom.findFirst({ where: { id: classId, academyId: ctx.member.academyId } });
+  if (!c) return { ok: false, message: "반을 찾을 수 없습니다." };
+  const { newJoinCode } = await import("@/lib/onboarding");
+  const joinCode = mode === "new" ? await newJoinCode() : null;
+  await prisma.classRoom.update({ where: { id: classId }, data: { joinCode } });
+  await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "class.join_code", target: classId, detail: mode });
+  revalidatePath("/app/students");
+  revalidatePath("/app");
+  return { ok: true, message: mode === "new" ? `${c.name} 반 코드 ${joinCode}` : `${c.name} 반 코드를 껐습니다.` };
 }
 
 export async function unlinkStudentAction(studentId: string): Promise<ActionResult> {
@@ -214,7 +246,8 @@ export async function createClassAction(form: FormData): Promise<ActionResult> {
   const ctx = await requireAcademy();
   const name = String(form.get("name") ?? "").trim();
   if (!name || name.length > 30) return { ok: false, message: "반 이름을 확인하세요." };
-  await prisma.classRoom.create({ data: { academyId: ctx.member.academyId, name } });
+  const { newJoinCode } = await import("@/lib/onboarding");
+  await prisma.classRoom.create({ data: { academyId: ctx.member.academyId, name, joinCode: await newJoinCode() } });
   revalidatePath("/app/classes");
   revalidatePath("/app/students");
   return { ok: true };
@@ -304,7 +337,8 @@ export async function uploadRosterAction(form: FormData): Promise<ActionResult> 
     if (!noClass) {
       let c = await prisma.classRoom.findFirst({ where: { academyId: ctx.member.academyId, name: className } });
       if (!c) {
-        c = await prisma.classRoom.create({ data: { academyId: ctx.member.academyId, name: className.slice(0, 30) } });
+        const { newJoinCode } = await import("@/lib/onboarding");
+        c = await prisma.classRoom.create({ data: { academyId: ctx.member.academyId, name: className.slice(0, 30), joinCode: await newJoinCode() } });
         newClasses++;
       } else if (c.archived) await prisma.classRoom.update({ where: { id: c.id }, data: { archived: false } });
       classId = c.id;
@@ -323,10 +357,11 @@ export async function uploadRosterAction(form: FormData): Promise<ActionResult> 
     }
     perClass.push(`${noClass ? "반 없음" : className} ${n}명`);
   }
-  if (!created && !skipped) return { ok: false, message: "학생 행이 없습니다. 1열 이름, 2열 학교, 3열 학년으로 작성해 주세요." };
+  if (!created && !skipped) return { ok: false, message: "학생 행이 없습니다. 양식대로 1열 이름, 2열 학교, 3열 학년을 적어주세요." };
   await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "student.roster_upload", detail: `${created}명 (${perClass.join(", ")})` });
   revalidatePath("/app/students");
-  return { ok: true, message: `${created}명 등록${newClasses ? ` · 새 반 ${newClasses}개` : ""}${skipped ? ` · 이미 있는 ${skipped}명 제외` : ""} — ${perClass.join(", ")}` };
+  revalidatePath("/app");
+  return { ok: true, message: `${created}명 등록${newClasses ? ` · 새 반 ${newClasses}개` : ""}${skipped ? ` · 이미 있는 ${skipped}명 제외` : ""}` };
 }
 
 async function ownStudents(ctx: Awaited<ReturnType<typeof requireAcademy>>, ids: string[]) {

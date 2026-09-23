@@ -6,8 +6,8 @@ import { payAction } from "./actions";
 const won = (n: number) => `${n.toLocaleString("ko-KR")}원`;
 
 /**
- * ⑤ 결제 — 학원(Academy)이 결제 주체. 주문 내용 = Teacher Seat 수 × 9,900원.
- * 첫 결제와 실패 후 재시도(/app/billing) 둘 다 이 폼을 쓴다.
+ * 결제 — 학원(Academy)이 결제 주체. 주문 내용 = Teacher Seat 수 × 9,900원.
+ * 학원을 만든 직후(결제 대기)와 실패 후 재시도 둘 다 이 폼을 쓴다.
  */
 export function PayForm({ academyId, academyName, seats, unitPrice, lastError, mock, onPaid }: { academyId: string; academyName: string; seats: number; unitPrice: number; lastError: string | null; mock: boolean; onPaid?: string }) {
   const [card, setCard] = useState({ number: "", expiry: "", cvc: "", holder: "" });
@@ -34,7 +34,7 @@ export function PayForm({ academyId, academyName, seats, unitPrice, lastError, m
   return (
     <section className="card card-body anim-fade-up" data-testid="pay-step">
       <div className="flex items-center justify-between">
-        <div className="lbl">05 · Payment</div>
+        <div className="lbl">Payment</div>
         <span className="digital">{academyName}</span>
       </div>
       <h1 className="h1 mt-1">결제하고 시작하기</h1>
@@ -88,7 +88,7 @@ export function PayForm({ academyId, academyName, seats, unitPrice, lastError, m
       <button type="button" className="btn-primary mt-4 w-full py-3" onClick={submit} disabled={pending || card.number.replace(/\D/g, "").length < 12} data-testid="pay">
         {pending ? "결제 중…" : `월 ${won(amount)} 결제하고 시작하기`}
       </button>
-      <p className="muted mt-2 text-center">결제 정보는 학원에 연결됩니다. 원장이 바뀌어도 학원 구독은 유지됩니다.</p>
+      <p className="muted mt-2 text-center">결제 정보는 학원에 연결됩니다. 학원장이 바뀌어도 학원 구독은 유지됩니다.</p>
     </section>
   );
 }

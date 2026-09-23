@@ -26,8 +26,8 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               <p className="mt-2 text-[13px]" style={{ color: "rgba(255,244,240,0.9)" }}>
                 학원장이 요금제 및 결제를 완료하면 바로 사용할 수 있습니다. 데이터는 그대로 보관됩니다.
               </p>
-              <Link href="/workspaces" className="btn mt-4" style={{ background: "var(--accent-ink)", color: "var(--accent)" }}>
-                다른 학원으로
+              <Link href="/switch" className="btn mt-4" style={{ background: "var(--accent-ink)", color: "var(--accent)" }}>
+                계정 전환
               </Link>
             </div>
           </div>
