@@ -114,3 +114,10 @@ User.isPlatformAdmin → /admin
 - 업로드는 매직 바이트 판정, ZIP 엔트리/해제 크기/경로 검사, XML DTD·ENTITY 거부, PDF 페이지 제한.
 - 파일 URL 은 권한 검사를 통과해야 응답(`Cache-Control: private, no-store`). 다른 학원 리소스는 404.
 - 오류 응답에 스택·토큰 없음. 감사 로그(`AuditLog`)에 학생 원문·정답 미기록.
+
+## v5.0 — Monorepo (2026-09-23)
+
+- pnpm workspace (`apps/*`, `packages/*`) + Turborepo. `node-linker=hoisted`. 루트 `pnpm-lock.yaml` 하나.
+- `apps/web` = 이 문서의 Next.js 전체 (Prisma 포함, Server-only). `apps/mobile` = Expo SDK 57 (Expo Router · TanStack Query · SecureStore).
+- 공유: `packages/types`(DTO) · `validation`(Zod) · `api-client`(fetch 봉투 처리 · `DaneobangApiError`) · `design-tokens` · `utils`. UI 컴포넌트·CSS·Prisma 는 공유하지 않는다.
+- 모바일 인증: `POST /api/v1/auth/oauth`(공급사 access token 검증) → 30일 JWT(`signToken(user.id, "mobile", "30d")`) → SecureStore. 학원 컨텍스트는 `x-academy-id`, 학생은 `x-student-id`. 자세히: `docs/MOBILE_MVP.md`.

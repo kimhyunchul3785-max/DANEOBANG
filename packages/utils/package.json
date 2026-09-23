@@ -1,0 +1,12 @@
+{
+  "name": "@daneobang/utils",
+  "version": "0.1.0",
+  "private": true,
+  "description": "단어방 순수 TS 공용 함수 — 날짜(Asia/Seoul) · 문자열 · 결정적 난수 (Node/DOM 의존 없음)",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": { ".": "./src/index.ts" },
+  "sideEffects": false,
+  "scripts": { "typecheck": "tsc --noEmit" },
+  "devDependencies": { "@daneobang/tsconfig": "workspace:*", "typescript": "5.9.2" }
+}

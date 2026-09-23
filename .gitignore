@@ -1,17 +1,32 @@
 node_modules
-.next
-.next-dev
+.turbo
 .env
-storage/
-prisma/*.db
-prisma/*.db-journal
-prisma/*.db-wal
-prisma/*.db-shm
+.env.*.local
 *.log
+log/
 
-fixtures/e2e/
-fixtures/omr/
-src/.build-stamp
-tsconfig.tsbuildinfo
-next-env.d.ts
+# apps/web (Next.js)
+apps/web/.next
+apps/web/.next-dev
+apps/web/storage/
+apps/web/prisma/*.db
+apps/web/prisma/*.db-journal
+apps/web/prisma/*.db-wal
+apps/web/prisma/*.db-shm
+apps/web/fixtures/e2e/
+apps/web/fixtures/omr/
+apps/web/src/.build-stamp
+apps/web/tsconfig.tsbuildinfo
+apps/web/next-env.d.ts
 node_modules/.pkg-stamp
+
+# apps/mobile (Expo)
+apps/mobile/.expo
+apps/mobile/dist
+apps/mobile/android
+apps/mobile/ios
+apps/mobile/*.jks
+apps/mobile/*.p8
+apps/mobile/*.p12
+apps/mobile/*.key
+apps/mobile/*.mobileprovision

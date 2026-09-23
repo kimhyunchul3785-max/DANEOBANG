@@ -1,0 +1,40 @@
+{
+  "expo": {
+    "name": "단어방",
+    "slug": "daneobang",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "scheme": "daneobang",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "splash": { "image": "./assets/splash-icon.png", "resizeMode": "contain", "backgroundColor": "#E9E6E1" },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.daneobang.app",
+      "infoPlist": { "ITSAppUsesNonExemptEncryption": false }
+    },
+    "android": {
+      "package": "com.daneobang.app",
+      "adaptiveIcon": {
+        "backgroundColor": "#E8431A",
+        "foregroundImage": "./assets/android-icon-foreground.png",
+        "backgroundImage": "./assets/android-icon-background.png",
+        "monochromeImage": "./assets/android-icon-monochrome.png"
+      },
+      "predictiveBackGestureEnabled": false,
+      "usesCleartextTraffic": true
+    },
+    "web": { "favicon": "./assets/favicon.png" },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-web-browser",
+      ["expo-splash-screen", { "backgroundColor": "#E9E6E1", "image": "./assets/splash-icon.png", "imageWidth": 160 }],
+      ["expo-notifications", { "color": "#E8431A" }],
+      ["@react-native-google-signin/google-signin", { "iosUrlScheme": "com.googleusercontent.apps.REPLACE_WITH_IOS_CLIENT_ID_REVERSED" }]
+    ],
+    "experiments": { "typedRoutes": true },
+    "extra": { "eas": { "projectId": "" } }
+  }
+}
