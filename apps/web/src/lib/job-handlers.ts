@@ -146,5 +146,27 @@ registerJobHandler("import", async ({ resourceId }) => {
   }
 });
 
+// ───── 예약 출제 시작 알림: startAt 이 되면 그 시각에 시작하는 배정의 학생에게 종 알림 + 앱 푸시 ─────
+registerJobHandler("notify_start", async ({ resourceId, payload }) => {
+  const at = new Date(String(payload.startAt ?? ""));
+  if (Number.isNaN(at.getTime())) throw new PermanentJobError("bad_start_at");
+  const exam = await prisma.exam.findUnique({ where: { id: resourceId }, select: { id: true, title: true, status: true, questionCount: true } });
+  if (!exam || exam.status !== "published") return { skipped: "exam_not_published" };
+  const win = 60 * 1000; // 같은 예약(분 단위)의 배정만
+  const rows = await prisma.assignment.findMany({
+    where: { examId: exam.id, status: { in: ["assigned", "in_progress"] }, startAt: { gte: new Date(at.getTime() - win), lte: new Date(at.getTime() + win) } },
+    select: { dueAt: true, student: { select: { userId: true } } },
+  });
+  const { notifyUser, pushToUsers } = await import("./notify");
+  const { fmtMDHM } = await import("./util");
+  const userIds = [...new Set(rows.map((r) => r.student.userId).filter((x): x is string => !!x))];
+  const due = rows[0]?.dueAt ? ` · ${fmtMDHM(rows[0].dueAt)}까지` : "";
+  const title = "시험이 시작됐어요";
+  const body = `${exam.title} · ${exam.questionCount}문항${due}`;
+  for (const uid of userIds) await notifyUser(uid, title, body, "/learn");
+  const push = await pushToUsers(userIds, { title, body, data: { link: "/learn", examId: exam.id } });
+  return { notified: userIds.length, pushed: push.sent };
+});
+
 // ───── 종이 시험지 렌더 / 사진 판독 (omr 모듈에서 등록) ─────
 import "./omr/handlers";

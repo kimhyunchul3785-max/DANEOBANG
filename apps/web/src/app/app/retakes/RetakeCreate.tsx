@@ -37,10 +37,10 @@ export function IssueBox({ taskId, wrong, same }: { taskId: string; wrong: numbe
   return (
     <div className="flex flex-wrap items-center gap-2" data-testid="issue-box">
       <ModeToggle mode={mode} onChange={setMode} wrong={wrong} same={same} />
-      <input type="datetime-local" className="input retake-due w-[200px]" value={due} onChange={(e) => setDue(e.target.value)} aria-label="재시험 마감" title="마감" data-testid="issue-due" />
+      <input type="datetime-local" className="input retake-due w-[196px]" value={due} onChange={(e) => setDue(e.target.value)} aria-label="재시험 마감" title="마감" data-testid="issue-due" />
       <button
         type="button"
-        className="btn-accent btn-sm retake-btn"
+        className="btn-primary btn-sm retake-btn"
         disabled={pending}
         data-testid="issue-submit"
         onClick={() =>
@@ -55,7 +55,7 @@ export function IssueBox({ taskId, wrong, same }: { taskId: string; wrong: numbe
           })
         }
       >
-        {pending ? "출제 중…" : "재시험 출제"}
+        {pending ? "출제 중…" : "출제"}
       </button>
     </div>
   );

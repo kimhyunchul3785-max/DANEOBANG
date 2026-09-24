@@ -7,7 +7,7 @@ export function Logo({ variant = "wordmark", light = false, height = 22, href = 
   const ratio = variant === "full" ? 532 / 330 : 528 / 182;
   const img = <Image src={src} alt="단어방" width={Math.round(height * ratio)} height={height} priority className={className} style={{ height, width: "auto" }} />;
   return href ? (
-    <Link href={href} aria-label="단어방 홈" className="inline-flex items-center">
+    <Link href={href} aria-label="단어방 홈" className="inline-flex min-h-[40px] items-center">
       {img}
     </Link>
   ) : (

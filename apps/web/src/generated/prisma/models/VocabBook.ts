@@ -31,6 +31,8 @@ export type VocabBookMinAggregateOutputType = {
   title: string | null
   level: string | null
   status: string | null
+  folderId: string | null
+  mergedFrom: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -42,6 +44,8 @@ export type VocabBookMaxAggregateOutputType = {
   title: string | null
   level: string | null
   status: string | null
+  folderId: string | null
+  mergedFrom: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -53,6 +57,8 @@ export type VocabBookCountAggregateOutputType = {
   title: number
   level: number
   status: number
+  folderId: number
+  mergedFrom: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -66,6 +72,8 @@ export type VocabBookMinAggregateInputType = {
   title?: true
   level?: true
   status?: true
+  folderId?: true
+  mergedFrom?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -77,6 +85,8 @@ export type VocabBookMaxAggregateInputType = {
   title?: true
   level?: true
   status?: true
+  folderId?: true
+  mergedFrom?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -88,6 +98,8 @@ export type VocabBookCountAggregateInputType = {
   title?: true
   level?: true
   status?: true
+  folderId?: true
+  mergedFrom?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -172,6 +184,8 @@ export type VocabBookGroupByOutputType = {
   title: string
   level: string | null
   status: string
+  folderId: string | null
+  mergedFrom: string | null
   createdAt: Date
   updatedAt: Date
   _count: VocabBookCountAggregateOutputType | null
@@ -204,13 +218,17 @@ export type VocabBookWhereInput = {
   title?: Prisma.StringFilter<"VocabBook"> | string
   level?: Prisma.StringNullableFilter<"VocabBook"> | string | null
   status?: Prisma.StringFilter<"VocabBook"> | string
+  folderId?: Prisma.StringNullableFilter<"VocabBook"> | string | null
+  mergedFrom?: Prisma.StringNullableFilter<"VocabBook"> | string | null
   createdAt?: Prisma.DateTimeFilter<"VocabBook"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"VocabBook"> | Date | string
   academy?: Prisma.XOR<Prisma.AcademyScalarRelationFilter, Prisma.AcademyWhereInput>
+  folder?: Prisma.XOR<Prisma.BookFolderNullableScalarRelationFilter, Prisma.BookFolderWhereInput> | null
   days?: Prisma.BookDayListRelationFilter
   words?: Prisma.WordListRelationFilter
   imports?: Prisma.ImportListRelationFilter
   exams?: Prisma.ExamListRelationFilter
+  tags?: Prisma.VocabBookTagListRelationFilter
 }
 
 export type VocabBookOrderByWithRelationInput = {
@@ -220,13 +238,17 @@ export type VocabBookOrderByWithRelationInput = {
   title?: Prisma.SortOrder
   level?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  folderId?: Prisma.SortOrderInput | Prisma.SortOrder
+  mergedFrom?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   academy?: Prisma.AcademyOrderByWithRelationInput
+  folder?: Prisma.BookFolderOrderByWithRelationInput
   days?: Prisma.BookDayOrderByRelationAggregateInput
   words?: Prisma.WordOrderByRelationAggregateInput
   imports?: Prisma.ImportOrderByRelationAggregateInput
   exams?: Prisma.ExamOrderByRelationAggregateInput
+  tags?: Prisma.VocabBookTagOrderByRelationAggregateInput
 }
 
 export type VocabBookWhereUniqueInput = Prisma.AtLeast<{
@@ -239,13 +261,17 @@ export type VocabBookWhereUniqueInput = Prisma.AtLeast<{
   title?: Prisma.StringFilter<"VocabBook"> | string
   level?: Prisma.StringNullableFilter<"VocabBook"> | string | null
   status?: Prisma.StringFilter<"VocabBook"> | string
+  folderId?: Prisma.StringNullableFilter<"VocabBook"> | string | null
+  mergedFrom?: Prisma.StringNullableFilter<"VocabBook"> | string | null
   createdAt?: Prisma.DateTimeFilter<"VocabBook"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"VocabBook"> | Date | string
   academy?: Prisma.XOR<Prisma.AcademyScalarRelationFilter, Prisma.AcademyWhereInput>
+  folder?: Prisma.XOR<Prisma.BookFolderNullableScalarRelationFilter, Prisma.BookFolderWhereInput> | null
   days?: Prisma.BookDayListRelationFilter
   words?: Prisma.WordListRelationFilter
   imports?: Prisma.ImportListRelationFilter
   exams?: Prisma.ExamListRelationFilter
+  tags?: Prisma.VocabBookTagListRelationFilter
 }, "id">
 
 export type VocabBookOrderByWithAggregationInput = {
@@ -255,6 +281,8 @@ export type VocabBookOrderByWithAggregationInput = {
   title?: Prisma.SortOrder
   level?: Prisma.SortOrderInput | Prisma.SortOrder
   status?: Prisma.SortOrder
+  folderId?: Prisma.SortOrderInput | Prisma.SortOrder
+  mergedFrom?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.VocabBookCountOrderByAggregateInput
@@ -272,6 +300,8 @@ export type VocabBookScalarWhereWithAggregatesInput = {
   title?: Prisma.StringWithAggregatesFilter<"VocabBook"> | string
   level?: Prisma.StringNullableWithAggregatesFilter<"VocabBook"> | string | null
   status?: Prisma.StringWithAggregatesFilter<"VocabBook"> | string
+  folderId?: Prisma.StringNullableWithAggregatesFilter<"VocabBook"> | string | null
+  mergedFrom?: Prisma.StringNullableWithAggregatesFilter<"VocabBook"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"VocabBook"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"VocabBook"> | Date | string
 }
@@ -282,13 +312,16 @@ export type VocabBookCreateInput = {
   title: string
   level?: string | null
   status?: string
+  mergedFrom?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   academy: Prisma.AcademyCreateNestedOneWithoutBooksInput
+  folder?: Prisma.BookFolderCreateNestedOneWithoutBooksInput
   days?: Prisma.BookDayCreateNestedManyWithoutBookInput
   words?: Prisma.WordCreateNestedManyWithoutBookInput
   imports?: Prisma.ImportCreateNestedManyWithoutBookInput
   exams?: Prisma.ExamCreateNestedManyWithoutBookInput
+  tags?: Prisma.VocabBookTagCreateNestedManyWithoutBookInput
 }
 
 export type VocabBookUncheckedCreateInput = {
@@ -298,12 +331,15 @@ export type VocabBookUncheckedCreateInput = {
   title: string
   level?: string | null
   status?: string
+  folderId?: string | null
+  mergedFrom?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   days?: Prisma.BookDayUncheckedCreateNestedManyWithoutBookInput
   words?: Prisma.WordUncheckedCreateNestedManyWithoutBookInput
   imports?: Prisma.ImportUncheckedCreateNestedManyWithoutBookInput
   exams?: Prisma.ExamUncheckedCreateNestedManyWithoutBookInput
+  tags?: Prisma.VocabBookTagUncheckedCreateNestedManyWithoutBookInput
 }
 
 export type VocabBookUpdateInput = {
@@ -312,13 +348,16 @@ export type VocabBookUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  mergedFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   academy?: Prisma.AcademyUpdateOneRequiredWithoutBooksNestedInput
+  folder?: Prisma.BookFolderUpdateOneWithoutBooksNestedInput
   days?: Prisma.BookDayUpdateManyWithoutBookNestedInput
   words?: Prisma.WordUpdateManyWithoutBookNestedInput
   imports?: Prisma.ImportUpdateManyWithoutBookNestedInput
   exams?: Prisma.ExamUpdateManyWithoutBookNestedInput
+  tags?: Prisma.VocabBookTagUpdateManyWithoutBookNestedInput
 }
 
 export type VocabBookUncheckedUpdateInput = {
@@ -328,12 +367,15 @@ export type VocabBookUncheckedUpdateInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  folderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mergedFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   days?: Prisma.BookDayUncheckedUpdateManyWithoutBookNestedInput
   words?: Prisma.WordUncheckedUpdateManyWithoutBookNestedInput
   imports?: Prisma.ImportUncheckedUpdateManyWithoutBookNestedInput
   exams?: Prisma.ExamUncheckedUpdateManyWithoutBookNestedInput
+  tags?: Prisma.VocabBookTagUncheckedUpdateManyWithoutBookNestedInput
 }
 
 export type VocabBookCreateManyInput = {
@@ -343,6 +385,8 @@ export type VocabBookCreateManyInput = {
   title: string
   level?: string | null
   status?: string
+  folderId?: string | null
+  mergedFrom?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -353,6 +397,7 @@ export type VocabBookUpdateManyMutationInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  mergedFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -364,6 +409,8 @@ export type VocabBookUncheckedUpdateManyInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  folderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mergedFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -385,6 +432,8 @@ export type VocabBookCountOrderByAggregateInput = {
   title?: Prisma.SortOrder
   level?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  folderId?: Prisma.SortOrder
+  mergedFrom?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -396,6 +445,8 @@ export type VocabBookMaxOrderByAggregateInput = {
   title?: Prisma.SortOrder
   level?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  folderId?: Prisma.SortOrder
+  mergedFrom?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -407,6 +458,8 @@ export type VocabBookMinOrderByAggregateInput = {
   title?: Prisma.SortOrder
   level?: Prisma.SortOrder
   status?: Prisma.SortOrder
+  folderId?: Prisma.SortOrder
+  mergedFrom?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -461,6 +514,62 @@ export type VocabBookUncheckedUpdateManyWithoutAcademyNestedInput = {
   update?: Prisma.VocabBookUpdateWithWhereUniqueWithoutAcademyInput | Prisma.VocabBookUpdateWithWhereUniqueWithoutAcademyInput[]
   updateMany?: Prisma.VocabBookUpdateManyWithWhereWithoutAcademyInput | Prisma.VocabBookUpdateManyWithWhereWithoutAcademyInput[]
   deleteMany?: Prisma.VocabBookScalarWhereInput | Prisma.VocabBookScalarWhereInput[]
+}
+
+export type VocabBookCreateNestedManyWithoutFolderInput = {
+  create?: Prisma.XOR<Prisma.VocabBookCreateWithoutFolderInput, Prisma.VocabBookUncheckedCreateWithoutFolderInput> | Prisma.VocabBookCreateWithoutFolderInput[] | Prisma.VocabBookUncheckedCreateWithoutFolderInput[]
+  connectOrCreate?: Prisma.VocabBookCreateOrConnectWithoutFolderInput | Prisma.VocabBookCreateOrConnectWithoutFolderInput[]
+  createMany?: Prisma.VocabBookCreateManyFolderInputEnvelope
+  connect?: Prisma.VocabBookWhereUniqueInput | Prisma.VocabBookWhereUniqueInput[]
+}
+
+export type VocabBookUncheckedCreateNestedManyWithoutFolderInput = {
+  create?: Prisma.XOR<Prisma.VocabBookCreateWithoutFolderInput, Prisma.VocabBookUncheckedCreateWithoutFolderInput> | Prisma.VocabBookCreateWithoutFolderInput[] | Prisma.VocabBookUncheckedCreateWithoutFolderInput[]
+  connectOrCreate?: Prisma.VocabBookCreateOrConnectWithoutFolderInput | Prisma.VocabBookCreateOrConnectWithoutFolderInput[]
+  createMany?: Prisma.VocabBookCreateManyFolderInputEnvelope
+  connect?: Prisma.VocabBookWhereUniqueInput | Prisma.VocabBookWhereUniqueInput[]
+}
+
+export type VocabBookUpdateManyWithoutFolderNestedInput = {
+  create?: Prisma.XOR<Prisma.VocabBookCreateWithoutFolderInput, Prisma.VocabBookUncheckedCreateWithoutFolderInput> | Prisma.VocabBookCreateWithoutFolderInput[] | Prisma.VocabBookUncheckedCreateWithoutFolderInput[]
+  connectOrCreate?: Prisma.VocabBookCreateOrConnectWithoutFolderInput | Prisma.VocabBookCreateOrConnectWithoutFolderInput[]
+  upsert?: Prisma.VocabBookUpsertWithWhereUniqueWithoutFolderInput | Prisma.VocabBookUpsertWithWhereUniqueWithoutFolderInput[]
+  createMany?: Prisma.VocabBookCreateManyFolderInputEnvelope
+  set?: Prisma.VocabBookWhereUniqueInput | Prisma.VocabBookWhereUniqueInput[]
+  disconnect?: Prisma.VocabBookWhereUniqueInput | Prisma.VocabBookWhereUniqueInput[]
+  delete?: Prisma.VocabBookWhereUniqueInput | Prisma.VocabBookWhereUniqueInput[]
+  connect?: Prisma.VocabBookWhereUniqueInput | Prisma.VocabBookWhereUniqueInput[]
+  update?: Prisma.VocabBookUpdateWithWhereUniqueWithoutFolderInput | Prisma.VocabBookUpdateWithWhereUniqueWithoutFolderInput[]
+  updateMany?: Prisma.VocabBookUpdateManyWithWhereWithoutFolderInput | Prisma.VocabBookUpdateManyWithWhereWithoutFolderInput[]
+  deleteMany?: Prisma.VocabBookScalarWhereInput | Prisma.VocabBookScalarWhereInput[]
+}
+
+export type VocabBookUncheckedUpdateManyWithoutFolderNestedInput = {
+  create?: Prisma.XOR<Prisma.VocabBookCreateWithoutFolderInput, Prisma.VocabBookUncheckedCreateWithoutFolderInput> | Prisma.VocabBookCreateWithoutFolderInput[] | Prisma.VocabBookUncheckedCreateWithoutFolderInput[]
+  connectOrCreate?: Prisma.VocabBookCreateOrConnectWithoutFolderInput | Prisma.VocabBookCreateOrConnectWithoutFolderInput[]
+  upsert?: Prisma.VocabBookUpsertWithWhereUniqueWithoutFolderInput | Prisma.VocabBookUpsertWithWhereUniqueWithoutFolderInput[]
+  createMany?: Prisma.VocabBookCreateManyFolderInputEnvelope
+  set?: Prisma.VocabBookWhereUniqueInput | Prisma.VocabBookWhereUniqueInput[]
+  disconnect?: Prisma.VocabBookWhereUniqueInput | Prisma.VocabBookWhereUniqueInput[]
+  delete?: Prisma.VocabBookWhereUniqueInput | Prisma.VocabBookWhereUniqueInput[]
+  connect?: Prisma.VocabBookWhereUniqueInput | Prisma.VocabBookWhereUniqueInput[]
+  update?: Prisma.VocabBookUpdateWithWhereUniqueWithoutFolderInput | Prisma.VocabBookUpdateWithWhereUniqueWithoutFolderInput[]
+  updateMany?: Prisma.VocabBookUpdateManyWithWhereWithoutFolderInput | Prisma.VocabBookUpdateManyWithWhereWithoutFolderInput[]
+  deleteMany?: Prisma.VocabBookScalarWhereInput | Prisma.VocabBookScalarWhereInput[]
+}
+
+export type VocabBookCreateNestedOneWithoutTagsInput = {
+  create?: Prisma.XOR<Prisma.VocabBookCreateWithoutTagsInput, Prisma.VocabBookUncheckedCreateWithoutTagsInput>
+  connectOrCreate?: Prisma.VocabBookCreateOrConnectWithoutTagsInput
+  connect?: Prisma.VocabBookWhereUniqueInput
+}
+
+export type VocabBookUpdateOneRequiredWithoutTagsNestedInput = {
+  create?: Prisma.XOR<Prisma.VocabBookCreateWithoutTagsInput, Prisma.VocabBookUncheckedCreateWithoutTagsInput>
+  connectOrCreate?: Prisma.VocabBookCreateOrConnectWithoutTagsInput
+  upsert?: Prisma.VocabBookUpsertWithoutTagsInput
+  connect?: Prisma.VocabBookWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.VocabBookUpdateToOneWithWhereWithoutTagsInput, Prisma.VocabBookUpdateWithoutTagsInput>, Prisma.VocabBookUncheckedUpdateWithoutTagsInput>
 }
 
 export type VocabBookCreateNestedOneWithoutDaysInput = {
@@ -527,12 +636,15 @@ export type VocabBookCreateWithoutAcademyInput = {
   title: string
   level?: string | null
   status?: string
+  mergedFrom?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  folder?: Prisma.BookFolderCreateNestedOneWithoutBooksInput
   days?: Prisma.BookDayCreateNestedManyWithoutBookInput
   words?: Prisma.WordCreateNestedManyWithoutBookInput
   imports?: Prisma.ImportCreateNestedManyWithoutBookInput
   exams?: Prisma.ExamCreateNestedManyWithoutBookInput
+  tags?: Prisma.VocabBookTagCreateNestedManyWithoutBookInput
 }
 
 export type VocabBookUncheckedCreateWithoutAcademyInput = {
@@ -541,12 +653,15 @@ export type VocabBookUncheckedCreateWithoutAcademyInput = {
   title: string
   level?: string | null
   status?: string
+  folderId?: string | null
+  mergedFrom?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   days?: Prisma.BookDayUncheckedCreateNestedManyWithoutBookInput
   words?: Prisma.WordUncheckedCreateNestedManyWithoutBookInput
   imports?: Prisma.ImportUncheckedCreateNestedManyWithoutBookInput
   exams?: Prisma.ExamUncheckedCreateNestedManyWithoutBookInput
+  tags?: Prisma.VocabBookTagUncheckedCreateNestedManyWithoutBookInput
 }
 
 export type VocabBookCreateOrConnectWithoutAcademyInput = {
@@ -584,8 +699,153 @@ export type VocabBookScalarWhereInput = {
   title?: Prisma.StringFilter<"VocabBook"> | string
   level?: Prisma.StringNullableFilter<"VocabBook"> | string | null
   status?: Prisma.StringFilter<"VocabBook"> | string
+  folderId?: Prisma.StringNullableFilter<"VocabBook"> | string | null
+  mergedFrom?: Prisma.StringNullableFilter<"VocabBook"> | string | null
   createdAt?: Prisma.DateTimeFilter<"VocabBook"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"VocabBook"> | Date | string
+}
+
+export type VocabBookCreateWithoutFolderInput = {
+  id?: string
+  createdById: string
+  title: string
+  level?: string | null
+  status?: string
+  mergedFrom?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  academy: Prisma.AcademyCreateNestedOneWithoutBooksInput
+  days?: Prisma.BookDayCreateNestedManyWithoutBookInput
+  words?: Prisma.WordCreateNestedManyWithoutBookInput
+  imports?: Prisma.ImportCreateNestedManyWithoutBookInput
+  exams?: Prisma.ExamCreateNestedManyWithoutBookInput
+  tags?: Prisma.VocabBookTagCreateNestedManyWithoutBookInput
+}
+
+export type VocabBookUncheckedCreateWithoutFolderInput = {
+  id?: string
+  academyId: string
+  createdById: string
+  title: string
+  level?: string | null
+  status?: string
+  mergedFrom?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  days?: Prisma.BookDayUncheckedCreateNestedManyWithoutBookInput
+  words?: Prisma.WordUncheckedCreateNestedManyWithoutBookInput
+  imports?: Prisma.ImportUncheckedCreateNestedManyWithoutBookInput
+  exams?: Prisma.ExamUncheckedCreateNestedManyWithoutBookInput
+  tags?: Prisma.VocabBookTagUncheckedCreateNestedManyWithoutBookInput
+}
+
+export type VocabBookCreateOrConnectWithoutFolderInput = {
+  where: Prisma.VocabBookWhereUniqueInput
+  create: Prisma.XOR<Prisma.VocabBookCreateWithoutFolderInput, Prisma.VocabBookUncheckedCreateWithoutFolderInput>
+}
+
+export type VocabBookCreateManyFolderInputEnvelope = {
+  data: Prisma.VocabBookCreateManyFolderInput | Prisma.VocabBookCreateManyFolderInput[]
+}
+
+export type VocabBookUpsertWithWhereUniqueWithoutFolderInput = {
+  where: Prisma.VocabBookWhereUniqueInput
+  update: Prisma.XOR<Prisma.VocabBookUpdateWithoutFolderInput, Prisma.VocabBookUncheckedUpdateWithoutFolderInput>
+  create: Prisma.XOR<Prisma.VocabBookCreateWithoutFolderInput, Prisma.VocabBookUncheckedCreateWithoutFolderInput>
+}
+
+export type VocabBookUpdateWithWhereUniqueWithoutFolderInput = {
+  where: Prisma.VocabBookWhereUniqueInput
+  data: Prisma.XOR<Prisma.VocabBookUpdateWithoutFolderInput, Prisma.VocabBookUncheckedUpdateWithoutFolderInput>
+}
+
+export type VocabBookUpdateManyWithWhereWithoutFolderInput = {
+  where: Prisma.VocabBookScalarWhereInput
+  data: Prisma.XOR<Prisma.VocabBookUpdateManyMutationInput, Prisma.VocabBookUncheckedUpdateManyWithoutFolderInput>
+}
+
+export type VocabBookCreateWithoutTagsInput = {
+  id?: string
+  createdById: string
+  title: string
+  level?: string | null
+  status?: string
+  mergedFrom?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  academy: Prisma.AcademyCreateNestedOneWithoutBooksInput
+  folder?: Prisma.BookFolderCreateNestedOneWithoutBooksInput
+  days?: Prisma.BookDayCreateNestedManyWithoutBookInput
+  words?: Prisma.WordCreateNestedManyWithoutBookInput
+  imports?: Prisma.ImportCreateNestedManyWithoutBookInput
+  exams?: Prisma.ExamCreateNestedManyWithoutBookInput
+}
+
+export type VocabBookUncheckedCreateWithoutTagsInput = {
+  id?: string
+  academyId: string
+  createdById: string
+  title: string
+  level?: string | null
+  status?: string
+  folderId?: string | null
+  mergedFrom?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  days?: Prisma.BookDayUncheckedCreateNestedManyWithoutBookInput
+  words?: Prisma.WordUncheckedCreateNestedManyWithoutBookInput
+  imports?: Prisma.ImportUncheckedCreateNestedManyWithoutBookInput
+  exams?: Prisma.ExamUncheckedCreateNestedManyWithoutBookInput
+}
+
+export type VocabBookCreateOrConnectWithoutTagsInput = {
+  where: Prisma.VocabBookWhereUniqueInput
+  create: Prisma.XOR<Prisma.VocabBookCreateWithoutTagsInput, Prisma.VocabBookUncheckedCreateWithoutTagsInput>
+}
+
+export type VocabBookUpsertWithoutTagsInput = {
+  update: Prisma.XOR<Prisma.VocabBookUpdateWithoutTagsInput, Prisma.VocabBookUncheckedUpdateWithoutTagsInput>
+  create: Prisma.XOR<Prisma.VocabBookCreateWithoutTagsInput, Prisma.VocabBookUncheckedCreateWithoutTagsInput>
+  where?: Prisma.VocabBookWhereInput
+}
+
+export type VocabBookUpdateToOneWithWhereWithoutTagsInput = {
+  where?: Prisma.VocabBookWhereInput
+  data: Prisma.XOR<Prisma.VocabBookUpdateWithoutTagsInput, Prisma.VocabBookUncheckedUpdateWithoutTagsInput>
+}
+
+export type VocabBookUpdateWithoutTagsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  mergedFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  academy?: Prisma.AcademyUpdateOneRequiredWithoutBooksNestedInput
+  folder?: Prisma.BookFolderUpdateOneWithoutBooksNestedInput
+  days?: Prisma.BookDayUpdateManyWithoutBookNestedInput
+  words?: Prisma.WordUpdateManyWithoutBookNestedInput
+  imports?: Prisma.ImportUpdateManyWithoutBookNestedInput
+  exams?: Prisma.ExamUpdateManyWithoutBookNestedInput
+}
+
+export type VocabBookUncheckedUpdateWithoutTagsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  academyId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  folderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mergedFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  days?: Prisma.BookDayUncheckedUpdateManyWithoutBookNestedInput
+  words?: Prisma.WordUncheckedUpdateManyWithoutBookNestedInput
+  imports?: Prisma.ImportUncheckedUpdateManyWithoutBookNestedInput
+  exams?: Prisma.ExamUncheckedUpdateManyWithoutBookNestedInput
 }
 
 export type VocabBookCreateWithoutDaysInput = {
@@ -594,12 +854,15 @@ export type VocabBookCreateWithoutDaysInput = {
   title: string
   level?: string | null
   status?: string
+  mergedFrom?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   academy: Prisma.AcademyCreateNestedOneWithoutBooksInput
+  folder?: Prisma.BookFolderCreateNestedOneWithoutBooksInput
   words?: Prisma.WordCreateNestedManyWithoutBookInput
   imports?: Prisma.ImportCreateNestedManyWithoutBookInput
   exams?: Prisma.ExamCreateNestedManyWithoutBookInput
+  tags?: Prisma.VocabBookTagCreateNestedManyWithoutBookInput
 }
 
 export type VocabBookUncheckedCreateWithoutDaysInput = {
@@ -609,11 +872,14 @@ export type VocabBookUncheckedCreateWithoutDaysInput = {
   title: string
   level?: string | null
   status?: string
+  folderId?: string | null
+  mergedFrom?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   words?: Prisma.WordUncheckedCreateNestedManyWithoutBookInput
   imports?: Prisma.ImportUncheckedCreateNestedManyWithoutBookInput
   exams?: Prisma.ExamUncheckedCreateNestedManyWithoutBookInput
+  tags?: Prisma.VocabBookTagUncheckedCreateNestedManyWithoutBookInput
 }
 
 export type VocabBookCreateOrConnectWithoutDaysInput = {
@@ -638,12 +904,15 @@ export type VocabBookUpdateWithoutDaysInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  mergedFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   academy?: Prisma.AcademyUpdateOneRequiredWithoutBooksNestedInput
+  folder?: Prisma.BookFolderUpdateOneWithoutBooksNestedInput
   words?: Prisma.WordUpdateManyWithoutBookNestedInput
   imports?: Prisma.ImportUpdateManyWithoutBookNestedInput
   exams?: Prisma.ExamUpdateManyWithoutBookNestedInput
+  tags?: Prisma.VocabBookTagUpdateManyWithoutBookNestedInput
 }
 
 export type VocabBookUncheckedUpdateWithoutDaysInput = {
@@ -653,11 +922,14 @@ export type VocabBookUncheckedUpdateWithoutDaysInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  folderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mergedFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   words?: Prisma.WordUncheckedUpdateManyWithoutBookNestedInput
   imports?: Prisma.ImportUncheckedUpdateManyWithoutBookNestedInput
   exams?: Prisma.ExamUncheckedUpdateManyWithoutBookNestedInput
+  tags?: Prisma.VocabBookTagUncheckedUpdateManyWithoutBookNestedInput
 }
 
 export type VocabBookCreateWithoutWordsInput = {
@@ -666,12 +938,15 @@ export type VocabBookCreateWithoutWordsInput = {
   title: string
   level?: string | null
   status?: string
+  mergedFrom?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   academy: Prisma.AcademyCreateNestedOneWithoutBooksInput
+  folder?: Prisma.BookFolderCreateNestedOneWithoutBooksInput
   days?: Prisma.BookDayCreateNestedManyWithoutBookInput
   imports?: Prisma.ImportCreateNestedManyWithoutBookInput
   exams?: Prisma.ExamCreateNestedManyWithoutBookInput
+  tags?: Prisma.VocabBookTagCreateNestedManyWithoutBookInput
 }
 
 export type VocabBookUncheckedCreateWithoutWordsInput = {
@@ -681,11 +956,14 @@ export type VocabBookUncheckedCreateWithoutWordsInput = {
   title: string
   level?: string | null
   status?: string
+  folderId?: string | null
+  mergedFrom?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   days?: Prisma.BookDayUncheckedCreateNestedManyWithoutBookInput
   imports?: Prisma.ImportUncheckedCreateNestedManyWithoutBookInput
   exams?: Prisma.ExamUncheckedCreateNestedManyWithoutBookInput
+  tags?: Prisma.VocabBookTagUncheckedCreateNestedManyWithoutBookInput
 }
 
 export type VocabBookCreateOrConnectWithoutWordsInput = {
@@ -710,12 +988,15 @@ export type VocabBookUpdateWithoutWordsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  mergedFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   academy?: Prisma.AcademyUpdateOneRequiredWithoutBooksNestedInput
+  folder?: Prisma.BookFolderUpdateOneWithoutBooksNestedInput
   days?: Prisma.BookDayUpdateManyWithoutBookNestedInput
   imports?: Prisma.ImportUpdateManyWithoutBookNestedInput
   exams?: Prisma.ExamUpdateManyWithoutBookNestedInput
+  tags?: Prisma.VocabBookTagUpdateManyWithoutBookNestedInput
 }
 
 export type VocabBookUncheckedUpdateWithoutWordsInput = {
@@ -725,11 +1006,14 @@ export type VocabBookUncheckedUpdateWithoutWordsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  folderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mergedFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   days?: Prisma.BookDayUncheckedUpdateManyWithoutBookNestedInput
   imports?: Prisma.ImportUncheckedUpdateManyWithoutBookNestedInput
   exams?: Prisma.ExamUncheckedUpdateManyWithoutBookNestedInput
+  tags?: Prisma.VocabBookTagUncheckedUpdateManyWithoutBookNestedInput
 }
 
 export type VocabBookCreateWithoutImportsInput = {
@@ -738,12 +1022,15 @@ export type VocabBookCreateWithoutImportsInput = {
   title: string
   level?: string | null
   status?: string
+  mergedFrom?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   academy: Prisma.AcademyCreateNestedOneWithoutBooksInput
+  folder?: Prisma.BookFolderCreateNestedOneWithoutBooksInput
   days?: Prisma.BookDayCreateNestedManyWithoutBookInput
   words?: Prisma.WordCreateNestedManyWithoutBookInput
   exams?: Prisma.ExamCreateNestedManyWithoutBookInput
+  tags?: Prisma.VocabBookTagCreateNestedManyWithoutBookInput
 }
 
 export type VocabBookUncheckedCreateWithoutImportsInput = {
@@ -753,11 +1040,14 @@ export type VocabBookUncheckedCreateWithoutImportsInput = {
   title: string
   level?: string | null
   status?: string
+  folderId?: string | null
+  mergedFrom?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   days?: Prisma.BookDayUncheckedCreateNestedManyWithoutBookInput
   words?: Prisma.WordUncheckedCreateNestedManyWithoutBookInput
   exams?: Prisma.ExamUncheckedCreateNestedManyWithoutBookInput
+  tags?: Prisma.VocabBookTagUncheckedCreateNestedManyWithoutBookInput
 }
 
 export type VocabBookCreateOrConnectWithoutImportsInput = {
@@ -782,12 +1072,15 @@ export type VocabBookUpdateWithoutImportsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  mergedFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   academy?: Prisma.AcademyUpdateOneRequiredWithoutBooksNestedInput
+  folder?: Prisma.BookFolderUpdateOneWithoutBooksNestedInput
   days?: Prisma.BookDayUpdateManyWithoutBookNestedInput
   words?: Prisma.WordUpdateManyWithoutBookNestedInput
   exams?: Prisma.ExamUpdateManyWithoutBookNestedInput
+  tags?: Prisma.VocabBookTagUpdateManyWithoutBookNestedInput
 }
 
 export type VocabBookUncheckedUpdateWithoutImportsInput = {
@@ -797,11 +1090,14 @@ export type VocabBookUncheckedUpdateWithoutImportsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  folderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mergedFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   days?: Prisma.BookDayUncheckedUpdateManyWithoutBookNestedInput
   words?: Prisma.WordUncheckedUpdateManyWithoutBookNestedInput
   exams?: Prisma.ExamUncheckedUpdateManyWithoutBookNestedInput
+  tags?: Prisma.VocabBookTagUncheckedUpdateManyWithoutBookNestedInput
 }
 
 export type VocabBookCreateWithoutExamsInput = {
@@ -810,12 +1106,15 @@ export type VocabBookCreateWithoutExamsInput = {
   title: string
   level?: string | null
   status?: string
+  mergedFrom?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   academy: Prisma.AcademyCreateNestedOneWithoutBooksInput
+  folder?: Prisma.BookFolderCreateNestedOneWithoutBooksInput
   days?: Prisma.BookDayCreateNestedManyWithoutBookInput
   words?: Prisma.WordCreateNestedManyWithoutBookInput
   imports?: Prisma.ImportCreateNestedManyWithoutBookInput
+  tags?: Prisma.VocabBookTagCreateNestedManyWithoutBookInput
 }
 
 export type VocabBookUncheckedCreateWithoutExamsInput = {
@@ -825,11 +1124,14 @@ export type VocabBookUncheckedCreateWithoutExamsInput = {
   title: string
   level?: string | null
   status?: string
+  folderId?: string | null
+  mergedFrom?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   days?: Prisma.BookDayUncheckedCreateNestedManyWithoutBookInput
   words?: Prisma.WordUncheckedCreateNestedManyWithoutBookInput
   imports?: Prisma.ImportUncheckedCreateNestedManyWithoutBookInput
+  tags?: Prisma.VocabBookTagUncheckedCreateNestedManyWithoutBookInput
 }
 
 export type VocabBookCreateOrConnectWithoutExamsInput = {
@@ -854,12 +1156,15 @@ export type VocabBookUpdateWithoutExamsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  mergedFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   academy?: Prisma.AcademyUpdateOneRequiredWithoutBooksNestedInput
+  folder?: Prisma.BookFolderUpdateOneWithoutBooksNestedInput
   days?: Prisma.BookDayUpdateManyWithoutBookNestedInput
   words?: Prisma.WordUpdateManyWithoutBookNestedInput
   imports?: Prisma.ImportUpdateManyWithoutBookNestedInput
+  tags?: Prisma.VocabBookTagUpdateManyWithoutBookNestedInput
 }
 
 export type VocabBookUncheckedUpdateWithoutExamsInput = {
@@ -869,11 +1174,14 @@ export type VocabBookUncheckedUpdateWithoutExamsInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  folderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mergedFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   days?: Prisma.BookDayUncheckedUpdateManyWithoutBookNestedInput
   words?: Prisma.WordUncheckedUpdateManyWithoutBookNestedInput
   imports?: Prisma.ImportUncheckedUpdateManyWithoutBookNestedInput
+  tags?: Prisma.VocabBookTagUncheckedUpdateManyWithoutBookNestedInput
 }
 
 export type VocabBookCreateManyAcademyInput = {
@@ -882,6 +1190,8 @@ export type VocabBookCreateManyAcademyInput = {
   title: string
   level?: string | null
   status?: string
+  folderId?: string | null
+  mergedFrom?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -892,12 +1202,15 @@ export type VocabBookUpdateWithoutAcademyInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  mergedFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  folder?: Prisma.BookFolderUpdateOneWithoutBooksNestedInput
   days?: Prisma.BookDayUpdateManyWithoutBookNestedInput
   words?: Prisma.WordUpdateManyWithoutBookNestedInput
   imports?: Prisma.ImportUpdateManyWithoutBookNestedInput
   exams?: Prisma.ExamUpdateManyWithoutBookNestedInput
+  tags?: Prisma.VocabBookTagUpdateManyWithoutBookNestedInput
 }
 
 export type VocabBookUncheckedUpdateWithoutAcademyInput = {
@@ -906,12 +1219,15 @@ export type VocabBookUncheckedUpdateWithoutAcademyInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  folderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mergedFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   days?: Prisma.BookDayUncheckedUpdateManyWithoutBookNestedInput
   words?: Prisma.WordUncheckedUpdateManyWithoutBookNestedInput
   imports?: Prisma.ImportUncheckedUpdateManyWithoutBookNestedInput
   exams?: Prisma.ExamUncheckedUpdateManyWithoutBookNestedInput
+  tags?: Prisma.VocabBookTagUncheckedUpdateManyWithoutBookNestedInput
 }
 
 export type VocabBookUncheckedUpdateManyWithoutAcademyInput = {
@@ -920,6 +1236,66 @@ export type VocabBookUncheckedUpdateManyWithoutAcademyInput = {
   title?: Prisma.StringFieldUpdateOperationsInput | string
   level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   status?: Prisma.StringFieldUpdateOperationsInput | string
+  folderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  mergedFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type VocabBookCreateManyFolderInput = {
+  id?: string
+  academyId: string
+  createdById: string
+  title: string
+  level?: string | null
+  status?: string
+  mergedFrom?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type VocabBookUpdateWithoutFolderInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  mergedFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  academy?: Prisma.AcademyUpdateOneRequiredWithoutBooksNestedInput
+  days?: Prisma.BookDayUpdateManyWithoutBookNestedInput
+  words?: Prisma.WordUpdateManyWithoutBookNestedInput
+  imports?: Prisma.ImportUpdateManyWithoutBookNestedInput
+  exams?: Prisma.ExamUpdateManyWithoutBookNestedInput
+  tags?: Prisma.VocabBookTagUpdateManyWithoutBookNestedInput
+}
+
+export type VocabBookUncheckedUpdateWithoutFolderInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  academyId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  mergedFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  days?: Prisma.BookDayUncheckedUpdateManyWithoutBookNestedInput
+  words?: Prisma.WordUncheckedUpdateManyWithoutBookNestedInput
+  imports?: Prisma.ImportUncheckedUpdateManyWithoutBookNestedInput
+  exams?: Prisma.ExamUncheckedUpdateManyWithoutBookNestedInput
+  tags?: Prisma.VocabBookTagUncheckedUpdateManyWithoutBookNestedInput
+}
+
+export type VocabBookUncheckedUpdateManyWithoutFolderInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  academyId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdById?: Prisma.StringFieldUpdateOperationsInput | string
+  title?: Prisma.StringFieldUpdateOperationsInput | string
+  level?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  mergedFrom?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -934,6 +1310,7 @@ export type VocabBookCountOutputType = {
   words: number
   imports: number
   exams: number
+  tags: number
 }
 
 export type VocabBookCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -941,6 +1318,7 @@ export type VocabBookCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensi
   words?: boolean | VocabBookCountOutputTypeCountWordsArgs
   imports?: boolean | VocabBookCountOutputTypeCountImportsArgs
   exams?: boolean | VocabBookCountOutputTypeCountExamsArgs
+  tags?: boolean | VocabBookCountOutputTypeCountTagsArgs
 }
 
 /**
@@ -981,6 +1359,13 @@ export type VocabBookCountOutputTypeCountExamsArgs<ExtArgs extends runtime.Types
   where?: Prisma.ExamWhereInput
 }
 
+/**
+ * VocabBookCountOutputType without action
+ */
+export type VocabBookCountOutputTypeCountTagsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.VocabBookTagWhereInput
+}
+
 
 export type VocabBookSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -989,13 +1374,17 @@ export type VocabBookSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   title?: boolean
   level?: boolean
   status?: boolean
+  folderId?: boolean
+  mergedFrom?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   academy?: boolean | Prisma.AcademyDefaultArgs<ExtArgs>
+  folder?: boolean | Prisma.VocabBook$folderArgs<ExtArgs>
   days?: boolean | Prisma.VocabBook$daysArgs<ExtArgs>
   words?: boolean | Prisma.VocabBook$wordsArgs<ExtArgs>
   imports?: boolean | Prisma.VocabBook$importsArgs<ExtArgs>
   exams?: boolean | Prisma.VocabBook$examsArgs<ExtArgs>
+  tags?: boolean | Prisma.VocabBook$tagsArgs<ExtArgs>
   _count?: boolean | Prisma.VocabBookCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["vocabBook"]>
 
@@ -1006,9 +1395,12 @@ export type VocabBookSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   title?: boolean
   level?: boolean
   status?: boolean
+  folderId?: boolean
+  mergedFrom?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   academy?: boolean | Prisma.AcademyDefaultArgs<ExtArgs>
+  folder?: boolean | Prisma.VocabBook$folderArgs<ExtArgs>
 }, ExtArgs["result"]["vocabBook"]>
 
 export type VocabBookSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1018,9 +1410,12 @@ export type VocabBookSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   title?: boolean
   level?: boolean
   status?: boolean
+  folderId?: boolean
+  mergedFrom?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   academy?: boolean | Prisma.AcademyDefaultArgs<ExtArgs>
+  folder?: boolean | Prisma.VocabBook$folderArgs<ExtArgs>
 }, ExtArgs["result"]["vocabBook"]>
 
 export type VocabBookSelectScalar = {
@@ -1030,34 +1425,42 @@ export type VocabBookSelectScalar = {
   title?: boolean
   level?: boolean
   status?: boolean
+  folderId?: boolean
+  mergedFrom?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type VocabBookOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "academyId" | "createdById" | "title" | "level" | "status" | "createdAt" | "updatedAt", ExtArgs["result"]["vocabBook"]>
+export type VocabBookOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "academyId" | "createdById" | "title" | "level" | "status" | "folderId" | "mergedFrom" | "createdAt" | "updatedAt", ExtArgs["result"]["vocabBook"]>
 export type VocabBookInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   academy?: boolean | Prisma.AcademyDefaultArgs<ExtArgs>
+  folder?: boolean | Prisma.VocabBook$folderArgs<ExtArgs>
   days?: boolean | Prisma.VocabBook$daysArgs<ExtArgs>
   words?: boolean | Prisma.VocabBook$wordsArgs<ExtArgs>
   imports?: boolean | Prisma.VocabBook$importsArgs<ExtArgs>
   exams?: boolean | Prisma.VocabBook$examsArgs<ExtArgs>
+  tags?: boolean | Prisma.VocabBook$tagsArgs<ExtArgs>
   _count?: boolean | Prisma.VocabBookCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type VocabBookIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   academy?: boolean | Prisma.AcademyDefaultArgs<ExtArgs>
+  folder?: boolean | Prisma.VocabBook$folderArgs<ExtArgs>
 }
 export type VocabBookIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   academy?: boolean | Prisma.AcademyDefaultArgs<ExtArgs>
+  folder?: boolean | Prisma.VocabBook$folderArgs<ExtArgs>
 }
 
 export type $VocabBookPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "VocabBook"
   objects: {
     academy: Prisma.$AcademyPayload<ExtArgs>
+    folder: Prisma.$BookFolderPayload<ExtArgs> | null
     days: Prisma.$BookDayPayload<ExtArgs>[]
     words: Prisma.$WordPayload<ExtArgs>[]
     imports: Prisma.$ImportPayload<ExtArgs>[]
     exams: Prisma.$ExamPayload<ExtArgs>[]
+    tags: Prisma.$VocabBookTagPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1066,6 +1469,8 @@ export type $VocabBookPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     title: string
     level: string | null
     status: string
+    folderId: string | null
+    mergedFrom: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["vocabBook"]>
@@ -1463,10 +1868,12 @@ readonly fields: VocabBookFieldRefs;
 export interface Prisma__VocabBookClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   academy<T extends Prisma.AcademyDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.AcademyDefaultArgs<ExtArgs>>): Prisma.Prisma__AcademyClient<runtime.Types.Result.GetResult<Prisma.$AcademyPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  folder<T extends Prisma.VocabBook$folderArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.VocabBook$folderArgs<ExtArgs>>): Prisma.Prisma__BookFolderClient<runtime.Types.Result.GetResult<Prisma.$BookFolderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   days<T extends Prisma.VocabBook$daysArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.VocabBook$daysArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BookDayPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   words<T extends Prisma.VocabBook$wordsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.VocabBook$wordsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$WordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   imports<T extends Prisma.VocabBook$importsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.VocabBook$importsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ImportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   exams<T extends Prisma.VocabBook$examsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.VocabBook$examsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExamPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  tags<T extends Prisma.VocabBook$tagsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.VocabBook$tagsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VocabBookTagPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1502,6 +1909,8 @@ export interface VocabBookFieldRefs {
   readonly title: Prisma.FieldRef<"VocabBook", 'String'>
   readonly level: Prisma.FieldRef<"VocabBook", 'String'>
   readonly status: Prisma.FieldRef<"VocabBook", 'String'>
+  readonly folderId: Prisma.FieldRef<"VocabBook", 'String'>
+  readonly mergedFrom: Prisma.FieldRef<"VocabBook", 'String'>
   readonly createdAt: Prisma.FieldRef<"VocabBook", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"VocabBook", 'DateTime'>
 }
@@ -1903,6 +2312,25 @@ export type VocabBookDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Int
 }
 
 /**
+ * VocabBook.folder
+ */
+export type VocabBook$folderArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BookFolder
+   */
+  select?: Prisma.BookFolderSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BookFolder
+   */
+  omit?: Prisma.BookFolderOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BookFolderInclude<ExtArgs> | null
+  where?: Prisma.BookFolderWhereInput
+}
+
+/**
  * VocabBook.days
  */
 export type VocabBook$daysArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1996,6 +2424,30 @@ export type VocabBook$examsArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.ExamScalarFieldEnum | Prisma.ExamScalarFieldEnum[]
+}
+
+/**
+ * VocabBook.tags
+ */
+export type VocabBook$tagsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the VocabBookTag
+   */
+  select?: Prisma.VocabBookTagSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the VocabBookTag
+   */
+  omit?: Prisma.VocabBookTagOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.VocabBookTagInclude<ExtArgs> | null
+  where?: Prisma.VocabBookTagWhereInput
+  orderBy?: Prisma.VocabBookTagOrderByWithRelationInput | Prisma.VocabBookTagOrderByWithRelationInput[]
+  cursor?: Prisma.VocabBookTagWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.VocabBookTagScalarFieldEnum | Prisma.VocabBookTagScalarFieldEnum[]
 }
 
 /**

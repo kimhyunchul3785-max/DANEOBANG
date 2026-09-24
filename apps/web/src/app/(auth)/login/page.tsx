@@ -1,12 +1,12 @@
 import { redirect } from "next/navigation";
-import { getCurrentUser, landingAfterLogin } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 import { AuthShell } from "../AuthShell";
 
 /** 첫 화면 = 로그인. 이미 로그인돼 있으면 있어야 할 곳으로 */
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ next?: string; error?: string }> }) {
   const sp = await searchParams;
   const user = await getCurrentUser();
-  if (user) redirect(await landingAfterLogin(user.id, sp.next));
+  if (user) redirect(`/api/auth/landing${sp.next ? `?next=${encodeURIComponent(sp.next)}` : ""}`); // 쿠키는 Route Handler 에서 (페이지에서 굽으면 500)
   const messages: Record<string, string> = {
     google_not_configured: "Google 로그인 키가 아직 설정되지 않았습니다. '설정 방법'을 눌러 .env 에 키를 넣어 주세요.",
     kakao_not_configured: "카카오 로그인 키가 아직 설정되지 않았습니다. '설정 방법'을 눌러 .env 에 키를 넣어 주세요.",

@@ -121,7 +121,7 @@ export async function requireAcademy(): Promise<AcademyContext> {
     const user = await getCurrentUser();
     if (!user) redirect("/login?next=/app");
     const ms = await prisma.academyMember.findMany({ where: { userId: user.id, status: "active", academy: { status: { in: ACADEMY_ENTERABLE } } }, select: { academyId: true } });
-    if (ms.length === 1) redirect(`/switch?to=member:${ms[0].academyId}`);
+    if (ms.length === 1) redirect(`/api/auth/switch?to=member:${ms[0].academyId}`);
     redirect(ms.length === 0 ? "/welcome" : "/switch");
   }
   return ctx;
@@ -129,7 +129,7 @@ export async function requireAcademy(): Promise<AcademyContext> {
 
 export async function requireOwner(): Promise<AcademyContext> {
   const ctx = await requireAcademy();
-  if (!ctx.isOwner) redirect("/app");
+  if (!ctx.isOwner) redirect("/app?denied=owner"); // 오늘 화면이 "학원장만 볼 수 있어요" 토스트를 띄운다
   return ctx;
 }
 

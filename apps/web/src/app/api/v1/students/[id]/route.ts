@@ -10,7 +10,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
     const { id } = await params;
     const s = await prisma.student.findFirst({
       where: { id, ...studentScope(ctx) },
-      include: { classRoom: true, assignments: { include: { exam: { select: { id: true, title: true, isRetake: true } }, attempts: { include: { grades: { where: { current: true } } }, orderBy: { attemptNo: "asc" } } }, orderBy: { createdAt: "desc" } }, retakes: { where: { status: { in: ["pending", "scheduled"] } } } },
+      include: { classRoom: true, assignments: { include: { exam: { select: { id: true, title: true, isRetake: true } }, attempts: { include: { grades: { where: { current: true } } }, orderBy: { attemptNo: "asc" } } }, orderBy: { createdAt: "desc" } }, retakes: { where: { status: { in: ["pending", "issued"] } }, include: { sourceAttempt: { select: { assignment: { select: { exam: { select: { title: true } } } } } } }, orderBy: [{ dueAt: { sort: "asc", nulls: "last" } }, { createdAt: "desc" }] } },
     });
     if (!s) return fail(404, "not_found");
     return ok({
@@ -21,7 +21,7 @@ export async function GET(req: Request, { params }: { params: Promise<{ id: stri
       class: s.classRoom ? { id: s.classRoom.id, name: s.classRoom.name } : null,
       linked: !!s.userId,
       history: s.assignments.map((a) => ({ assignmentId: a.id, exam: a.exam, status: a.status, mode: a.mode, dueAt: a.dueAt, attempts: a.attempts.map((t) => ({ attemptId: t.id, attemptNo: t.attemptNo, mode: t.mode, status: t.status, submittedAt: t.submittedAt, grade: t.grades[0] ? { score: Math.round(t.grades[0].score), correct: t.grades[0].correctCount, total: t.grades[0].totalCount, passed: t.grades[0].passed } : null })) })),
-      pendingRetakes: s.retakes.map((r) => ({ id: r.id, dueAt: r.dueAt, status: r.status })),
+      pendingRetakes: s.retakes.map((r) => ({ id: r.id, dueAt: r.dueAt, status: r.status, issued: !!r.retakeExamId, title: r.sourceAttempt?.assignment.exam.title ?? "반복 오답 재시험" })),
     });
   }, req);
 }

@@ -28,7 +28,7 @@ export function AssignPanel({ examId, forms, students, classes, defaultDue }: { 
   const dueError = due && due <= effectiveStart ? "마감이 시작보다 빠르거나 같아요." : null;
   return (
     <div className="card card-body" data-testid="assign-panel">
-      <div className="lbl">Add · 대상 추가</div>
+      <div className="lbl">대상 추가</div>
       <p className="muted mt-1">아직 대상이 아닌 학생 {students.length}명. 반을 고르거나 개별로 체크하세요.</p>
       <ActionForm action={assignStudentsAction} className="mt-3 space-y-3" onSuccess={() => setSel([])}>
         <input type="hidden" name="examId" value={examId} />

@@ -16,7 +16,7 @@ const IMAGE_MAGIC: [number[], string][] = [
 export async function findPrintPage(token: string) {
   return prisma.printPage.findUnique({
     where: { token },
-    include: { print: { include: { pages: { orderBy: { pageNo: "asc" } }, attempt: { include: { grades: { where: { current: true } }, assignment: { include: { exam: { select: { id: true, title: true, academyId: true, passScore: true, answerVisibility: true, answersReleased: true } }, student: { select: { id: true, name: true, userId: true, user: { select: { passwordHash: true, name: true } } } } } } } } } } },
+    include: { print: { include: { pages: { orderBy: { pageNo: "asc" } }, attempt: { include: { grades: { where: { current: true } }, assignment: { include: { exam: { select: { id: true, title: true, academyId: true, passScore: true, answerVisibility: true, scoreVisibility: true, answersReleased: true } }, student: { select: { id: true, name: true, userId: true, user: { select: { passwordHash: true, name: true } } } } } } } } } } },
   });
 }
 
@@ -53,7 +53,7 @@ export async function submitStudentScan(params: { buf: Buffer; fileName: string;
 export async function listStudentScans(userId: string, studentId?: string) {
   const scans = await prisma.scanUpload.findMany({
     where: { uploadedById: userId, source: "student", ...(studentId ? { page: { print: { attempt: { assignment: { studentId } } } } } : {}) },
-    include: { page: { include: { print: { include: { attempt: { include: { grades: { where: { current: true } }, assignment: { include: { exam: { select: { id: true, title: true } } } } } } } } } } },
+    include: { page: { include: { print: { include: { attempt: { include: { grades: { where: { current: true } }, assignment: { include: { exam: { select: { id: true, title: true, scoreVisibility: true, answersReleased: true } } } } } } } } } } },
     orderBy: { createdAt: "desc" },
     take: 20,
   });
@@ -67,7 +67,9 @@ export async function listStudentScans(userId: string, studentId?: string) {
     examTitle: s.page?.print.attempt.assignment.exam.title ?? null,
     attemptId: s.page?.print.attempt.id ?? null,
     attemptStatus: s.page?.print.attempt.status ?? null,
-    score: s.page?.print.attempt.grades[0] ? Math.round(s.page.print.attempt.grades[0].score) : null,
-    passed: s.page?.print.attempt.grades[0]?.passed ?? null,
+    // 점수 공개 정책: "선생님이 공개한 뒤"면 공개 전까지 숨긴다
+    score: s.page?.print.attempt.grades[0] && (s.page.print.attempt.assignment.exam.scoreVisibility === "immediate" || s.page.print.attempt.assignment.exam.answersReleased) ? Math.round(s.page.print.attempt.grades[0].score) : null,
+    passed: s.page?.print.attempt.grades[0] && (s.page.print.attempt.assignment.exam.scoreVisibility === "immediate" || s.page.print.attempt.assignment.exam.answersReleased) ? s.page.print.attempt.grades[0].passed : null,
+    scoreHidden: !!s.page?.print.attempt.grades[0] && !(s.page.print.attempt.assignment.exam.scoreVisibility === "immediate" || s.page.print.attempt.assignment.exam.answersReleased),
   }));
 }

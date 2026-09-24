@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/db";
+import { notifyUser } from "@/lib/notify";
 import { requireAcademy, audit } from "@/lib/auth";
 import { canAccessStudent } from "@/lib/scope";
 import { hashToken, randomToken, fmtMDHM } from "@/lib/util";
@@ -189,6 +190,7 @@ export async function decideLinkRequestAction(requestId: string, decision: "link
       return created;
     });
     await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "student.link_new", target: s.id, detail: `from ${r.studentId}` });
+    await notifyUser(r.userId, "학원과 연결됐어요", `${ctx.member.academy.name} · 이제 시험이 여기에 보여요.`, "/learn");
     revalidatePath("/app/students");
     revalidatePath(`/app/students/${r.studentId}`);
     return { ok: true, message: `${s.name} 학생을 새로 추가하고 연결했습니다.` };
@@ -198,6 +200,7 @@ export async function decideLinkRequestAction(requestId: string, decision: "link
     await tx.studentLinkRequest.update({ where: { id: requestId }, data: done });
     await tx.studentLinkRequest.updateMany({ where: { studentId: r.studentId, status: "pending", id: { not: requestId } }, data: { status: "rejected" } });
   });
+  await notifyUser(r.userId, "학원과 연결됐어요", `${ctx.member.academy.name} · 이제 시험이 여기에 보여요.`, "/learn");
   await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "student.link", target: r.studentId });
   revalidatePath(`/app/students/${r.studentId}`);
   revalidatePath("/app/students");

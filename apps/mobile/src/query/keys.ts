@@ -7,4 +7,5 @@ export const qk = {
   exams: (academyId: string) => ["exams", academyId] as const,
   exam: (academyId: string, examId: string) => ["exam", academyId, examId] as const,
   results: (academyId: string, filters: Record<string, string | undefined>) => ["results", academyId, filters] as const,
+  retakes: (academyId: string, studentId?: string) => ["retakes", academyId, studentId ?? "all"] as const,
 };

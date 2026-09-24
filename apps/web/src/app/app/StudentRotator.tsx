@@ -24,14 +24,14 @@ export function StudentRotator({ rows, pageSize = 6, interval = 6000 }: { rows: 
       <ul key={page}>
         {slice.map((r, i) => (
           <li key={r.id} className="row anim-slide" style={{ animationDelay: `${i * 45}ms` }}>
-            <Link href={`/app/students/${r.id}`} className="min-w-0 truncate text-[14px] hover:underline">
-              {r.name} <span className="muted">· {r.className ?? "반 없음"}</span>
+            <Link href={`/app/students/${r.id}`} className="min-w-0 truncate text-[14px] font-medium hover:underline">
+              {r.name} <span className="muted font-normal">· {r.className ?? "반 없음"}</span>
             </Link>
-            <span className="flex items-center gap-3">
-              <span className="digital" style={{ color: r.delta !== null && r.delta < 0 ? "var(--accent)" : "var(--ink-3)" }}>
-                {r.delta === null ? "··" : r.delta > 0 ? `▲${r.delta}` : r.delta < 0 ? `▼${-r.delta}` : "="}
+            <span className="flex items-center gap-3 tabular-nums">
+              <span className="text-[12px] font-semibold" style={{ color: r.delta !== null && r.delta < 0 ? "var(--accent)" : r.delta !== null && r.delta > 0 ? "var(--ok)" : "var(--ink-4)" }}>
+                {r.delta === null ? "" : r.delta > 0 ? `▲ ${r.delta}` : r.delta < 0 ? `▼ ${-r.delta}` : "–"}
               </span>
-              <span className="num-md" style={{ fontSize: 20, color: r.a !== null && r.a < 70 ? "var(--accent)" : undefined }}>
+              <span className="w-8 text-right text-[15px] font-bold" style={{ color: r.a !== null && r.a < 70 ? "var(--accent)" : undefined }}>
                 {r.a ?? "–"}
               </span>
             </span>
@@ -45,7 +45,7 @@ export function StudentRotator({ rows, pageSize = 6, interval = 6000 }: { rows: 
               <button key={i} type="button" role="tab" aria-selected={i === page} aria-label={`${i + 1}페이지`} onClick={() => setPage(i)} className="h-1.5 rounded-full transition-all" style={{ width: i === page ? 18 : 6, background: i === page ? "var(--ink)" : "rgba(27,26,24,0.18)" }} />
             ))}
           </div>
-          <span className="digital" style={{ color: "var(--ink-3)", fontSize: 12 }}>
+          <span className="text-[12px] tabular-nums" style={{ color: "var(--ink-3)" }}>
             {String(page * pageSize + 1).padStart(2, "0")}–{String(Math.min(rows.length, (page + 1) * pageSize)).padStart(2, "0")} / {rows.length}
             {paused ? " ▮▮" : " ▶"}
           </span>

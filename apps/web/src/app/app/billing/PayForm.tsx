@@ -34,7 +34,7 @@ export function PayForm({ academyId, academyName, seats, unitPrice, lastError, m
   return (
     <section className="card card-body anim-fade-up" data-testid="pay-step">
       <div className="flex items-center justify-between">
-        <div className="lbl">Payment</div>
+        <div className="lbl">결제</div>
         <span className="digital">{academyName}</span>
       </div>
       <h1 className="h1 mt-1">결제하고 시작하기</h1>

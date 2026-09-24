@@ -6,5 +6,5 @@ import { PracticeRunner } from "./PracticeRunner";
 export default async function PracticeAllPage() {
   const { user, student } = await requireStudent();
   const set = await practiceSetAll(user.id, student.id);
-  return <PracticeRunner title={`${set.title} · ${set.words.length}개`} words={set.words} meaningPool={set.meaningPool} englishPool={set.englishPool} backHref="/learn/grades" backLabel="Grades" />;
+  return <PracticeRunner title={`${set.title} · ${set.words.length}개`} words={set.words} meaningPool={set.meaningPool} englishPool={set.englishPool} />;
 }

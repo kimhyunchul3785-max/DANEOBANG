@@ -79,7 +79,8 @@ export async function generateItems(params: { dayIds: string[]; questionCount: n
   }
   candidates = shuffle(chosen, rnd);
 
-  // 보기 생성
+  // 보기 생성 — 오답 보기는 이 시험의 다른 문항 정답이 아닌 단어를 먼저 쓴다 (소거법 힌트 줄이기)
+  const questionIds = new Set(candidates.map((c) => c.id));
   const items: GeneratedItem[] = [];
   const short: string[] = [];
   for (const w of candidates) {
@@ -108,7 +109,10 @@ export async function generateItems(params: { dayIds: string[]; questionCount: n
         if (picks.length === EXAM_DEFAULTS.optionCount - 1) break;
       }
     };
-    take(samePos);
+    const outside = (arr: PoolWord[]) => arr.filter((o) => !questionIds.has(o.id));
+    take(outside(samePos));
+    if (picks.length < EXAM_DEFAULTS.optionCount - 1) take(outside(usable).filter((o) => !picks.includes(o)));
+    if (picks.length < EXAM_DEFAULTS.optionCount - 1) take(samePos.filter((o) => !picks.includes(o)));
     if (picks.length < EXAM_DEFAULTS.optionCount - 1) take(usable.filter((o) => !picks.includes(o)));
     if (picks.length < EXAM_DEFAULTS.optionCount - 1) {
       short.push(w.english);
@@ -134,12 +138,16 @@ export function formHash(items: GeneratedItem[]) {
 export async function createFormForExam(examId: string, opts?: { onlyWordIds?: string[]; distractorDayIds?: string[] }) {
   const exam = await prisma.exam.findUniqueOrThrow({ where: { id: examId }, include: { scopes: true, forms: { select: { version: true } } } });
   const seed = `${examId}:${Date.now()}:${Math.random()}`;
-  const gen = await generateItems({ dayIds: exam.scopes.map((s) => s.dayId), questionCount: exam.questionCount, seed, onlyWordIds: opts?.onlyWordIds, distractorDayIds: opts?.distractorDayIds });
+  // 오답 보기 후보: 따로 지정이 없으면 같은 단어장 전체 (범위 안 단어만 쓰면 다른 문항의 정답이 보기로 반복된다)
+  const distractorDayIds = opts?.distractorDayIds ?? (await prisma.bookDay.findMany({ where: { bookId: exam.bookId }, select: { id: true } })).map((d) => d.id);
+  const gen = await generateItems({ dayIds: exam.scopes.map((s) => s.dayId), questionCount: exam.questionCount, seed, onlyWordIds: opts?.onlyWordIds, distractorDayIds });
   const version = (exam.forms.reduce((m, f) => Math.max(m, f.version), 0) || 0) + 1;
   const form = await prisma.$transaction(async (tx) => {
     // 기존 draft 는 하나만 유지
     await tx.examForm.deleteMany({ where: { examId, status: "draft" } });
     const f = await tx.examForm.create({ data: { examId, version, seed, warnings: JSON.stringify(gen.warnings), hash: formHash(gen.items) } });
+    // 범위 단어가 모자라 문항이 줄었으면 시험의 문항 수도 실제 값으로 (목록·상세·학생 화면이 같은 숫자)
+    if (gen.items.length !== exam.questionCount) await tx.exam.update({ where: { id: examId }, data: { questionCount: gen.items.length } });
     for (const [i, it] of gen.items.entries()) {
       await tx.formItem.create({
         data: {

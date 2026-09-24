@@ -21,7 +21,7 @@ export async function listStudentAssignments(userId: string, studentId?: string)
     where: { studentId: { in: students.map((s) => s.id) }, exam: { status: "published" } },
     include: {
       exam: { select: { id: true, title: true, questionCount: true, passScore: true, timeLimitMin: true, secondsPerItem: true, isRetake: true, scoreVisibility: true, answerVisibility: true, answersReleased: true, academy: { select: { name: true } } } },
-      attempts: { include: { grades: { where: { current: true } } }, orderBy: { attemptNo: "desc" } },
+      attempts: { include: { grades: { where: { current: true } }, _count: { select: { answers: { where: { optionId: { not: null } } } } } }, orderBy: { attemptNo: "desc" } },
       student: { select: { id: true, name: true } },
     },
     orderBy: { createdAt: "asc" }, // 출제된 순서(옛날 → 현재). 학생은 안 친 것을 차례대로 친다
@@ -41,7 +41,8 @@ export async function listStudentAssignments(userId: string, studentId?: string)
       dueAt: a.dueAt,
       attemptId: latest?.id ?? null,
       attemptStatus: latest?.status ?? null,
-      score: g && a.exam.scoreVisibility === "immediate" ? { score: Math.round(g.score), correct: g.correctCount, total: g.totalCount, passed: g.passed } : g ? { hidden: true } : null,
+      answeredCount: latest?.status === "in_progress" ? latest._count.answers : 0,
+      score: g && (a.exam.scoreVisibility === "immediate" || a.exam.answersReleased) ? { score: Math.round(g.score), correct: g.correctCount, total: g.totalCount, passed: g.passed } : g ? { hidden: true } : null,
       canStart: !expired && a.status !== "completed" && (a.mode === null || a.mode === "online") && (!a.startAt || a.startAt.getTime() <= now),
     };
   });
@@ -178,6 +179,8 @@ export async function attemptResultForStudent(attemptId: string, userId: string)
     score: showScore && g ? { score: Math.round(g.score), correct: g.correctCount, total: g.totalCount, passed: g.passed, passScore: exam.passScore } : null,
     scoreHidden: !!g && !showScore,
     answersReleased: showAnswers,
+    // 공개 정책 (학생 화면에서 "왜 안 보이는지"를 4가지 경우별로 설명하기 위해)
+    policy: { score: exam.scoreVisibility as "immediate" | "after_release", answers: exam.answerVisibility as "immediate" | "after_release", released: exam.answersReleased },
     wrongItems,
   };
 }

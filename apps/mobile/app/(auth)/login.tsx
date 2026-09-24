@@ -73,7 +73,7 @@ export default function LoginScreen() {
   return (
     <View style={[styles.wrap, { paddingTop: insets.top + 24, paddingBottom: insets.bottom + 24 }]}>
       <View style={{ flex: 1, justifyContent: "center", gap: spacing.md }}>
-        <Label>Vocabulary tests for academies</Label>
+        <Label>학원 단어 시험</Label>
         <Text style={styles.wordmark}>단어방</Text>
         <Text style={[text.title, { marginTop: 4 }]}>단어 테스트를{"\n"}더 간단하게.</Text>
       </View>
@@ -90,7 +90,7 @@ export default function LoginScreen() {
         <Pressable onPress={onKakao} disabled={!!busy || !kakaoRequest} style={({ pressed }) => [styles.provider, styles.kakao, pressed && { opacity: 0.85 }, !!busy && busy !== "kakao" && { opacity: 0.5 }]} accessibilityRole="button">
           <Text style={[styles.providerText, { color: "#191600" }]}>{busy === "kakao" ? "확인 중…" : "카카오로 계속하기"}</Text>
         </Pressable>
-        {!googleConfigured() && !kakaoConfigured() && <Text style={[text.muted, { textAlign: "center" }]}>구글·카카오 키가 아직 설정되지 않았어요 · apps/mobile/.env</Text>}
+        {!googleConfigured() && !kakaoConfigured() && <Text style={[text.muted, { textAlign: "center" }]}>{__DEV__ ? "구글·카카오 키가 아직 설정되지 않았어요 · apps/mobile/.env" : "지금은 로그인할 수 없어요. 잠시 뒤 다시 시도해 주세요."}</Text>}
         {__DEV__ && (
           <Button variant="ghost" onPress={() => router.push("/(auth)/dev-login")} style={{ marginTop: spacing.sm }}>
             Dev login

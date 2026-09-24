@@ -8,7 +8,7 @@ export default async function TeacherWelcomePage() {
   return (
     <WelcomeShell user={user} back="/welcome?force=1">
       <div className="anim-fade-up">
-        <div className="lbl">Teacher</div>
+        <div className="lbl">선생님</div>
         <h1 className="h1 mt-1">어떻게 시작할까요?</h1>
       </div>
       <div className="mt-6 grid gap-3 anim-fade-up" style={{ animationDelay: "60ms" }}>

@@ -410,6 +410,8 @@ export const ModelName = {
   TeacherStudent: 'TeacherStudent',
   StudentLinkRequest: 'StudentLinkRequest',
   VocabBook: 'VocabBook',
+  BookFolder: 'BookFolder',
+  VocabBookTag: 'VocabBookTag',
   BookDay: 'BookDay',
   Word: 'Word',
   WordRevision: 'WordRevision',
@@ -448,7 +450,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "userIdentity" | "academy" | "academyMember" | "invitation" | "subscription" | "payment" | "signupSession" | "classRoom" | "student" | "teacherStudent" | "studentLinkRequest" | "vocabBook" | "bookDay" | "word" | "wordRevision" | "import" | "importRow" | "exam" | "examScope" | "examForm" | "formItem" | "formOption" | "assignment" | "attempt" | "attemptAnswer" | "gradeRevision" | "printInstance" | "printPage" | "scanUpload" | "retakeTask" | "job" | "auditLog" | "deviceToken" | "notification" | "usageEvent"
+    modelProps: "user" | "userIdentity" | "academy" | "academyMember" | "invitation" | "subscription" | "payment" | "signupSession" | "classRoom" | "student" | "teacherStudent" | "studentLinkRequest" | "vocabBook" | "bookFolder" | "vocabBookTag" | "bookDay" | "word" | "wordRevision" | "import" | "importRow" | "exam" | "examScope" | "examForm" | "formItem" | "formOption" | "assignment" | "attempt" | "attemptAnswer" | "gradeRevision" | "printInstance" | "printPage" | "scanUpload" | "retakeTask" | "job" | "auditLog" | "deviceToken" | "notification" | "usageEvent"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1411,6 +1413,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.VocabBookCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.VocabBookCountAggregateOutputType> | number
+        }
+      }
+    }
+    BookFolder: {
+      payload: Prisma.$BookFolderPayload<ExtArgs>
+      fields: Prisma.BookFolderFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BookFolderFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookFolderPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BookFolderFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookFolderPayload>
+        }
+        findFirst: {
+          args: Prisma.BookFolderFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookFolderPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BookFolderFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookFolderPayload>
+        }
+        findMany: {
+          args: Prisma.BookFolderFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookFolderPayload>[]
+        }
+        create: {
+          args: Prisma.BookFolderCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookFolderPayload>
+        }
+        createMany: {
+          args: Prisma.BookFolderCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BookFolderCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookFolderPayload>[]
+        }
+        delete: {
+          args: Prisma.BookFolderDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookFolderPayload>
+        }
+        update: {
+          args: Prisma.BookFolderUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookFolderPayload>
+        }
+        deleteMany: {
+          args: Prisma.BookFolderDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BookFolderUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BookFolderUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookFolderPayload>[]
+        }
+        upsert: {
+          args: Prisma.BookFolderUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BookFolderPayload>
+        }
+        aggregate: {
+          args: Prisma.BookFolderAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBookFolder>
+        }
+        groupBy: {
+          args: Prisma.BookFolderGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BookFolderGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BookFolderCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BookFolderCountAggregateOutputType> | number
+        }
+      }
+    }
+    VocabBookTag: {
+      payload: Prisma.$VocabBookTagPayload<ExtArgs>
+      fields: Prisma.VocabBookTagFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.VocabBookTagFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VocabBookTagPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.VocabBookTagFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VocabBookTagPayload>
+        }
+        findFirst: {
+          args: Prisma.VocabBookTagFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VocabBookTagPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.VocabBookTagFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VocabBookTagPayload>
+        }
+        findMany: {
+          args: Prisma.VocabBookTagFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VocabBookTagPayload>[]
+        }
+        create: {
+          args: Prisma.VocabBookTagCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VocabBookTagPayload>
+        }
+        createMany: {
+          args: Prisma.VocabBookTagCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.VocabBookTagCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VocabBookTagPayload>[]
+        }
+        delete: {
+          args: Prisma.VocabBookTagDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VocabBookTagPayload>
+        }
+        update: {
+          args: Prisma.VocabBookTagUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VocabBookTagPayload>
+        }
+        deleteMany: {
+          args: Prisma.VocabBookTagDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.VocabBookTagUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.VocabBookTagUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VocabBookTagPayload>[]
+        }
+        upsert: {
+          args: Prisma.VocabBookTagUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$VocabBookTagPayload>
+        }
+        aggregate: {
+          args: Prisma.VocabBookTagAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateVocabBookTag>
+        }
+        groupBy: {
+          args: Prisma.VocabBookTagGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VocabBookTagGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.VocabBookTagCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.VocabBookTagCountAggregateOutputType> | number
         }
       }
     }
@@ -3362,11 +3512,33 @@ export const VocabBookScalarFieldEnum = {
   title: 'title',
   level: 'level',
   status: 'status',
+  folderId: 'folderId',
+  mergedFrom: 'mergedFrom',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type VocabBookScalarFieldEnum = (typeof VocabBookScalarFieldEnum)[keyof typeof VocabBookScalarFieldEnum]
+
+
+export const BookFolderScalarFieldEnum = {
+  id: 'id',
+  academyId: 'academyId',
+  name: 'name',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt'
+} as const
+
+export type BookFolderScalarFieldEnum = (typeof BookFolderScalarFieldEnum)[keyof typeof BookFolderScalarFieldEnum]
+
+
+export const VocabBookTagScalarFieldEnum = {
+  bookId: 'bookId',
+  tagId: 'tagId',
+  createdAt: 'createdAt'
+} as const
+
+export type VocabBookTagScalarFieldEnum = (typeof VocabBookTagScalarFieldEnum)[keyof typeof VocabBookTagScalarFieldEnum]
 
 
 export const BookDayScalarFieldEnum = {
@@ -3931,6 +4103,8 @@ export type GlobalOmitConfig = {
   teacherStudent?: Prisma.TeacherStudentOmit
   studentLinkRequest?: Prisma.StudentLinkRequestOmit
   vocabBook?: Prisma.VocabBookOmit
+  bookFolder?: Prisma.BookFolderOmit
+  vocabBookTag?: Prisma.VocabBookTagOmit
   bookDay?: Prisma.BookDayOmit
   word?: Prisma.WordOmit
   wordRevision?: Prisma.WordRevisionOmit

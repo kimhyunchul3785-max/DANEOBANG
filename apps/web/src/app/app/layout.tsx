@@ -21,7 +21,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <AppShell ctx={ctx}>
           <div className="mx-auto max-w-lg">
             <div className="card-accent card-body">
-              <div className="lbl-on">Payment required</div>
+              <div className="lbl-on">결제 필요</div>
               <h1 className="mt-2 text-[20px] font-semibold">{status === "pending_payment" ? "학원 결제가 아직 완료되지 않았습니다" : "학원 결제에 문제가 있습니다"}</h1>
               <p className="mt-2 text-[13px]" style={{ color: "rgba(255,244,240,0.9)" }}>
                 학원장이 요금제 및 결제를 완료하면 바로 사용할 수 있습니다. 데이터는 그대로 보관됩니다.

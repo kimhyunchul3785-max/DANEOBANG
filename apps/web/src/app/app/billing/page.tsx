@@ -26,13 +26,28 @@ export default async function BillingPage() {
   if (!billingEnabled()) {
     return (
       <div className="mx-auto max-w-[560px]">
-        <div className="kicker">Billing · 요금제 및 결제</div>
-        <h1 className="h1 mt-1 mb-3">체험 기간 · 결제 준비 중</h1>
-        <div className="card card-body text-[14px]">
-          <p>지금은 결제 없이 모든 기능을 쓸 수 있습니다. 선생님 수 제한도 없습니다.</p>
-          <p className="muted mt-2">
-            서비스화할 때 <code>.env</code>에 <code>BILLING_ENABLED=&quot;true&quot;</code>를 넣으면 가입 단계의 선생님 수·결제, 요금제 화면, Seat 제한이 그대로 켜집니다 (선생님 1명당 월 {won(9900)}). 현재 선생님 {usage.used}명{usage.pending ? ` · 초대 대기 ${usage.pending}` : ""}.
-          </p>
+        <div className="kicker">요금제</div>
+        <h1 className="h1 mt-1 mb-3">무료 체험 중</h1>
+        <div className="card card-body text-[14px]" data-testid="billing-trial">
+          <p>지금은 결제 없이 모든 기능을 쓸 수 있고, 선생님 수 제한도 없어요.</p>
+          <div className="mt-4 grid grid-cols-2 gap-3">
+            <div className="card-2 rounded-xl p-3">
+              <div className="lbl">지금 선생님</div>
+              <div className="num-md mt-1">{usage.used}명</div>
+              {usage.pending ? <div className="muted text-[12px]">초대 대기 {usage.pending}</div> : null}
+            </div>
+            <div className="card-2 rounded-xl p-3">
+              <div className="lbl">정식 요금</div>
+              <div className="num-md mt-1">{won(9900)}</div>
+              <div className="muted text-[12px]">선생님 1명당 · 월 · 학생 무료</div>
+            </div>
+          </div>
+          <p className="muted mt-3">정식 요금이 시작되기 전에 미리 알려드려요.</p>
+          {process.env.NODE_ENV !== "production" && (
+            <p className="mt-3 text-[11.5px]" style={{ color: "var(--ink-3)" }}>
+              개발용: <code>BILLING_ENABLED=&quot;true&quot;</code> 이면 결제·Seat 제한이 켜집니다.
+            </p>
+          )}
         </div>
       </div>
     );
@@ -42,7 +57,7 @@ export default async function BillingPage() {
   if (needsPayment) {
     return (
       <div className="mx-auto max-w-[560px]">
-        <div className="kicker">Billing · 요금제 및 결제</div>
+        <div className="kicker">요금제 및 결제</div>
         <h1 className="h1 mt-1 mb-4">결제를 완료해주세요</h1>
         <p className="muted mb-4">결제 전에는 선생님 초대·학생 등록·단어시험을 사용할 수 없습니다. 데이터는 그대로 보관됩니다.</p>
         <PayForm academyId={academyId} academyName={ctx.member.academy.name} seats={sub?.seatQuantity ?? 1} unitPrice={sub?.unitPrice ?? 9900} lastError={sub?.lastPaymentError ?? null} mock={billingProvider() === "mock"} onPaid="/app" />
@@ -54,7 +69,7 @@ export default async function BillingPage() {
     <div className="mx-auto max-w-5xl">
       <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <div className="kicker">Billing · 요금제 및 결제</div>
+          <div className="kicker">요금제 및 결제</div>
           <h1 className="h1 mt-1">선생님 {sub.seatQuantity}명 플랜</h1>
           <p className="muted mt-1">결제 주체는 학원입니다. 선생님 개인에게는 결제를 요구하지 않습니다.</p>
         </div>

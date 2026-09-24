@@ -20,6 +20,9 @@ import type {
   StudentDetail,
   StudentListItem,
   SubmitResponse,
+  RetakeListItem,
+  RetakeIssueResponse,
+  ExamDueResponse,
 } from "@daneobang/types";
 import type { AnswersPatchInput, AttemptSubmitInput, DeviceRegisterInput, MobileLoginInput, MobileOAuthInput, ResultsQuery } from "@daneobang/validation";
 
@@ -144,6 +147,15 @@ export function createApiClient(opts: ApiClientOptions) {
     exams: {
       list: () => request<ExamListItem[]>("GET", "/exams"),
       detail: (id: string) => request<ExamDetail>("GET", `/exams/${encodeURIComponent(id)}`),
+      /** 마감 연장: days = 오늘부터 n일 뒤 23:59(KST). scope=overdue 면 이미 지난 학생만 */
+      extendDue: (id: string, body: { days?: number; dueAt?: string | null; scope?: "open" | "overdue" }) => request<ExamDueResponse>("POST", `/exams/${encodeURIComponent(id)}/due`, { body }),
+    },
+    retakes: {
+      list: (studentId?: string) => request<RetakeListItem[]>("GET", "/retakes", { query: { studentId } }),
+      /** 재시험 출제: 기본 오답만 · 3일 뒤 마감 */
+      issue: (id: string, body: { mode?: "wrong" | "same"; days?: number } = {}) => request<RetakeIssueResponse>("POST", `/retakes/${encodeURIComponent(id)}/issue`, { body }),
+      /** 한 학생의 출제 전 여러 건을 누적 오답 재시험 하나로 */
+      issueCombined: (taskIds: string[], days?: number) => request<RetakeIssueResponse & { tasks: number }>("POST", "/retakes/combined", { body: { taskIds, days } }),
     },
     results: { list: (filters: ResultsQuery = {}) => request<ResultItem[]>("GET", "/results", { query: filters }) },
     // 학생 앱 (v0.2)

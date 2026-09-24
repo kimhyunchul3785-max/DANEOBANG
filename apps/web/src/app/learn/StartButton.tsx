@@ -6,8 +6,8 @@ export function StartButton({ assignmentId, label, variant, compact }: { assignm
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const router = useRouter();
-  const cls = compact ? "btn-primary btn-sm" : variant === "on-accent" ? "btn w-full py-3 text-[13px]" : "btn-primary w-full py-3";
-  const style = variant === "on-accent" && !compact ? { background: "var(--accent-ink)", color: "var(--accent)" } : undefined;
+  const cls = compact ? "btn-primary btn-sm" : variant === "on-accent" ? "btn w-full text-[15px]" : "btn-primary w-full";
+  const style = variant === "on-accent" && !compact ? { background: "#fff", color: "var(--accent)", minHeight: 48 } : compact ? undefined : { minHeight: 48 };
   return (
     <div className={compact ? "" : "w-full"}>
       <button

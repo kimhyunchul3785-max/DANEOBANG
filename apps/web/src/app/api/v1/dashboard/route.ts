@@ -3,6 +3,7 @@ import { getAcademyContext } from "@/lib/auth";
 import { studentScope } from "@/lib/scope";
 import { seoulWeekRange } from "@/lib/util";
 import { handle, ok, fail } from "@/lib/api";
+import { todayAssignmentWhere, overdueAssignmentWhere } from "@/lib/metrics";
 
 export async function GET(req: Request) {
   return handle(async () => {
@@ -12,11 +13,10 @@ export async function GET(req: Request) {
     const scope = studentScope(ctx);
     const now = new Date();
     const week = seoulWeekRange(now);
-    const dayStart = new Date(now.getTime() - ((now.getTime() + 9 * 3600e3) % 86400e3));
     const [students, todayAssignments, overdue, retakes, scansPending, recent] = await Promise.all([
       prisma.student.count({ where: { ...scope, status: "active" } }),
-      prisma.assignment.findMany({ where: { exam: { academyId }, student: scope, OR: [{ dueAt: { gte: dayStart } }, { createdAt: { gte: dayStart } }] }, select: { status: true } }),
-      prisma.assignment.count({ where: { exam: { academyId }, student: scope, status: { in: ["assigned", "in_progress"] }, dueAt: { lt: now } } }),
+      prisma.assignment.findMany({ where: todayAssignmentWhere(academyId, scope, now), select: { status: true } }),
+      prisma.assignment.count({ where: overdueAssignmentWhere(academyId, scope, now) }),
       prisma.retakeTask.count({ where: { student: scope, status: { in: ["pending", "issued"] }, OR: [{ dueAt: null }, { dueAt: { gte: week.start, lt: week.end } }] } }),
       prisma.scanUpload.count({ where: { academyId, status: { in: ["needs_review", "unrecognized"] } } }),
       prisma.gradeRevision.findMany({ where: { current: true, attempt: { assignment: { exam: { academyId }, student: scope } } }, include: { attempt: { include: { assignment: { include: { student: { select: { id: true, name: true } }, exam: { select: { id: true, title: true } } } } } } }, orderBy: { createdAt: "desc" }, take: 10 }),

@@ -12,7 +12,7 @@ export function AcceptScanButton({ action }: { action: () => Promise<ActionResul
       onDone={(r) => {
         if (!r.ok) return;
         const next = (r.data as { nextId?: string | null } | undefined)?.nextId;
-        router.push(next ? `/app/scans/${next}` : "/app/scans");
+        router.push(next ? `/app/tests/scans/${next}` : "/app/tests/scans");
       }}
     >
       이 페이지 확정 → 다음

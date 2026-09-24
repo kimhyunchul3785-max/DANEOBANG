@@ -10,7 +10,7 @@ import { fmtPhone } from "@/lib/phone";
 export type RosterRow = { id: string; name: string; className: string | null; classId: string | null; school: string | null; grade: string | null; phone: string | null; teachers: string; linked: boolean; invited: boolean; pending: number; avg: number | null; retake: number; status: string };
 
 /** 명단 표: 체크해서 반 이동 · 담당 지정 · 비활성 · 삭제 */
-export function RosterTable({ rows, classes, members, isOwner }: { rows: RosterRow[]; classes: { id: string; name: string }[]; members: { id: string; name: string }[]; isOwner: boolean }) {
+export function RosterTable({ rows, classes, members, isOwner, emptyText }: { rows: RosterRow[]; classes: { id: string; name: string }[]; members: { id: string; name: string }[]; isOwner: boolean; emptyText?: string }) {
   const [sel, setSel] = useState<string[]>([]);
   const [moveTo, setMoveTo] = useState<string>("");
   const [teacher, setTeacher] = useState<string>(members[0]?.id ?? "");
@@ -41,9 +41,9 @@ export function RosterTable({ rows, classes, members, isOwner }: { rows: RosterR
   return (
     <div>
       {/* 일괄 작업 바 */}
-      <div className={`mb-3 flex flex-wrap items-center gap-2 rounded-2xl px-4 py-2.5 transition-colors ${sel.length ? "card-dark" : "card-2"}`} data-testid="bulk-bar" aria-live="polite">
+      <div className={`mb-2 flex flex-wrap items-center gap-2 rounded-xl py-2 transition-colors ${sel.length ? "card-dark px-4" : "px-1"}`} data-testid="bulk-bar" aria-live="polite">
         <span className="digital" style={{ color: sel.length ? "#fff4f0" : "var(--ink-3)" }}>
-          {String(sel.length).padStart(2, "0")} SELECTED
+          {sel.length}명 선택
         </span>
         {sel.length > 0 && (
           <>
@@ -113,7 +113,6 @@ export function RosterTable({ rows, classes, members, isOwner }: { rows: RosterR
             )}
           </>
         )}
-        {sel.length === 0 && <span className="muted">체크하면 문자 초대 · 반 이동 · 담당 지정 · 비활성 · 삭제를 할 수 있습니다.</span>}
       </div>
 
       {codes && (
@@ -149,44 +148,47 @@ export function RosterTable({ rows, classes, members, isOwner }: { rows: RosterR
       )}
 
       <div className="overflow-x-auto">
-      <table className="tbl">
+      <table className="tbl tbl-cards roster">
         <thead>
           <tr className="[&>th]:whitespace-nowrap">
             <th className="w-8">
-              <input type="checkbox" checked={allOn} onChange={() => setSel(allOn ? [] : all)} aria-label="전체 선택" />
+              <input type="checkbox" checked={allOn} onChange={() => setSel(allOn ? [] : all)} aria-label="전체 선택" style={{ width: 18, height: 18 }} />
             </th>
             <th>이름 · 학교</th>
-            <th>반</th>
-            <th>휴대폰</th>
+            <th className="w-[16%]">반</th>
+            <th className="w-[18%]">휴대폰</th>
             <th>
               <SortHeader target="#roster-body" attr="avg">4주 평균</SortHeader>
             </th>
-            <th>재시험</th>
+            <th className="w-[10%]">재시험</th>
           </tr>
         </thead>
         <tbody id="roster-body">
           {rows.length === 0 && (
             <tr>
               <td colSpan={6} className="text-center" style={{ color: "var(--ink-3)" }}>
-                학생이 없습니다. 반 코드를 학생에게 알려주거나, 오른쪽에서 엑셀·한 명씩 등록하세요.
+                {emptyText ?? "학생이 없습니다. 반 코드를 학생에게 알려주거나, 아래에서 엑셀·한 명씩 등록하세요."}
               </td>
             </tr>
           )}
           {rows.map((r) => (
             <tr key={r.id} data-avg={r.avg ?? ""} className={r.status !== "active" ? "opacity-50" : ""} style={sel.includes(r.id) ? { background: "rgba(27,26,24,0.05)" } : undefined}>
-              <td>
-                <input type="checkbox" checked={sel.includes(r.id)} onChange={() => toggle(r.id)} aria-label={`${r.name} 선택`} />
+              <td data-label="_check">
+                <input type="checkbox" checked={sel.includes(r.id)} onChange={() => toggle(r.id)} aria-label={`${r.name} 선택`} style={{ width: 18, height: 18 }} />
               </td>
-              <td className="whitespace-nowrap">
-                <Link href={`/app/students/${r.id}`} className="font-medium hover:underline">
-                  {r.name}
-                </Link>
-                <div className="text-[12px]" style={{ color: "var(--ink-3)" }}>
-                  {r.school || r.grade ? `${r.school ?? ""} ${r.grade ?? ""}`.trim() : "학교 미입력"}
+              <td className="whitespace-nowrap" data-label="_title">
+                <div>
+                  <Link href={`/app/students/${r.id}`} className="font-medium hover:underline">
+                    {r.name}
+                  </Link>
+                  <div className="text-[12px] font-normal" style={{ color: "var(--ink-3)" }}>
+                    {r.school || r.grade ? `${r.school ?? ""} ${r.grade ?? ""}`.trim() : "학교 미입력"}
+                    <span className="sm:hidden"> · {r.className ?? "반 없음"}</span>
+                  </div>
                 </div>
               </td>
-              <td className="whitespace-nowrap">{r.className ?? <span className="muted">반 없음</span>}</td>
-              <td className="whitespace-nowrap text-[12.5px]" style={{ color: "var(--ink-2)" }} title={r.teachers ? `담당 ${r.teachers}` : undefined}>
+              <td className="whitespace-nowrap" data-label="반">{r.className ?? <span className="muted">반 없음</span>}</td>
+              <td className="whitespace-nowrap text-[12.5px]" data-label="휴대폰" style={{ color: "var(--ink-2)" }} title={r.teachers ? `담당 ${r.teachers}` : undefined}>
                 {r.phone ? fmtPhone(r.phone) : <span className="muted">-</span>}
                 {!r.linked && r.status === "active" && (
                   <div className="text-[11px]" style={{ color: "var(--ink-3)" }}>
@@ -194,10 +196,10 @@ export function RosterTable({ rows, classes, members, isOwner }: { rows: RosterR
                   </div>
                 )}
               </td>
-              <td className="num-md" style={{ fontSize: 18, color: r.avg !== null && r.avg < 70 ? "var(--accent)" : undefined }}>
+              <td className="text-[15px] font-bold tabular-nums" data-label="4주 평균" style={{ color: r.avg !== null && r.avg < 70 ? "var(--accent)" : undefined }}>
                 {r.avg ?? "–"}
               </td>
-              <td>{r.retake ? <span className="badge-red">{r.retake}</span> : <span className="muted">-</span>}</td>
+              <td data-label="재시험" data-empty={r.retake ? undefined : "1"}>{r.retake ? <span className="badge-red">{r.retake}<span className="sm:hidden">&nbsp;재시험</span></span> : <span className="muted">-</span>}</td>
             </tr>
           ))}
         </tbody>

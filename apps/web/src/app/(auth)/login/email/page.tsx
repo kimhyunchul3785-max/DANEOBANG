@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { getCurrentUser, landingAfterLogin } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 import { Logo } from "@/components/Logo";
 import { LoginForm } from "../LoginForm";
 
@@ -11,7 +11,7 @@ import { LoginForm } from "../LoginForm";
 export default async function EmailLoginPage({ searchParams }: { searchParams: Promise<{ next?: string }> }) {
   const sp = await searchParams;
   const user = await getCurrentUser();
-  if (user) redirect(await landingAfterLogin(user.id, sp.next));
+  if (user) redirect(`/api/auth/landing${sp.next ? `?next=${encodeURIComponent(sp.next)}` : ""}`); // 쿠키는 Route Handler 에서 (페이지에서 굽으면 500)
   const devLogin = (process.env.ALLOW_DEV_LOGIN ?? "true") !== "false";
   return (
     <main className="flex min-h-screen items-center justify-center px-4 py-10">

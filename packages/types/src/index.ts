@@ -127,7 +127,8 @@ export interface StudentDetail {
   class: { id: string; name: string } | null;
   linked: boolean;
   history: StudentHistoryItem[];
-  pendingRetakes: { id: string; dueAt: IsoDate | null; status: string }[];
+  /** 끝나지 않은 재시험 (출제 전 · 응시 대기) */
+  pendingRetakes: { id: string; dueAt: IsoDate | null; status: string; issued: boolean; title: string }[];
 }
 
 // ───────── 시험
@@ -143,6 +144,14 @@ export interface ExamListItem {
   isRetake: boolean;
   answersReleased: boolean;
   assignments: number;
+  /** 완료한 배정 수 */
+  completed: number;
+  /** 마감이 지났는데 안 친 배정 수 */
+  overdue: number;
+  /** 안 친 학생들의 공통 마감 (학생마다 다르거나 없으면 null) */
+  dueAt: IsoDate | null;
+  /** 웹 시험 탭과 같은 상태 분류 */
+  state: "draft" | "archived" | "none" | "scheduled" | "overdue" | "open" | "done" | string;
   createdAt: IsoDate;
 }
 export interface ExamFormRef {
@@ -226,4 +235,29 @@ export interface SubmitResponse {
   graded: boolean;
   already_graded: boolean;
   expired: boolean;
+}
+
+// ───────── 재시험 (모바일 현장 처리)
+/** GET /api/v1/retakes */
+export interface RetakeListItem {
+  id: string;
+  student: { id: string; name: string };
+  title: string;
+  score: number | null;
+  wrong: number;
+  sameCount: number;
+  issued: boolean;
+  dueAt: IsoDate | null;
+  createdAt: IsoDate;
+}
+/** POST /api/v1/retakes/{id}/issue */
+export interface RetakeIssueResponse {
+  examId: string;
+  questionCount: number;
+  dueAt: IsoDate;
+}
+/** POST /api/v1/exams/{id}/due */
+export interface ExamDueResponse {
+  updated: number;
+  dueAt: IsoDate | null;
 }

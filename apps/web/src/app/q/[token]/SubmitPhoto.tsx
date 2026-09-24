@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { uploadScansAction } from "@/app/app/scans/actions";
+import { uploadScansAction } from "@/app/app/tests/scans/actions";
 
 /**
  * 사진 찍어 제출 (카메라 직접 실행) → 채점 중 표시. QR 페이지·학생 앱 공용.

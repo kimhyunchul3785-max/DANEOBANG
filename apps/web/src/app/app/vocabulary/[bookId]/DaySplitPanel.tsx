@@ -43,11 +43,10 @@ export function DaySplitPanel({ bookId, items, hasDocDays, currentDays, highligh
       router.refresh();
     });
 
+  // v5.2 — 일수 · 단어 수 두 가지만 (지문별·직접 입력은 뺐다). 문서에 DAY 표기가 있으면 그것도.
   const segs: { key: SplitMode; label: string; show: boolean }[] = [
     { key: "days", label: "일수", show: true },
     { key: "perDay", label: "단어 수", show: true },
-    { key: "section", label: "지문별", show: sections > 1 },
-    { key: "custom", label: "직접", show: true },
     { key: "doc", label: "문서 표기", show: hasDocDays },
   ];
   const customSum = mode === "custom" ? parseSizes(sizes).reduce((a, b) => a + b, 0) : 0;
@@ -55,8 +54,8 @@ export function DaySplitPanel({ bookId, items, hasDocDays, currentDays, highligh
   return (
     <div className={`${highlight ? "card-accent" : "card"} card-body flex flex-col`} data-testid="day-split">
       <div className="flex items-center justify-between">
-        <div className={highlight ? "lbl-on" : "lbl"}>Split · DAY 나누기</div>
-        <span className="digital">NOW {currentDays} DAYS</span>
+        <div className={highlight ? "lbl-on" : "lbl"}>DAY 나누기</div>
+        <span className="digital">지금 DAY {currentDays}개</span>
       </div>
       <div className="mt-3 flex flex-wrap items-center gap-2">
         <div className="seg" style={highlight ? { background: "rgba(255,244,240,0.18)" } : undefined}>

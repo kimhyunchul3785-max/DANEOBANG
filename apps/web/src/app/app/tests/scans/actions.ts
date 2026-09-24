@@ -10,7 +10,7 @@ import { sha256, parseJSON } from "@/lib/util";
 import { FILE_LIMITS } from "@/lib/constants";
 import { gradeAttempt } from "@/lib/grading";
 import type { ItemDetection } from "@/lib/omr/analyze";
-import type { ActionResult } from "../students/actions";
+import type { ActionResult } from "@/app/app/students/actions";
 
 const IMAGE_MAGIC: [number[], string][] = [
   [[0xff, 0xd8, 0xff], "jpg"],
@@ -47,7 +47,7 @@ export async function uploadScansAction(form: FormData): Promise<ActionResult> {
     n++;
   }
   await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "scan.upload", detail: `${n}장` });
-  revalidatePath("/app/scans");
+  revalidatePath("/app/tests/scans");
   return { ok: n > 0 || skipped.length === 0, message: `${n}장 업로드 · 판독 중${skipped.length ? `\n제외: ${skipped.join(" / ")}` : ""}` };
 }
 
@@ -68,7 +68,7 @@ export async function reviewScanItemAction(scanId: string, position: number, opt
   reviewed[String(position)] = optionPosition;
   await prisma.scanUpload.update({ where: { id: scanId }, data: { reviewed: JSON.stringify(reviewed) } });
   await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "scan.review_item", target: scanId, detail: `#${position} → ${optionPosition ?? "blank"}` });
-  revalidatePath(`/app/scans/${scanId}`);
+  revalidatePath(`/app/tests/scans/${scanId}`);
   return { ok: true };
 }
 
@@ -83,7 +83,7 @@ export async function assignScanPageAction(form: FormData): Promise<ActionResult
   if (!page) return { ok: false, message: "페이지를 찾을 수 없습니다." };
   await prisma.scanUpload.update({ where: { id: scanId }, data: { status: "queued", errorCode: null } });
   await enqueueJob("analyze_scan", scanId, ctx.member.academyId, { forcePageId: page.id }, `analyze_scan:${scanId}:${Date.now()}`);
-  revalidatePath(`/app/scans/${scanId}`);
+  revalidatePath(`/app/tests/scans/${scanId}`);
   return { ok: true, message: "지정한 페이지 기준으로 다시 판독합니다 (기준점 검증은 그대로 통과해야 합니다)." };
 }
 
@@ -93,7 +93,7 @@ export async function rejectScanAction(scanId: string): Promise<ActionResult> {
   if (!scan) return { ok: false, message: "권한이 없습니다." };
   if (scan.status === "accepted") return { ok: false, message: "확정된 페이지는 삭제할 수 없습니다." };
   await prisma.scanUpload.update({ where: { id: scanId }, data: { status: "failed", errorCode: "rejected_by_teacher" } });
-  revalidatePath("/app/scans");
+  revalidatePath("/app/tests/scans");
   return { ok: true };
 }
 
@@ -136,11 +136,11 @@ export async function acceptScanAction(scanId: string): Promise<ActionResult> {
   const missing = pages.filter((p) => !acceptedPages.has(p.id)).map((p) => p.pageNo);
   const next = await prisma.scanUpload.findFirst({ where: { academyId: ctx.member.academyId, status: "needs_review", id: { not: scanId } }, orderBy: { createdAt: "asc" }, select: { id: true } });
   if (missing.length) {
-    revalidatePath("/app/scans");
+    revalidatePath("/app/tests/scans");
     return { ok: true, message: `페이지 확정. 아직 확정되지 않은 페이지: ${missing.join(", ")} — 모든 페이지가 확정되면 성적이 확정됩니다.`, data: { nextId: next?.id ?? null } };
   }
   const r = await gradeAttempt(attempt.id, { reason: "paper_finalized", by: ctx.user.id });
   await audit({ academyId: ctx.member.academyId, userId: ctx.user.id, action: "attempt.finalize_offline", target: attempt.id });
-  revalidatePath("/app/scans");
+  revalidatePath("/app/tests/scans");
   return { ok: true, message: `성적 확정: ${attempt.assignment.student.name} ${Math.round(r.grade.score)}점 (${r.grade.correctCount}/${r.grade.totalCount}) ${r.grade.passed ? "통과" : "재시험 대상"}${next ? " → 다음 검수로 이동" : ""}`, data: { nextId: next?.id ?? null } };
 }

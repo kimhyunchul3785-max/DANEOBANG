@@ -83,6 +83,16 @@ export type StudentLinkRequest = Prisma.StudentLinkRequestModel
  */
 export type VocabBook = Prisma.VocabBookModel
 /**
+ * Model BookFolder
+ * * v5.2 — 단어장 폴더 → v5.6 부터 "태그" (학원 단위). 단어장 하나에 여러 태그 (VocabBookTag)
+ */
+export type BookFolder = Prisma.BookFolderModel
+/**
+ * Model VocabBookTag
+ * * v5.6 — 단어장 ↔ 태그 (다대다)
+ */
+export type VocabBookTag = Prisma.VocabBookTagModel
+/**
  * Model BookDay
  * 
  */

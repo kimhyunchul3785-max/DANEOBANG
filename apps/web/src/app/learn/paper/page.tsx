@@ -32,11 +32,11 @@ export default async function PaperPage() {
           </Link>
           <div className="mt-1 text-[15px] font-semibold">종이 시험 · 사진 찍어 제출</div>
         </div>
-        <span className="digital">{String(paperOpen.length).padStart(2, "0")} OPEN</span>
+        <span className="digital">{String(paperOpen.length).padStart(2, "0")} 장</span>
       </div>
 
       <div className="card-accent card-body anim-fade-up">
-        <div className="lbl-on">Submit · 사진 채점</div>
+        <div className="lbl-on">사진 채점</div>
         <div className="mt-2 text-[18px] font-semibold leading-tight">다 풀었으면 사진을 찍어 올리세요</div>
         <p className="mt-1 text-[12.5px]" style={{ color: "rgba(255,244,240,0.85)" }}>
           QR로 시험을 알아보고 바로 채점합니다 · 시간 제한 없음
@@ -48,14 +48,14 @@ export default async function PaperPage() {
 
       {paperOpen.length > 0 && (
         <section className="card card-body">
-          <div className="lbl mb-1">Open · 진행 중인 종이 시험</div>
+          <div className="lbl mb-1">진행 중인 종이 시험</div>
           <ul>
             {paperOpen.map((a) => (
               <li key={a.assignmentId} className="row">
                 <div className="min-w-0">
                   <div className="truncate text-[14px] font-medium">{a.exam.title}</div>
                   <div className="lbl mt-0.5">
-                    {a.exam.questionCount} Q · Pass {a.exam.passScore}
+                    {a.exam.questionCount}문항 · 통과 {a.exam.passScore}점
                   </div>
                 </div>
                 <span className="badge-gray">PAPER</span>
@@ -70,7 +70,7 @@ export default async function PaperPage() {
       <div className="col">
       <section className="card card-body">
         <div className="mb-1 flex items-center justify-between">
-          <div className="lbl">Submitted · 제출 기록</div>
+          <div className="lbl">제출 기록</div>
           <span className="digital">{scans.length}</span>
         </div>
         {scans.length === 0 && <p className="muted">아직 제출한 사진이 없습니다.</p>}
@@ -94,8 +94,14 @@ export default async function PaperPage() {
                 </div>
                 {graded && s.attemptId ? (
                   <Link href={`/learn/results/${s.attemptId}`} className="flex items-center gap-2">
-                    <span className="num-md">{s.score}</span>
-                    <span className={s.passed ? "badge-green" : "badge-red"}>{s.passed ? "PASS" : "RETAKE"}</span>
+                    {s.score !== null ? (
+                      <>
+                        <span className="num-md">{s.score}</span>
+                        <span className={s.passed ? "badge-green" : "badge-red"}>{s.passed ? "통과" : "미달"}</span>
+                      </>
+                    ) : (
+                      <span className="badge-gray">채점 완료 · 점수 공개 전</span>
+                    )}
                   </Link>
                 ) : (
                   <span className={cls}>{label}</span>

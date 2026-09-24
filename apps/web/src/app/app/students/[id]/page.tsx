@@ -70,193 +70,285 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
     })
     .sort((x, y) => Number(!x.a) - Number(!y.a) || (x.due?.getTime() ?? Infinity) - (y.due?.getTime() ?? Infinity));
 
+  // 단어장 진도: 이 학생이 받은 시험(재시험 제외)의 범위 DAY → 통과 · 미달 · 배정만 · 안 함
+  const progAsg = student.assignments.filter((a) => !a.exam.isRetake && a.exam.status !== "archived");
+  const progExamIds = [...new Set(progAsg.map((a) => a.examId))];
+  const [scopes, progDays] = progExamIds.length
+    ? await Promise.all([
+        prisma.examScope.findMany({ where: { examId: { in: progExamIds } }, select: { examId: true, dayId: true } }),
+        prisma.bookDay.findMany({ where: { bookId: { in: [...new Set(progAsg.map((a) => a.exam.bookId))] }, book: { status: "active" } }, select: { id: true, bookId: true, dayNo: true, label: true, book: { select: { title: true } } }, orderBy: { dayNo: "asc" } }),
+      ])
+    : [[], []];
+  const dayState = new Map<string, { s: "pass" | "fail" | "open"; at: number }>();
+  const rank = { open: 0, fail: 1, pass: 2 } as const;
+  for (const a of progAsg) {
+    const gs = a.attempts.flatMap((x) => x.grades);
+    const st: "pass" | "fail" | "open" = gs.some((g) => g.passed) ? "pass" : gs.length ? "fail" : "open";
+    const at = a.attempts.reduce((m, x) => Math.max(m, x.submittedAt?.getTime() ?? 0), 0);
+    for (const sc of scopes.filter((x) => x.examId === a.examId)) {
+      const cur = dayState.get(sc.dayId);
+      if (!cur || rank[st] > rank[cur.s]) dayState.set(sc.dayId, { s: st, at: Math.max(at, cur?.at ?? 0) });
+      else cur.at = Math.max(cur.at, at);
+    }
+  }
+  const progress = [...new Set(progDays.map((d) => d.bookId))].map((bookId) => {
+    const days = progDays.filter((d) => d.bookId === bookId).map((d) => ({ ...d, st: dayState.get(d.id)?.s ?? null }));
+    const tested = days.filter((d) => d.st === "pass" || d.st === "fail").length;
+    const lastIdx = days.reduce((m, d, i) => (d.st ? i : m), -1);
+    const next = days.slice(lastIdx + 1).find((d) => !d.st) ?? days.find((d) => !d.st) ?? null;
+    return { bookId, title: days[0]?.book.title ?? "", days, tested, pct: days.length ? Math.round((tested / days.length) * 100) : 0, next };
+  });
+
   return (
     <div className="mx-auto max-w-6xl">
       <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
         <div>
           <Link href="/app/students" className="kicker hover:underline">
-            ← Students · {student.classRoom?.name ?? "반 없음"}
+            ← 학생 · {student.classRoom?.name ?? "반 없음"}
           </Link>
           <h1 className="h1 mt-1">{student.name}</h1>
           <p className="muted">
             {student.school ?? ""} {student.grade ?? ""} · 담당 {student.teachers.map((t) => t.member.user.name).join(", ") || "-"} · {student.user ? "계정 연결됨" : "오프라인 명단"}
           </p>
         </div>
-        <span className="digital">ID {student.id.slice(-6).toUpperCase()}</span>
       </div>
 
-      <div className="bento">
-        {/* 추이 */}
-        <section className="card span-6 card-body">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <div className="lbl">Trend · 12주 점수 추이 (첫 응시)</div>
-              <div className="mt-1 text-[13px]" style={{ color: "var(--ink-2)" }}>
-                점선 = 통과 기준 {passLine} · 빨간 점 = 미달
-              </div>
-            </div>
-            <div className="flex gap-6">
-              <div className="text-right">
-                <div className="num-lg">
-                  <CountUp value={stat.avg} placeholder="–" />
-                </div>
-                <div className="lbl mt-1">AVG 12W</div>
-              </div>
-              <div className="text-right">
-                <div className="num-lg">
-                  <CountUp value={stat.pass} suffix="%" placeholder="–" />
-                </div>
-                <div className="lbl mt-1">PASS</div>
-              </div>
-              <div className="text-right">
-                <div className="num-lg" style={stat.retake ? { color: "var(--accent)" } : undefined}>
-                  <CountUp value={stat.retake} />
-                </div>
-                <div className="lbl mt-1">RETAKE</div>
-              </div>
-            </div>
-          </div>
-          <div className="mt-4">
-            <Sparkline values={series} baseline={passLine} accentBelow={passLine} labels={weeks.map(weekLabel)} height={110} width={800} />
-          </div>
-          <div className="mt-1 flex justify-between">
-            {weeks.map((w, i) => (
-              <span key={i} className="lbl" style={{ fontSize: 9 }}>
-                {weekLabel(w)}
-              </span>
-            ))}
-          </div>
-        </section>
+      {/* 숫자 세 개: 한 줄 (추이 카드 안에 크게 두지 않는다) */}
+      <div className="kpis k3 mb-4" data-testid="student-kpis">
+        <div>
+          <span className="lbl">12주 평균</span>
+          <span className="kpi-v">
+            <CountUp value={stat.avg} placeholder="–" />
+          </span>
+          <span className="kpi-s hidden sm:block">첫 응시 기준</span>
+        </div>
+        <div>
+          <span className="lbl">통과율</span>
+          <span className="kpi-v">
+            <CountUp value={stat.pass} suffix="%" placeholder="–" />
+          </span>
+          <span className="kpi-s hidden sm:block">기준 {passLine}점</span>
+        </div>
+        <div>
+          <span className="lbl">재시험</span>
+          <span className="kpi-v" style={stat.retake ? { color: "var(--warn)" } : undefined}>
+            <CountUp value={stat.retake} />
+          </span>
+          <span className="kpi-s hidden sm:block">진행 중</span>
+        </div>
+      </div>
 
-        {/* 반복 오답 */}
-        <section className="card span-2 card-body flex flex-col">
-          <div className="flex items-center justify-between">
-            <div className="lbl">Weak words · 반복 오답</div>
-            <span className={weak.length ? "badge-red" : "badge-gray"}>{weak.length}</span>
+      {progress.length > 0 && (
+        <section className="card card-body mb-4" data-testid="book-progress">
+          <div className="sec-h mb-1">
+            <h2 className="sec-t">단어장 진도</h2>
+            <span className="prog-legend" aria-hidden>
+              <i className="pc pass" />
+              통과
+              <i className="pc fail" />
+              미달
+              <i className="pc open" />
+              배정
+              <i className="pc" />안 함
+            </span>
           </div>
-          <WeakWords studentId={student.id} words={weak} />
-        </section>
-
-        {/* 재시험 현황 */}
-        <section className={`${retakeRows.length ? "card-accent" : "card"} span-2 card-body flex flex-col`} data-testid="student-retakes">
-          <div className="flex items-center justify-between">
-            <div className={retakeRows.length ? "lbl-on" : "lbl"}>Retake · 재시험 {retakeRows.length ? `${retakeRows.length}건` : ""}</div>
-            <Link href="/app/retakes" className={`${retakeRows.length ? "lbl-on" : "lbl-ink"} hover:underline`}>
-              재시험 화면 →
-            </Link>
-          </div>
-          {retakeRows.length === 0 ? (
-            <p className="muted mt-3">진행 중인 재시험이 없습니다. 통과 기준에 못 미치면 자동으로 생기고, 위 반복 오답으로 직접 낼 수도 있습니다.</p>
-          ) : (
-            <ul className="mt-2 flex-1">
-              {retakeRows.slice(0, 5).map(({ r, a, g, title, due }) => (
-                <li key={r.id} className="py-2" style={{ borderTop: "1px solid rgba(255,244,240,0.25)" }}>
-                  <div className="truncate text-[14px] font-semibold">{title}</div>
-                  <div className="mt-1 flex flex-wrap items-center gap-2 text-[12.5px]" style={{ color: "rgba(255,244,240,0.9)" }}>
-                    {!a ? (
-                      <span className="badge-amber">출제 전 · 재시험 화면에서 범위·마감을 정해 내세요</span>
-                    ) : g ? (
-                      <span className={g.passed ? "badge-green" : "badge-red"}>
-                        {g.passed ? "통과" : "미달"} · {Math.round(g.score)}점
-                      </span>
-                    ) : (
+          <ul>
+            {progress.map((b) => (
+              <li key={b.bookId} className="prog-row" data-testid="progress-row" data-book={b.title}>
+                <div className="prog-head">
+                  <Link href={`/app/vocabulary/${b.bookId}`} className="min-w-0 truncate font-semibold hover:underline">
+                    {b.title}
+                  </Link>
+                  <span className="shrink-0 tabular-nums" style={{ color: "var(--ink-2)" }}>
+                    {b.tested} / {b.days.length} DAY · <b style={{ color: "var(--ink)" }}>{b.pct}%</b>
+                  </span>
+                  <span className="prog-next" data-testid="progress-next">
+                    {b.next ? (
                       <>
-                        <span>{due ? `${fmtMDHM(due)}까지` : "마감 없음"} · {a.status === "in_progress" ? "응시 중" : "응시 대기"}</span>
-                        <span className="[&_.btn-secondary]:bg-[#fff4f0] [&_.btn-secondary]:text-[var(--accent)]">
-                          <DueBox taskId={r.id} dueAt={due?.toISOString() ?? null} />
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        {/* 이력 */}
-        <section className="card span-2 card-body">
-          <div className="flex items-center justify-between">
-            <div className="lbl">History</div>
-            <span className="digital">{student.assignments.length}</span>
-          </div>
-          <ul className="mt-1">
-            {student.assignments.length === 0 && <li className="muted py-2">배정된 시험이 없습니다.</li>}
-            {student.assignments.slice(0, 8).map((a) => {
-              const t = a.attempts[a.attempts.length - 1];
-              const g = t?.grades[0];
-              return (
-                <li key={a.id} className="row">
-                  <div className="min-w-0">
-                    <Link href={`/app/tests/${a.examId}`} className="block truncate text-[13.5px] hover:underline">
-                      {a.exam.title}
-                    </Link>
-                    <div className="muted text-[12px]">
-                      {t ? `${fmtDate(t.submittedAt ?? t.startedAt, false).slice(5)} · ${t.mode === "online" ? "온라인" : "종이"}` : a.dueAt ? `기한 ${fmtDate(a.dueAt, false).slice(5)}` : "배정"}
-                      {g && ` · ${g.correctCount}/${g.totalCount}`}
-                    </div>
-                  </div>
-                  <span className="flex items-center gap-2">
-                    {g ? (
-                      <>
-                        <Link href={`/app/results/${t.id}`} className="num-md hover:underline" style={{ fontSize: 20 }}>
-                          {Math.round(g.score)}
-                        </Link>
-                        <span className={g.passed ? "badge-green" : "badge-red"}>{g.passed ? "PASS" : "RETAKE"}</span>
+                        다음 <b>{b.next.label}</b>
                       </>
                     ) : (
-                      <StatusBadge s={t?.status ?? a.status} />
+                      "완료"
                     )}
                   </span>
-                </li>
-              );
-            })}
+                </div>
+                <div className="meter mt-2" aria-hidden>
+                  <i style={{ width: `${b.pct}%` }} />
+                </div>
+                <div className="prog-cells mt-2">
+                  {b.days.map((d) => (
+                    <span key={d.id} className={`pc${d.st ? ` ${d.st}` : ""}${b.next?.id === d.id ? " next" : ""}`} title={`${d.label} · ${d.st === "pass" ? "통과" : d.st === "fail" ? "미달" : d.st === "open" ? "배정됨" : "안 함"}`} />
+                  ))}
+                </div>
+              </li>
+            ))}
           </ul>
-          {student.assignments.length > 8 && (
-            <Link href={`/app/results?student=${student.id}`} className="lbl-ink mt-2 inline-block">
-              All →
-            </Link>
-          )}
         </section>
+      )}
 
-        {/* 정보 · 계정 · 담당 */}
-        <section className="card span-3 card-body">
-          <div className="lbl mb-2">Profile · 정보</div>
-          <ActionForm action={updateStudentAction} className="space-y-2" resetOnSuccess={false}>
-            <input type="hidden" name="id" value={student.id} />
-            <input className="input" name="name" defaultValue={student.name} required />
-            <div className="flex gap-2">
-              <input className="input" name="school" defaultValue={student.school ?? ""} placeholder="학교" />
-              <input className="input" name="grade" defaultValue={student.grade ?? ""} placeholder="학년" />
+      {/* 휴대폰: 할 일(재시험·반복 오답) → 기록(이력·추이) → 정보 순서. 넓은 화면(xl): 왼쪽 기록 · 오른쪽 할 일과 정보 */}
+      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_380px] 2xl:grid-cols-[minmax(0,1fr)_420px]">
+        <div className="flex min-w-0 flex-col gap-4 xl:col-start-2 xl:row-start-1">
+            {/* 재시험 현황 */}
+            {/* 재시험 출제는 재시험 탭 한 곳에서 — 여기서는 현황과 마감 변경, 그리고 이 학생으로 필터한 재시험 탭 링크 */}
+            <section className="card card-body flex flex-col" data-testid="student-retakes">
+              <div className="flex items-center justify-between">
+                <div className="lbl">재시험 {retakeRows.length ? `${retakeRows.length}건` : ""}</div>
+                {retakeRows.length > 0 && <span className="badge-red">출제 전 {retakeRows.filter((x) => !x.a).length}</span>}
+              </div>
+              {retakeRows.length === 0 ? (
+                <p className="muted mt-1 text-[13px]">진행 중인 재시험 없음</p>
+              ) : (
+                <ul className="mt-2 flex-1">
+                  {retakeRows.slice(0, 5).map(({ r, a, g, title, due }) => (
+                    <li key={r.id} className="py-2" style={{ borderTop: "1px solid var(--line)" }}>
+                      <div className="truncate text-[14px] font-semibold">{title}</div>
+                      <div className="mt-1 flex flex-wrap items-center gap-2 text-[12.5px]" style={{ color: "var(--ink-2)" }}>
+                        {!a ? (
+                          <span className="badge-amber">출제 전</span>
+                        ) : g ? (
+                          <span className={g.passed ? "badge-green" : "badge-red"}>
+                            {g.passed ? "통과" : "미달"} · {Math.round(g.score)}점
+                          </span>
+                        ) : (
+                          <>
+                            <span>{due ? `${fmtMDHM(due)}까지` : "마감 없음"} · {a.status === "in_progress" ? "응시 중" : "응시 대기"}</span>
+                            <DueBox taskId={r.id} dueAt={due?.toISOString() ?? null} />
+                          </>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {retakeRows.length > 0 && (
+                <Link href={`/app/retakes?student=${student.id}`} className={`${retakeRows.some((x) => !x.a) ? "btn-accent" : "btn-secondary"} btn-sm mt-3 self-start`} data-testid="student-retake-link">
+                  {retakeRows.some((x) => !x.a) ? "재시험 탭에서 이 학생 출제하기 →" : "재시험 탭에서 보기 →"}
+                </Link>
+              )}
+            </section>
+
+            {/* 반복 오답 */}
+            <section className="card card-body flex flex-col">
+              <div className="flex items-center justify-between">
+                <div className="lbl">반복 오답</div>
+                <span className={weak.length ? "badge-red" : "badge-gray"}>{weak.length}</span>
+              </div>
+              <WeakWords studentId={student.id} words={weak} />
+            </section>
+
+        </div>
+
+        <div className="flex min-w-0 flex-col gap-4 xl:col-start-1 xl:row-span-2 xl:row-start-1">
+            {/* 이력 */}
+            <section className="card card-body">
+              <div className="flex items-center justify-between">
+                <div className="lbl">시험 이력</div>
+                <span className="digital">{student.assignments.length}</span>
+              </div>
+              <ul className="mt-1">
+                {student.assignments.length === 0 && <li className="muted py-2">배정된 시험이 없습니다.</li>}
+                {student.assignments.slice(0, 8).map((a, i) => {
+                  const t = a.attempts[a.attempts.length - 1];
+                  const g = t?.grades[0];
+                  return (
+                    <li key={a.id} className={`row${i >= 5 ? " max-sm:hidden" : ""}`}>
+                      <div className="min-w-0">
+                        <span className="block truncate text-[13.5px]">{a.exam.title}</span>
+                        <div className="muted text-[12px]">
+                          {t ? `${fmtDate(t.submittedAt ?? t.startedAt, false).slice(5)} · ${t.mode === "online" ? "온라인" : "종이"}` : a.dueAt ? `기한 ${fmtDate(a.dueAt, false).slice(5)}` : "배정"}
+                          {g && ` · ${g.correctCount}/${g.totalCount}`}
+                        </div>
+                      </div>
+                      <span className="flex items-center gap-2">
+                        {g ? (
+                          <>
+                            <span className="num-md" style={{ fontSize: 20 }}>
+                              {Math.round(g.score)}
+                            </span>
+                            <span className={g.passed ? "badge-green" : "badge-red"}>{g.passed ? "통과" : "미달"}</span>
+                          </>
+                        ) : (
+                          <StatusBadge s={t?.status ?? a.status} />
+                        )}
+                      </span>
+                    </li>
+                  );
+                })}
+              </ul>
+              <Link href={`/app/results?studentId=${student.id}#detail`} className="lbl-ink mt-2 inline-block" data-testid="student-results-link">
+                → 성적 탭에서 응시 상세{student.assignments.length > 8 ? ` · 전체 ${student.assignments.length}건` : ""}
+              </Link>
+            </section>
+
+          <section className="card card-body">
+            <div className="sec-h">
+              <h2 className="sec-t">12주 점수 추이</h2>
+              <span className="text-[12.5px]" style={{ color: "var(--ink-3)" }}>
+                점선 = 통과 {passLine} · 빨간 점 = 미달
+              </span>
             </div>
-            <div className="flex gap-2">
-              <input className="input" name="phone" inputMode="tel" defaultValue={student.phone ?? ""} placeholder="휴대폰 (인증번호 발송)" />
-              <input className="input" name="email" type="email" defaultValue={student.email ?? ""} placeholder="이메일 (선택)" />
+            <div className="mt-3">
+              <Sparkline values={series} baseline={passLine} accentBelow={passLine} labels={weeks.map(weekLabel)} height={96} width={800} />
             </div>
-            <select className="input" name="classId" defaultValue={student.classId ?? ""}>
-              <option value="">반 없음</option>
-              {classes.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
+            <div className="mt-1 flex justify-between text-[11px]" style={{ color: "var(--ink-3)" }}>
+              {weeks.map((w, i) => (
+                <span key={i} className={i % 2 ? "hidden sm:inline" : undefined}>
+                  {weekLabel(w)}
+                </span>
               ))}
-            </select>
-            <textarea className="input" name="memo" rows={2} defaultValue={student.memo ?? ""} placeholder="메모" />
-            <select className="input" name="status" defaultValue={student.status}>
-              <option value="active">활성</option>
-              <option value="inactive">비활성 (기록 유지)</option>
-            </select>
-            <button className="btn-primary">저장</button>
-          </ActionForm>
-        </section>
-        <div className="span-3 space-y-4">
-          <StudentTools
-            student={{ id: student.id, name: student.name, email: student.email, phone: student.phone, userId: student.userId, userEmail: student.user?.email ?? null, hasInvite: !!student.inviteTokenHash, inviteExpiresAt: student.inviteExpiresAt?.toISOString() ?? null, inviteSentAt: student.inviteSentAt?.toISOString() ?? null, codeSent: !!student.phoneCodeHash && (!student.phoneCodeExpiresAt || student.phoneCodeExpiresAt > new Date()), codeExpiresAt: student.phoneCodeExpiresAt?.toISOString() ?? null }}
-            linkRequests={student.linkRequests.map((r) => ({ id: r.id, user: linkUsers.find((u) => u.id === r.userId) ?? null, createdAt: r.createdAt.toISOString(), name: r.name, className: classes.find((c) => c.id === r.classId)?.name ?? null }))}
-            isOwner={ctx.isOwner}
-            members={members.map((m) => ({ id: m.id, name: m.user.name, role: m.role }))}
-            assignedMemberIds={student.teachers.map((t) => t.memberId)}
-          />
+            </div>
+          </section>
+        </div>
+
+        <div className="flex min-w-0 flex-col gap-4 xl:col-start-2 xl:row-start-2">
+            {/* 정보 · 계정 · 담당: 자주 바꾸지 않으므로 접어 둔다 */}
+            <details className="card card-body group" data-testid="student-info">
+              <summary className="sec-h cursor-pointer list-none">
+                <h2 className="sec-t">학생 정보</h2>
+                <span className="sec-link">
+                  <span className="group-open:hidden">수정 ▾</span>
+                  <span className="hidden group-open:inline">접기 ▴</span>
+                </span>
+              </summary>
+              <div className="mt-3">
+              <ActionForm action={updateStudentAction} className="space-y-2" resetOnSuccess={false}>
+                <input type="hidden" name="id" value={student.id} />
+                <input className="input" aria-label="이름" name="name" defaultValue={student.name} required />
+                <div className="flex gap-2">
+                  <input className="input" aria-label="학교" name="school" defaultValue={student.school ?? ""} placeholder="학교" />
+                  <input className="input" aria-label="학년" name="grade" defaultValue={student.grade ?? ""} placeholder="학년" />
+                </div>
+                <div className="flex gap-2">
+                  <input className="input" aria-label="휴대폰" name="phone" inputMode="tel" defaultValue={student.phone ?? ""} placeholder="휴대폰 (인증번호 발송)" />
+                  <input className="input" aria-label="이메일" name="email" type="email" defaultValue={student.email ?? ""} placeholder="이메일 (선택)" />
+                </div>
+                <select className="input" aria-label="반" name="classId" defaultValue={student.classId ?? ""}>
+                  <option value="">반 없음</option>
+                  {classes.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+                <textarea className="input" aria-label="메모" name="memo" rows={2} defaultValue={student.memo ?? ""} placeholder="메모" />
+                <select className="input" aria-label="상태" name="status" defaultValue={student.status}>
+                  <option value="active">활성</option>
+                  <option value="inactive">비활성 (기록 유지)</option>
+                </select>
+                <button className="btn-primary">저장</button>
+              </ActionForm>
+              </div>
+            </details>
+            <div className="space-y-4">
+              <StudentTools
+                student={{ id: student.id, name: student.name, email: student.email, phone: student.phone, userId: student.userId, userEmail: student.user?.email ?? null, hasInvite: !!student.inviteTokenHash, inviteExpiresAt: student.inviteExpiresAt?.toISOString() ?? null, inviteSentAt: student.inviteSentAt?.toISOString() ?? null, codeSent: !!student.phoneCodeHash && (!student.phoneCodeExpiresAt || student.phoneCodeExpiresAt > new Date()), codeExpiresAt: student.phoneCodeExpiresAt?.toISOString() ?? null }}
+                linkRequests={student.linkRequests.map((r) => ({ id: r.id, user: linkUsers.find((u) => u.id === r.userId) ?? null, createdAt: r.createdAt.toISOString(), name: r.name, className: classes.find((c) => c.id === r.classId)?.name ?? null }))}
+                isOwner={ctx.isOwner}
+                members={members.map((m) => ({ id: m.id, name: m.user.name, role: m.role }))}
+                assignedMemberIds={student.teachers.map((t) => t.memberId)}
+              />
+            </div>
         </div>
       </div>
     </div>

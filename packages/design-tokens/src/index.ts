@@ -4,17 +4,23 @@
  * 값의 원본은 apps/web/src/app/globals.css :root 와 같아야 한다.
  */
 export const color = {
-  background: "#E9E6E1", // 페이지 (warm gray) — 순백 없음
-  backgroundDeep: "#DFDBD4",
-  surface: "#F3F1ED", // 모듈(카드)
-  surfaceRaised: "#FAF9F6", // 입력 · 필
-  ink: "#1B1A18", // 텍스트 · 선택 상태
+  background: "#F4F3F0", // 페이지 (따뜻한 오프화이트)
+  backgroundDeep: "#EBE9E4",
+  surface: "#FFFFFF", // 모듈(카드) — 흰 표면 + 헤어라인
+  surfaceRaised: "#F6F5F2", // 입력 · 세그먼트 트랙 · 보조 채움
+  ink: "#1B1A18", // 텍스트 · 주 버튼
   inkSecondary: "#4A4843",
-  inkTertiary: "#8B8780",
-  line: "rgba(27, 26, 24, 0.08)",
-  accent: "#E8431A", // 화면당 큰 모듈 1개 · 재시험 · 마감 임박 · 제출
+  inkTertiary: "#6A665F", // 보조 글자 (흰 표면 위 5:1)
+  inkQuaternary: "#9A968E", // 비활성 · 자리표시
+  line: "rgba(27, 26, 24, 0.09)",
+  lineStrong: "rgba(27, 26, 24, 0.14)",
+  fill: "rgba(27, 26, 24, 0.05)",
+  accent: "#E8431A", // 학생 주 동작 · 긴급 상태에만
+  accentSoft: "rgba(232, 67, 26, 0.09)",
   accentInk: "#FFF4F0", // 강조 배경 위 글자
-  charcoal: "#232220", // 어두운 모듈 · 동작 바
+  warn: "#B45309", // 할 일(출제 전 · 확인 필요)
+  info: "#1D4ED8", // 진행 중 · 응시 대기
+  charcoal: "#232220", // 동작 바
   charcoal2: "#2F2E2B",
   success: "#1F7A4D",
 } as const;
@@ -28,11 +34,28 @@ export const onAccent = {
 } as const;
 
 export const radius = {
-  large: 24, // 큰 모듈
-  medium: 18, // 작은 모듈 · 드롭존
-  input: 14,
-  small: 10,
-  pill: 999, // 상태 · 컨트롤
+  large: 16, // 카드 (웹 14 — 앱은 손가락 크기에 맞춰 조금 크게)
+  medium: 14,
+  input: 12,
+  small: 8, // 배지 · 작은 버튼
+  pill: 999,
+} as const;
+
+/**
+ * 가변 레이아웃 기준 (앱). 폭만 보지 않고 '쓸 수 있는 가로'로 판단한다.
+ * - compact < 600: 휴대폰 — 한 열, 한 화면 한 작업
+ * - medium 600–899: 큰 휴대폰 가로 · 태블릿 세로 — 한 열이되 본문 최대폭 640, 요약은 2~3칸
+ * - expanded ≥ 900: 태블릿 가로 · iPad — 목록 + 상세(마스터-디테일) 또는 2열, 탭은 왼쪽 레일
+ */
+export const layout = {
+  medium: 600,
+  expanded: 900,
+  contentMax: 640, // medium 에서 한 열 본문 최대폭
+  wideMax: 1180, // expanded 에서 전체 최대폭
+  listPane: 380, // expanded 에서 목록 열 폭
+  touch: 48, // 최소 터치 높이 (웹 40)
+  tabBar: 64,
+  railWidth: 88,
 } as const;
 
 export const spacing = {
@@ -65,22 +88,24 @@ export const motion = {
 /** 글꼴 역할 — 실제 글꼴 파일은 앱마다 따로 싣는다 */
 export const typography = {
   family: {
-    body: "Pretendard", // 한글 본문
-    ui: "Space Grotesk", // 소문 라벨 (대문자 · 자간 0.16em)
-    numeric: "Inter Tight", // 큰 숫자 (200~300)
-    digital: "DotGothic16", // 상태 · 카운터 (READY / 01/20 / D-6)
+    body: "Pretendard", // 한 글꼴 (웹 v5.4 부터)
+    ui: "Pretendard",
+    numeric: "Pretendard", // 숫자는 tabular 굵게
+    digital: "Pretendard",
   },
+  /** 앱 크기 — 웹보다 한 단계 크게 (이동 중 한 손으로 읽는다) */
   size: {
-    label: 10.5,
-    caption: 12,
-    body: 14,
-    bodyLarge: 15,
+    label: 13,
+    caption: 13,
+    body: 16,
+    bodyLarge: 17,
     title: 20,
-    h1: 26,
-    numMd: 28,
-    numLg: 44,
+    h1: 28,
+    numMd: 24,
+    numLg: 34,
+    numXl: 48,
   },
-  letterSpacing: { label: 0.16, button: 0.08 }, // em
+  letterSpacing: { label: 0, button: 0 }, // em — 대문자 라벨 없음
   weight: { light: "300", regular: "400", medium: "500", semibold: "600", bold: "700" },
 } as const;
 

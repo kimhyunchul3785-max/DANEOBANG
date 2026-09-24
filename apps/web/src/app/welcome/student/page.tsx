@@ -9,7 +9,7 @@ export default async function StudentWelcomePage({ searchParams }: { searchParam
   return (
     <WelcomeShell user={user} back={sp.from === "learn" ? "/learn" : sp.from === "switch" ? "/switch" : "/welcome?force=1"}>
       <div className="anim-fade-up">
-        <div className="lbl">Student · {user.name}</div>
+        <div className="lbl">학생 · {user.name}</div>
         <h1 className="h1 mt-1">학원과 연결해주세요</h1>
         <p className="muted mt-1">선생님에게 받은 방법으로 연결할 수 있어요.</p>
       </div>

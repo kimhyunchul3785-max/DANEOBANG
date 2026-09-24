@@ -40,7 +40,7 @@ export default function DevLoginScreen() {
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background, paddingHorizontal: 24, paddingTop: insets.top + 24, gap: spacing.md }}>
-      <Label>Dev · 개발용 로그인</Label>
+      <Label>개발용 로그인</Label>
       <Text style={text.h1}>기존 계정으로</Text>
       <Card>
         <Label>이메일 또는 휴대폰</Label>

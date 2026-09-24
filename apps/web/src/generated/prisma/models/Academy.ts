@@ -252,6 +252,7 @@ export type AcademyWhereInput = {
   classes?: Prisma.ClassRoomListRelationFilter
   students?: Prisma.StudentListRelationFilter
   books?: Prisma.VocabBookListRelationFilter
+  bookFolders?: Prisma.BookFolderListRelationFilter
   imports?: Prisma.ImportListRelationFilter
   exams?: Prisma.ExamListRelationFilter
   scans?: Prisma.ScanUploadListRelationFilter
@@ -279,6 +280,7 @@ export type AcademyOrderByWithRelationInput = {
   classes?: Prisma.ClassRoomOrderByRelationAggregateInput
   students?: Prisma.StudentOrderByRelationAggregateInput
   books?: Prisma.VocabBookOrderByRelationAggregateInput
+  bookFolders?: Prisma.BookFolderOrderByRelationAggregateInput
   imports?: Prisma.ImportOrderByRelationAggregateInput
   exams?: Prisma.ExamOrderByRelationAggregateInput
   scans?: Prisma.ScanUploadOrderByRelationAggregateInput
@@ -309,6 +311,7 @@ export type AcademyWhereUniqueInput = Prisma.AtLeast<{
   classes?: Prisma.ClassRoomListRelationFilter
   students?: Prisma.StudentListRelationFilter
   books?: Prisma.VocabBookListRelationFilter
+  bookFolders?: Prisma.BookFolderListRelationFilter
   imports?: Prisma.ImportListRelationFilter
   exams?: Prisma.ExamListRelationFilter
   scans?: Prisma.ScanUploadListRelationFilter
@@ -374,6 +377,7 @@ export type AcademyCreateInput = {
   classes?: Prisma.ClassRoomCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookCreateNestedManyWithoutAcademyInput
+  bookFolders?: Prisma.BookFolderCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportCreateNestedManyWithoutAcademyInput
   exams?: Prisma.ExamCreateNestedManyWithoutAcademyInput
   scans?: Prisma.ScanUploadCreateNestedManyWithoutAcademyInput
@@ -401,6 +405,7 @@ export type AcademyUncheckedCreateInput = {
   classes?: Prisma.ClassRoomUncheckedCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookUncheckedCreateNestedManyWithoutAcademyInput
+  bookFolders?: Prisma.BookFolderUncheckedCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportUncheckedCreateNestedManyWithoutAcademyInput
   exams?: Prisma.ExamUncheckedCreateNestedManyWithoutAcademyInput
   scans?: Prisma.ScanUploadUncheckedCreateNestedManyWithoutAcademyInput
@@ -428,6 +433,7 @@ export type AcademyUpdateInput = {
   classes?: Prisma.ClassRoomUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUpdateManyWithoutAcademyNestedInput
+  bookFolders?: Prisma.BookFolderUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUpdateManyWithoutAcademyNestedInput
   exams?: Prisma.ExamUpdateManyWithoutAcademyNestedInput
   scans?: Prisma.ScanUploadUpdateManyWithoutAcademyNestedInput
@@ -455,6 +461,7 @@ export type AcademyUncheckedUpdateInput = {
   classes?: Prisma.ClassRoomUncheckedUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUncheckedUpdateManyWithoutAcademyNestedInput
+  bookFolders?: Prisma.BookFolderUncheckedUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUncheckedUpdateManyWithoutAcademyNestedInput
   exams?: Prisma.ExamUncheckedUpdateManyWithoutAcademyNestedInput
   scans?: Prisma.ScanUploadUncheckedUpdateManyWithoutAcademyNestedInput
@@ -652,6 +659,20 @@ export type AcademyUpdateOneRequiredWithoutBooksNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.AcademyUpdateToOneWithWhereWithoutBooksInput, Prisma.AcademyUpdateWithoutBooksInput>, Prisma.AcademyUncheckedUpdateWithoutBooksInput>
 }
 
+export type AcademyCreateNestedOneWithoutBookFoldersInput = {
+  create?: Prisma.XOR<Prisma.AcademyCreateWithoutBookFoldersInput, Prisma.AcademyUncheckedCreateWithoutBookFoldersInput>
+  connectOrCreate?: Prisma.AcademyCreateOrConnectWithoutBookFoldersInput
+  connect?: Prisma.AcademyWhereUniqueInput
+}
+
+export type AcademyUpdateOneRequiredWithoutBookFoldersNestedInput = {
+  create?: Prisma.XOR<Prisma.AcademyCreateWithoutBookFoldersInput, Prisma.AcademyUncheckedCreateWithoutBookFoldersInput>
+  connectOrCreate?: Prisma.AcademyCreateOrConnectWithoutBookFoldersInput
+  upsert?: Prisma.AcademyUpsertWithoutBookFoldersInput
+  connect?: Prisma.AcademyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.AcademyUpdateToOneWithWhereWithoutBookFoldersInput, Prisma.AcademyUpdateWithoutBookFoldersInput>, Prisma.AcademyUncheckedUpdateWithoutBookFoldersInput>
+}
+
 export type AcademyCreateNestedOneWithoutImportsInput = {
   create?: Prisma.XOR<Prisma.AcademyCreateWithoutImportsInput, Prisma.AcademyUncheckedCreateWithoutImportsInput>
   connectOrCreate?: Prisma.AcademyCreateOrConnectWithoutImportsInput
@@ -745,6 +766,7 @@ export type AcademyCreateWithoutMembersInput = {
   classes?: Prisma.ClassRoomCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookCreateNestedManyWithoutAcademyInput
+  bookFolders?: Prisma.BookFolderCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportCreateNestedManyWithoutAcademyInput
   exams?: Prisma.ExamCreateNestedManyWithoutAcademyInput
   scans?: Prisma.ScanUploadCreateNestedManyWithoutAcademyInput
@@ -771,6 +793,7 @@ export type AcademyUncheckedCreateWithoutMembersInput = {
   classes?: Prisma.ClassRoomUncheckedCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookUncheckedCreateNestedManyWithoutAcademyInput
+  bookFolders?: Prisma.BookFolderUncheckedCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportUncheckedCreateNestedManyWithoutAcademyInput
   exams?: Prisma.ExamUncheckedCreateNestedManyWithoutAcademyInput
   scans?: Prisma.ScanUploadUncheckedCreateNestedManyWithoutAcademyInput
@@ -813,6 +836,7 @@ export type AcademyUpdateWithoutMembersInput = {
   classes?: Prisma.ClassRoomUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUpdateManyWithoutAcademyNestedInput
+  bookFolders?: Prisma.BookFolderUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUpdateManyWithoutAcademyNestedInput
   exams?: Prisma.ExamUpdateManyWithoutAcademyNestedInput
   scans?: Prisma.ScanUploadUpdateManyWithoutAcademyNestedInput
@@ -839,6 +863,7 @@ export type AcademyUncheckedUpdateWithoutMembersInput = {
   classes?: Prisma.ClassRoomUncheckedUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUncheckedUpdateManyWithoutAcademyNestedInput
+  bookFolders?: Prisma.BookFolderUncheckedUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUncheckedUpdateManyWithoutAcademyNestedInput
   exams?: Prisma.ExamUncheckedUpdateManyWithoutAcademyNestedInput
   scans?: Prisma.ScanUploadUncheckedUpdateManyWithoutAcademyNestedInput
@@ -865,6 +890,7 @@ export type AcademyCreateWithoutInvitationsInput = {
   classes?: Prisma.ClassRoomCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookCreateNestedManyWithoutAcademyInput
+  bookFolders?: Prisma.BookFolderCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportCreateNestedManyWithoutAcademyInput
   exams?: Prisma.ExamCreateNestedManyWithoutAcademyInput
   scans?: Prisma.ScanUploadCreateNestedManyWithoutAcademyInput
@@ -891,6 +917,7 @@ export type AcademyUncheckedCreateWithoutInvitationsInput = {
   classes?: Prisma.ClassRoomUncheckedCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookUncheckedCreateNestedManyWithoutAcademyInput
+  bookFolders?: Prisma.BookFolderUncheckedCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportUncheckedCreateNestedManyWithoutAcademyInput
   exams?: Prisma.ExamUncheckedCreateNestedManyWithoutAcademyInput
   scans?: Prisma.ScanUploadUncheckedCreateNestedManyWithoutAcademyInput
@@ -933,6 +960,7 @@ export type AcademyUpdateWithoutInvitationsInput = {
   classes?: Prisma.ClassRoomUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUpdateManyWithoutAcademyNestedInput
+  bookFolders?: Prisma.BookFolderUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUpdateManyWithoutAcademyNestedInput
   exams?: Prisma.ExamUpdateManyWithoutAcademyNestedInput
   scans?: Prisma.ScanUploadUpdateManyWithoutAcademyNestedInput
@@ -959,6 +987,7 @@ export type AcademyUncheckedUpdateWithoutInvitationsInput = {
   classes?: Prisma.ClassRoomUncheckedUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUncheckedUpdateManyWithoutAcademyNestedInput
+  bookFolders?: Prisma.BookFolderUncheckedUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUncheckedUpdateManyWithoutAcademyNestedInput
   exams?: Prisma.ExamUncheckedUpdateManyWithoutAcademyNestedInput
   scans?: Prisma.ScanUploadUncheckedUpdateManyWithoutAcademyNestedInput
@@ -985,6 +1014,7 @@ export type AcademyCreateWithoutSubscriptionInput = {
   classes?: Prisma.ClassRoomCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookCreateNestedManyWithoutAcademyInput
+  bookFolders?: Prisma.BookFolderCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportCreateNestedManyWithoutAcademyInput
   exams?: Prisma.ExamCreateNestedManyWithoutAcademyInput
   scans?: Prisma.ScanUploadCreateNestedManyWithoutAcademyInput
@@ -1011,6 +1041,7 @@ export type AcademyUncheckedCreateWithoutSubscriptionInput = {
   classes?: Prisma.ClassRoomUncheckedCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookUncheckedCreateNestedManyWithoutAcademyInput
+  bookFolders?: Prisma.BookFolderUncheckedCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportUncheckedCreateNestedManyWithoutAcademyInput
   exams?: Prisma.ExamUncheckedCreateNestedManyWithoutAcademyInput
   scans?: Prisma.ScanUploadUncheckedCreateNestedManyWithoutAcademyInput
@@ -1053,6 +1084,7 @@ export type AcademyUpdateWithoutSubscriptionInput = {
   classes?: Prisma.ClassRoomUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUpdateManyWithoutAcademyNestedInput
+  bookFolders?: Prisma.BookFolderUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUpdateManyWithoutAcademyNestedInput
   exams?: Prisma.ExamUpdateManyWithoutAcademyNestedInput
   scans?: Prisma.ScanUploadUpdateManyWithoutAcademyNestedInput
@@ -1079,6 +1111,7 @@ export type AcademyUncheckedUpdateWithoutSubscriptionInput = {
   classes?: Prisma.ClassRoomUncheckedUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUncheckedUpdateManyWithoutAcademyNestedInput
+  bookFolders?: Prisma.BookFolderUncheckedUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUncheckedUpdateManyWithoutAcademyNestedInput
   exams?: Prisma.ExamUncheckedUpdateManyWithoutAcademyNestedInput
   scans?: Prisma.ScanUploadUncheckedUpdateManyWithoutAcademyNestedInput
@@ -1105,6 +1138,7 @@ export type AcademyCreateWithoutClassesInput = {
   subscription?: Prisma.SubscriptionCreateNestedOneWithoutAcademyInput
   students?: Prisma.StudentCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookCreateNestedManyWithoutAcademyInput
+  bookFolders?: Prisma.BookFolderCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportCreateNestedManyWithoutAcademyInput
   exams?: Prisma.ExamCreateNestedManyWithoutAcademyInput
   scans?: Prisma.ScanUploadCreateNestedManyWithoutAcademyInput
@@ -1131,6 +1165,7 @@ export type AcademyUncheckedCreateWithoutClassesInput = {
   subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutAcademyInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookUncheckedCreateNestedManyWithoutAcademyInput
+  bookFolders?: Prisma.BookFolderUncheckedCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportUncheckedCreateNestedManyWithoutAcademyInput
   exams?: Prisma.ExamUncheckedCreateNestedManyWithoutAcademyInput
   scans?: Prisma.ScanUploadUncheckedCreateNestedManyWithoutAcademyInput
@@ -1173,6 +1208,7 @@ export type AcademyUpdateWithoutClassesInput = {
   subscription?: Prisma.SubscriptionUpdateOneWithoutAcademyNestedInput
   students?: Prisma.StudentUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUpdateManyWithoutAcademyNestedInput
+  bookFolders?: Prisma.BookFolderUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUpdateManyWithoutAcademyNestedInput
   exams?: Prisma.ExamUpdateManyWithoutAcademyNestedInput
   scans?: Prisma.ScanUploadUpdateManyWithoutAcademyNestedInput
@@ -1199,6 +1235,7 @@ export type AcademyUncheckedUpdateWithoutClassesInput = {
   subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutAcademyNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUncheckedUpdateManyWithoutAcademyNestedInput
+  bookFolders?: Prisma.BookFolderUncheckedUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUncheckedUpdateManyWithoutAcademyNestedInput
   exams?: Prisma.ExamUncheckedUpdateManyWithoutAcademyNestedInput
   scans?: Prisma.ScanUploadUncheckedUpdateManyWithoutAcademyNestedInput
@@ -1225,6 +1262,7 @@ export type AcademyCreateWithoutStudentsInput = {
   subscription?: Prisma.SubscriptionCreateNestedOneWithoutAcademyInput
   classes?: Prisma.ClassRoomCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookCreateNestedManyWithoutAcademyInput
+  bookFolders?: Prisma.BookFolderCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportCreateNestedManyWithoutAcademyInput
   exams?: Prisma.ExamCreateNestedManyWithoutAcademyInput
   scans?: Prisma.ScanUploadCreateNestedManyWithoutAcademyInput
@@ -1251,6 +1289,7 @@ export type AcademyUncheckedCreateWithoutStudentsInput = {
   subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutAcademyInput
   classes?: Prisma.ClassRoomUncheckedCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookUncheckedCreateNestedManyWithoutAcademyInput
+  bookFolders?: Prisma.BookFolderUncheckedCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportUncheckedCreateNestedManyWithoutAcademyInput
   exams?: Prisma.ExamUncheckedCreateNestedManyWithoutAcademyInput
   scans?: Prisma.ScanUploadUncheckedCreateNestedManyWithoutAcademyInput
@@ -1293,6 +1332,7 @@ export type AcademyUpdateWithoutStudentsInput = {
   subscription?: Prisma.SubscriptionUpdateOneWithoutAcademyNestedInput
   classes?: Prisma.ClassRoomUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUpdateManyWithoutAcademyNestedInput
+  bookFolders?: Prisma.BookFolderUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUpdateManyWithoutAcademyNestedInput
   exams?: Prisma.ExamUpdateManyWithoutAcademyNestedInput
   scans?: Prisma.ScanUploadUpdateManyWithoutAcademyNestedInput
@@ -1319,6 +1359,7 @@ export type AcademyUncheckedUpdateWithoutStudentsInput = {
   subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutAcademyNestedInput
   classes?: Prisma.ClassRoomUncheckedUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUncheckedUpdateManyWithoutAcademyNestedInput
+  bookFolders?: Prisma.BookFolderUncheckedUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUncheckedUpdateManyWithoutAcademyNestedInput
   exams?: Prisma.ExamUncheckedUpdateManyWithoutAcademyNestedInput
   scans?: Prisma.ScanUploadUncheckedUpdateManyWithoutAcademyNestedInput
@@ -1345,6 +1386,7 @@ export type AcademyCreateWithoutBooksInput = {
   subscription?: Prisma.SubscriptionCreateNestedOneWithoutAcademyInput
   classes?: Prisma.ClassRoomCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentCreateNestedManyWithoutAcademyInput
+  bookFolders?: Prisma.BookFolderCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportCreateNestedManyWithoutAcademyInput
   exams?: Prisma.ExamCreateNestedManyWithoutAcademyInput
   scans?: Prisma.ScanUploadCreateNestedManyWithoutAcademyInput
@@ -1371,6 +1413,7 @@ export type AcademyUncheckedCreateWithoutBooksInput = {
   subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutAcademyInput
   classes?: Prisma.ClassRoomUncheckedCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutAcademyInput
+  bookFolders?: Prisma.BookFolderUncheckedCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportUncheckedCreateNestedManyWithoutAcademyInput
   exams?: Prisma.ExamUncheckedCreateNestedManyWithoutAcademyInput
   scans?: Prisma.ScanUploadUncheckedCreateNestedManyWithoutAcademyInput
@@ -1413,6 +1456,7 @@ export type AcademyUpdateWithoutBooksInput = {
   subscription?: Prisma.SubscriptionUpdateOneWithoutAcademyNestedInput
   classes?: Prisma.ClassRoomUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUpdateManyWithoutAcademyNestedInput
+  bookFolders?: Prisma.BookFolderUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUpdateManyWithoutAcademyNestedInput
   exams?: Prisma.ExamUpdateManyWithoutAcademyNestedInput
   scans?: Prisma.ScanUploadUpdateManyWithoutAcademyNestedInput
@@ -1439,6 +1483,131 @@ export type AcademyUncheckedUpdateWithoutBooksInput = {
   subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutAcademyNestedInput
   classes?: Prisma.ClassRoomUncheckedUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutAcademyNestedInput
+  bookFolders?: Prisma.BookFolderUncheckedUpdateManyWithoutAcademyNestedInput
+  imports?: Prisma.ImportUncheckedUpdateManyWithoutAcademyNestedInput
+  exams?: Prisma.ExamUncheckedUpdateManyWithoutAcademyNestedInput
+  scans?: Prisma.ScanUploadUncheckedUpdateManyWithoutAcademyNestedInput
+  jobs?: Prisma.JobUncheckedUpdateManyWithoutAcademyNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutAcademyNestedInput
+}
+
+export type AcademyCreateWithoutBookFoldersInput = {
+  id?: string
+  name: string
+  slug: string
+  intro?: string | null
+  color?: string
+  logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
+  status?: string
+  plan?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  members?: Prisma.AcademyMemberCreateNestedManyWithoutAcademyInput
+  invitations?: Prisma.InvitationCreateNestedManyWithoutAcademyInput
+  subscription?: Prisma.SubscriptionCreateNestedOneWithoutAcademyInput
+  classes?: Prisma.ClassRoomCreateNestedManyWithoutAcademyInput
+  students?: Prisma.StudentCreateNestedManyWithoutAcademyInput
+  books?: Prisma.VocabBookCreateNestedManyWithoutAcademyInput
+  imports?: Prisma.ImportCreateNestedManyWithoutAcademyInput
+  exams?: Prisma.ExamCreateNestedManyWithoutAcademyInput
+  scans?: Prisma.ScanUploadCreateNestedManyWithoutAcademyInput
+  jobs?: Prisma.JobCreateNestedManyWithoutAcademyInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutAcademyInput
+}
+
+export type AcademyUncheckedCreateWithoutBookFoldersInput = {
+  id?: string
+  name: string
+  slug: string
+  intro?: string | null
+  color?: string
+  logoPath?: string | null
+  representativeName?: string | null
+  phone?: string | null
+  region?: string | null
+  status?: string
+  plan?: string
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  members?: Prisma.AcademyMemberUncheckedCreateNestedManyWithoutAcademyInput
+  invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutAcademyInput
+  subscription?: Prisma.SubscriptionUncheckedCreateNestedOneWithoutAcademyInput
+  classes?: Prisma.ClassRoomUncheckedCreateNestedManyWithoutAcademyInput
+  students?: Prisma.StudentUncheckedCreateNestedManyWithoutAcademyInput
+  books?: Prisma.VocabBookUncheckedCreateNestedManyWithoutAcademyInput
+  imports?: Prisma.ImportUncheckedCreateNestedManyWithoutAcademyInput
+  exams?: Prisma.ExamUncheckedCreateNestedManyWithoutAcademyInput
+  scans?: Prisma.ScanUploadUncheckedCreateNestedManyWithoutAcademyInput
+  jobs?: Prisma.JobUncheckedCreateNestedManyWithoutAcademyInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutAcademyInput
+}
+
+export type AcademyCreateOrConnectWithoutBookFoldersInput = {
+  where: Prisma.AcademyWhereUniqueInput
+  create: Prisma.XOR<Prisma.AcademyCreateWithoutBookFoldersInput, Prisma.AcademyUncheckedCreateWithoutBookFoldersInput>
+}
+
+export type AcademyUpsertWithoutBookFoldersInput = {
+  update: Prisma.XOR<Prisma.AcademyUpdateWithoutBookFoldersInput, Prisma.AcademyUncheckedUpdateWithoutBookFoldersInput>
+  create: Prisma.XOR<Prisma.AcademyCreateWithoutBookFoldersInput, Prisma.AcademyUncheckedCreateWithoutBookFoldersInput>
+  where?: Prisma.AcademyWhereInput
+}
+
+export type AcademyUpdateToOneWithWhereWithoutBookFoldersInput = {
+  where?: Prisma.AcademyWhereInput
+  data: Prisma.XOR<Prisma.AcademyUpdateWithoutBookFoldersInput, Prisma.AcademyUncheckedUpdateWithoutBookFoldersInput>
+}
+
+export type AcademyUpdateWithoutBookFoldersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  plan?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.AcademyMemberUpdateManyWithoutAcademyNestedInput
+  invitations?: Prisma.InvitationUpdateManyWithoutAcademyNestedInput
+  subscription?: Prisma.SubscriptionUpdateOneWithoutAcademyNestedInput
+  classes?: Prisma.ClassRoomUpdateManyWithoutAcademyNestedInput
+  students?: Prisma.StudentUpdateManyWithoutAcademyNestedInput
+  books?: Prisma.VocabBookUpdateManyWithoutAcademyNestedInput
+  imports?: Prisma.ImportUpdateManyWithoutAcademyNestedInput
+  exams?: Prisma.ExamUpdateManyWithoutAcademyNestedInput
+  scans?: Prisma.ScanUploadUpdateManyWithoutAcademyNestedInput
+  jobs?: Prisma.JobUpdateManyWithoutAcademyNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutAcademyNestedInput
+}
+
+export type AcademyUncheckedUpdateWithoutBookFoldersInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  slug?: Prisma.StringFieldUpdateOperationsInput | string
+  intro?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.StringFieldUpdateOperationsInput | string
+  logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  representativeName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  region?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.StringFieldUpdateOperationsInput | string
+  plan?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.AcademyMemberUncheckedUpdateManyWithoutAcademyNestedInput
+  invitations?: Prisma.InvitationUncheckedUpdateManyWithoutAcademyNestedInput
+  subscription?: Prisma.SubscriptionUncheckedUpdateOneWithoutAcademyNestedInput
+  classes?: Prisma.ClassRoomUncheckedUpdateManyWithoutAcademyNestedInput
+  students?: Prisma.StudentUncheckedUpdateManyWithoutAcademyNestedInput
+  books?: Prisma.VocabBookUncheckedUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUncheckedUpdateManyWithoutAcademyNestedInput
   exams?: Prisma.ExamUncheckedUpdateManyWithoutAcademyNestedInput
   scans?: Prisma.ScanUploadUncheckedUpdateManyWithoutAcademyNestedInput
@@ -1466,6 +1635,7 @@ export type AcademyCreateWithoutImportsInput = {
   classes?: Prisma.ClassRoomCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookCreateNestedManyWithoutAcademyInput
+  bookFolders?: Prisma.BookFolderCreateNestedManyWithoutAcademyInput
   exams?: Prisma.ExamCreateNestedManyWithoutAcademyInput
   scans?: Prisma.ScanUploadCreateNestedManyWithoutAcademyInput
   jobs?: Prisma.JobCreateNestedManyWithoutAcademyInput
@@ -1492,6 +1662,7 @@ export type AcademyUncheckedCreateWithoutImportsInput = {
   classes?: Prisma.ClassRoomUncheckedCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookUncheckedCreateNestedManyWithoutAcademyInput
+  bookFolders?: Prisma.BookFolderUncheckedCreateNestedManyWithoutAcademyInput
   exams?: Prisma.ExamUncheckedCreateNestedManyWithoutAcademyInput
   scans?: Prisma.ScanUploadUncheckedCreateNestedManyWithoutAcademyInput
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutAcademyInput
@@ -1534,6 +1705,7 @@ export type AcademyUpdateWithoutImportsInput = {
   classes?: Prisma.ClassRoomUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUpdateManyWithoutAcademyNestedInput
+  bookFolders?: Prisma.BookFolderUpdateManyWithoutAcademyNestedInput
   exams?: Prisma.ExamUpdateManyWithoutAcademyNestedInput
   scans?: Prisma.ScanUploadUpdateManyWithoutAcademyNestedInput
   jobs?: Prisma.JobUpdateManyWithoutAcademyNestedInput
@@ -1560,6 +1732,7 @@ export type AcademyUncheckedUpdateWithoutImportsInput = {
   classes?: Prisma.ClassRoomUncheckedUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUncheckedUpdateManyWithoutAcademyNestedInput
+  bookFolders?: Prisma.BookFolderUncheckedUpdateManyWithoutAcademyNestedInput
   exams?: Prisma.ExamUncheckedUpdateManyWithoutAcademyNestedInput
   scans?: Prisma.ScanUploadUncheckedUpdateManyWithoutAcademyNestedInput
   jobs?: Prisma.JobUncheckedUpdateManyWithoutAcademyNestedInput
@@ -1586,6 +1759,7 @@ export type AcademyCreateWithoutExamsInput = {
   classes?: Prisma.ClassRoomCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookCreateNestedManyWithoutAcademyInput
+  bookFolders?: Prisma.BookFolderCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportCreateNestedManyWithoutAcademyInput
   scans?: Prisma.ScanUploadCreateNestedManyWithoutAcademyInput
   jobs?: Prisma.JobCreateNestedManyWithoutAcademyInput
@@ -1612,6 +1786,7 @@ export type AcademyUncheckedCreateWithoutExamsInput = {
   classes?: Prisma.ClassRoomUncheckedCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookUncheckedCreateNestedManyWithoutAcademyInput
+  bookFolders?: Prisma.BookFolderUncheckedCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportUncheckedCreateNestedManyWithoutAcademyInput
   scans?: Prisma.ScanUploadUncheckedCreateNestedManyWithoutAcademyInput
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutAcademyInput
@@ -1654,6 +1829,7 @@ export type AcademyUpdateWithoutExamsInput = {
   classes?: Prisma.ClassRoomUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUpdateManyWithoutAcademyNestedInput
+  bookFolders?: Prisma.BookFolderUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUpdateManyWithoutAcademyNestedInput
   scans?: Prisma.ScanUploadUpdateManyWithoutAcademyNestedInput
   jobs?: Prisma.JobUpdateManyWithoutAcademyNestedInput
@@ -1680,6 +1856,7 @@ export type AcademyUncheckedUpdateWithoutExamsInput = {
   classes?: Prisma.ClassRoomUncheckedUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUncheckedUpdateManyWithoutAcademyNestedInput
+  bookFolders?: Prisma.BookFolderUncheckedUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUncheckedUpdateManyWithoutAcademyNestedInput
   scans?: Prisma.ScanUploadUncheckedUpdateManyWithoutAcademyNestedInput
   jobs?: Prisma.JobUncheckedUpdateManyWithoutAcademyNestedInput
@@ -1706,6 +1883,7 @@ export type AcademyCreateWithoutScansInput = {
   classes?: Prisma.ClassRoomCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookCreateNestedManyWithoutAcademyInput
+  bookFolders?: Prisma.BookFolderCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportCreateNestedManyWithoutAcademyInput
   exams?: Prisma.ExamCreateNestedManyWithoutAcademyInput
   jobs?: Prisma.JobCreateNestedManyWithoutAcademyInput
@@ -1732,6 +1910,7 @@ export type AcademyUncheckedCreateWithoutScansInput = {
   classes?: Prisma.ClassRoomUncheckedCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookUncheckedCreateNestedManyWithoutAcademyInput
+  bookFolders?: Prisma.BookFolderUncheckedCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportUncheckedCreateNestedManyWithoutAcademyInput
   exams?: Prisma.ExamUncheckedCreateNestedManyWithoutAcademyInput
   jobs?: Prisma.JobUncheckedCreateNestedManyWithoutAcademyInput
@@ -1774,6 +1953,7 @@ export type AcademyUpdateWithoutScansInput = {
   classes?: Prisma.ClassRoomUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUpdateManyWithoutAcademyNestedInput
+  bookFolders?: Prisma.BookFolderUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUpdateManyWithoutAcademyNestedInput
   exams?: Prisma.ExamUpdateManyWithoutAcademyNestedInput
   jobs?: Prisma.JobUpdateManyWithoutAcademyNestedInput
@@ -1800,6 +1980,7 @@ export type AcademyUncheckedUpdateWithoutScansInput = {
   classes?: Prisma.ClassRoomUncheckedUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUncheckedUpdateManyWithoutAcademyNestedInput
+  bookFolders?: Prisma.BookFolderUncheckedUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUncheckedUpdateManyWithoutAcademyNestedInput
   exams?: Prisma.ExamUncheckedUpdateManyWithoutAcademyNestedInput
   jobs?: Prisma.JobUncheckedUpdateManyWithoutAcademyNestedInput
@@ -1826,6 +2007,7 @@ export type AcademyCreateWithoutJobsInput = {
   classes?: Prisma.ClassRoomCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookCreateNestedManyWithoutAcademyInput
+  bookFolders?: Prisma.BookFolderCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportCreateNestedManyWithoutAcademyInput
   exams?: Prisma.ExamCreateNestedManyWithoutAcademyInput
   scans?: Prisma.ScanUploadCreateNestedManyWithoutAcademyInput
@@ -1852,6 +2034,7 @@ export type AcademyUncheckedCreateWithoutJobsInput = {
   classes?: Prisma.ClassRoomUncheckedCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookUncheckedCreateNestedManyWithoutAcademyInput
+  bookFolders?: Prisma.BookFolderUncheckedCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportUncheckedCreateNestedManyWithoutAcademyInput
   exams?: Prisma.ExamUncheckedCreateNestedManyWithoutAcademyInput
   scans?: Prisma.ScanUploadUncheckedCreateNestedManyWithoutAcademyInput
@@ -1894,6 +2077,7 @@ export type AcademyUpdateWithoutJobsInput = {
   classes?: Prisma.ClassRoomUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUpdateManyWithoutAcademyNestedInput
+  bookFolders?: Prisma.BookFolderUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUpdateManyWithoutAcademyNestedInput
   exams?: Prisma.ExamUpdateManyWithoutAcademyNestedInput
   scans?: Prisma.ScanUploadUpdateManyWithoutAcademyNestedInput
@@ -1920,6 +2104,7 @@ export type AcademyUncheckedUpdateWithoutJobsInput = {
   classes?: Prisma.ClassRoomUncheckedUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUncheckedUpdateManyWithoutAcademyNestedInput
+  bookFolders?: Prisma.BookFolderUncheckedUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUncheckedUpdateManyWithoutAcademyNestedInput
   exams?: Prisma.ExamUncheckedUpdateManyWithoutAcademyNestedInput
   scans?: Prisma.ScanUploadUncheckedUpdateManyWithoutAcademyNestedInput
@@ -1946,6 +2131,7 @@ export type AcademyCreateWithoutAuditLogsInput = {
   classes?: Prisma.ClassRoomCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookCreateNestedManyWithoutAcademyInput
+  bookFolders?: Prisma.BookFolderCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportCreateNestedManyWithoutAcademyInput
   exams?: Prisma.ExamCreateNestedManyWithoutAcademyInput
   scans?: Prisma.ScanUploadCreateNestedManyWithoutAcademyInput
@@ -1972,6 +2158,7 @@ export type AcademyUncheckedCreateWithoutAuditLogsInput = {
   classes?: Prisma.ClassRoomUncheckedCreateNestedManyWithoutAcademyInput
   students?: Prisma.StudentUncheckedCreateNestedManyWithoutAcademyInput
   books?: Prisma.VocabBookUncheckedCreateNestedManyWithoutAcademyInput
+  bookFolders?: Prisma.BookFolderUncheckedCreateNestedManyWithoutAcademyInput
   imports?: Prisma.ImportUncheckedCreateNestedManyWithoutAcademyInput
   exams?: Prisma.ExamUncheckedCreateNestedManyWithoutAcademyInput
   scans?: Prisma.ScanUploadUncheckedCreateNestedManyWithoutAcademyInput
@@ -2014,6 +2201,7 @@ export type AcademyUpdateWithoutAuditLogsInput = {
   classes?: Prisma.ClassRoomUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUpdateManyWithoutAcademyNestedInput
+  bookFolders?: Prisma.BookFolderUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUpdateManyWithoutAcademyNestedInput
   exams?: Prisma.ExamUpdateManyWithoutAcademyNestedInput
   scans?: Prisma.ScanUploadUpdateManyWithoutAcademyNestedInput
@@ -2040,6 +2228,7 @@ export type AcademyUncheckedUpdateWithoutAuditLogsInput = {
   classes?: Prisma.ClassRoomUncheckedUpdateManyWithoutAcademyNestedInput
   students?: Prisma.StudentUncheckedUpdateManyWithoutAcademyNestedInput
   books?: Prisma.VocabBookUncheckedUpdateManyWithoutAcademyNestedInput
+  bookFolders?: Prisma.BookFolderUncheckedUpdateManyWithoutAcademyNestedInput
   imports?: Prisma.ImportUncheckedUpdateManyWithoutAcademyNestedInput
   exams?: Prisma.ExamUncheckedUpdateManyWithoutAcademyNestedInput
   scans?: Prisma.ScanUploadUncheckedUpdateManyWithoutAcademyNestedInput
@@ -2057,6 +2246,7 @@ export type AcademyCountOutputType = {
   classes: number
   students: number
   books: number
+  bookFolders: number
   imports: number
   exams: number
   scans: number
@@ -2070,6 +2260,7 @@ export type AcademyCountOutputTypeSelect<ExtArgs extends runtime.Types.Extension
   classes?: boolean | AcademyCountOutputTypeCountClassesArgs
   students?: boolean | AcademyCountOutputTypeCountStudentsArgs
   books?: boolean | AcademyCountOutputTypeCountBooksArgs
+  bookFolders?: boolean | AcademyCountOutputTypeCountBookFoldersArgs
   imports?: boolean | AcademyCountOutputTypeCountImportsArgs
   exams?: boolean | AcademyCountOutputTypeCountExamsArgs
   scans?: boolean | AcademyCountOutputTypeCountScansArgs
@@ -2120,6 +2311,13 @@ export type AcademyCountOutputTypeCountStudentsArgs<ExtArgs extends runtime.Type
  */
 export type AcademyCountOutputTypeCountBooksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.VocabBookWhereInput
+}
+
+/**
+ * AcademyCountOutputType without action
+ */
+export type AcademyCountOutputTypeCountBookFoldersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.BookFolderWhereInput
 }
 
 /**
@@ -2178,6 +2376,7 @@ export type AcademySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   classes?: boolean | Prisma.Academy$classesArgs<ExtArgs>
   students?: boolean | Prisma.Academy$studentsArgs<ExtArgs>
   books?: boolean | Prisma.Academy$booksArgs<ExtArgs>
+  bookFolders?: boolean | Prisma.Academy$bookFoldersArgs<ExtArgs>
   imports?: boolean | Prisma.Academy$importsArgs<ExtArgs>
   exams?: boolean | Prisma.Academy$examsArgs<ExtArgs>
   scans?: boolean | Prisma.Academy$scansArgs<ExtArgs>
@@ -2242,6 +2441,7 @@ export type AcademyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs
   classes?: boolean | Prisma.Academy$classesArgs<ExtArgs>
   students?: boolean | Prisma.Academy$studentsArgs<ExtArgs>
   books?: boolean | Prisma.Academy$booksArgs<ExtArgs>
+  bookFolders?: boolean | Prisma.Academy$bookFoldersArgs<ExtArgs>
   imports?: boolean | Prisma.Academy$importsArgs<ExtArgs>
   exams?: boolean | Prisma.Academy$examsArgs<ExtArgs>
   scans?: boolean | Prisma.Academy$scansArgs<ExtArgs>
@@ -2261,6 +2461,7 @@ export type $AcademyPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     classes: Prisma.$ClassRoomPayload<ExtArgs>[]
     students: Prisma.$StudentPayload<ExtArgs>[]
     books: Prisma.$VocabBookPayload<ExtArgs>[]
+    bookFolders: Prisma.$BookFolderPayload<ExtArgs>[]
     imports: Prisma.$ImportPayload<ExtArgs>[]
     exams: Prisma.$ExamPayload<ExtArgs>[]
     scans: Prisma.$ScanUploadPayload<ExtArgs>[]
@@ -2681,6 +2882,7 @@ export interface Prisma__AcademyClient<T, Null = never, ExtArgs extends runtime.
   classes<T extends Prisma.Academy$classesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Academy$classesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ClassRoomPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   students<T extends Prisma.Academy$studentsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Academy$studentsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StudentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   books<T extends Prisma.Academy$booksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Academy$booksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$VocabBookPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  bookFolders<T extends Prisma.Academy$bookFoldersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Academy$bookFoldersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BookFolderPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   imports<T extends Prisma.Academy$importsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Academy$importsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ImportPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   exams<T extends Prisma.Academy$examsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Academy$examsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ExamPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   scans<T extends Prisma.Academy$scansArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Academy$scansArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ScanUploadPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -3255,6 +3457,30 @@ export type Academy$booksArgs<ExtArgs extends runtime.Types.Extensions.InternalA
   take?: number
   skip?: number
   distinct?: Prisma.VocabBookScalarFieldEnum | Prisma.VocabBookScalarFieldEnum[]
+}
+
+/**
+ * Academy.bookFolders
+ */
+export type Academy$bookFoldersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the BookFolder
+   */
+  select?: Prisma.BookFolderSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the BookFolder
+   */
+  omit?: Prisma.BookFolderOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.BookFolderInclude<ExtArgs> | null
+  where?: Prisma.BookFolderWhereInput
+  orderBy?: Prisma.BookFolderOrderByWithRelationInput | Prisma.BookFolderOrderByWithRelationInput[]
+  cursor?: Prisma.BookFolderWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.BookFolderScalarFieldEnum | Prisma.BookFolderScalarFieldEnum[]
 }
 
 /**

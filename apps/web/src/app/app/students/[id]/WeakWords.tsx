@@ -39,7 +39,7 @@ export function WeakWords({ studentId, words }: { studentId: string; words: { wo
       </div>
       <button
         type="button"
-        className="btn-accent mt-2 w-full"
+        className="btn-primary mt-2 w-full"
         disabled={pending || sel.length === 0}
         data-testid="weak-issue"
         onClick={() =>
@@ -56,7 +56,6 @@ export function WeakWords({ studentId, words }: { studentId: string; words: { wo
       >
         {pending ? "출제 중…" : `이 ${sel.length}개로 재시험 출제`}
       </button>
-      <p className="muted mt-1 text-[12px]">바로 이 학생에게만 나가고, 재시험 화면과 학생 앱에 즉시 보입니다.</p>
     </>
   );
 }

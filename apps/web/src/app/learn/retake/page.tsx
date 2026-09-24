@@ -20,19 +20,16 @@ export default async function RetakePage() {
     <div className="learn-grid">
       <div className="col">
         <div className="flex items-end justify-between px-1">
-          <div>
-            <div className="lbl">Retake</div>
-            <div className="mt-1 text-[15px] font-semibold">재시험</div>
-          </div>
-          <span className="digital">{String(issued.length).padStart(2, "0")} TO DO</span>
+          <div className="text-[18px] font-semibold tracking-tight">재시험</div>
+          <span className="digital">칠 재시험 {issued.length}</span>
         </div>
 
         {next ? (
           <div className="card-accent card-body" data-testid="retake-next">
             <div className="flex items-start justify-between">
-              <div className="lbl-on">Next · {next.mode === "same" ? "같은 범위" : next.kind === "weak_words" ? "반복 오답" : "오답만"}</div>
+              <div className="lbl-on">다음 재시험 · {next.mode === "same" ? "같은 범위" : next.kind === "weak_words" ? "반복 오답" : "오답만"}</div>
               <span className="badge-gray" style={{ background: "rgba(255,244,240,0.2)", color: "#fff4f0" }}>
-                {next.retakeExam?.questionCount ?? next.wrongCount} Q
+                {next.retakeExam?.questionCount ?? next.wrongCount}문항
               </span>
             </div>
             <div className="mt-2 text-[20px] font-semibold leading-tight tracking-tight">{next.retakeExam?.title ?? next.sourceExam.title}</div>
@@ -43,7 +40,7 @@ export default async function RetakePage() {
                 {next.dueAt ? `${fmtMDHM(next.dueAt)}까지` : "마감 없음"}
               </div>
               <div className="text-right">
-                <div className="digital-lg">{next.dueAt ? (dday(next.dueAt)! <= 0 ? "D-DAY" : `D-${dday(next.dueAt)}`) : "OPEN"}</div>
+                <div className="digital-lg">{next.dueAt ? (dday(next.dueAt)! <= 0 ? "D-DAY" : `D-${dday(next.dueAt)}`) : "열림"}</div>
               </div>
             </div>
             <div className="mt-4">
@@ -54,20 +51,20 @@ export default async function RetakePage() {
               )}
             </div>
           </div>
+        ) : preparing.length ? (
+          // 준비 중 목록이 아래에 있으므로 큰 빈 카드 대신 한 줄 안내
+          <p className="muted px-1">지금 칠 재시험은 없어요. 선생님이 준비 중인 재시험이 나오면 알림이 와요.</p>
         ) : (
           <div className="card card-body">
-            <div className="lbl">Retake</div>
-            <div className="num-lg mt-3" style={{ color: "var(--ink-3)" }}>
-              —
-            </div>
-            <div className="muted mt-2">{preparing.length ? "선생님이 재시험을 준비하고 있어요. 나오면 알림이 와요." : "치를 재시험이 없어요. 통과 기준에 못 미치면 여기에 나타나요."}</div>
+            <div className="text-[16px] font-semibold">치를 재시험이 없어요</div>
+            <div className="muted mt-2">통과 기준에 못 미친 시험이 있으면 여기에 나타나요.</div>
           </div>
         )}
 
         {next && (
           <section className="card card-body">
             <div className="mb-1 flex items-center justify-between">
-              <div className="lbl">Review · 틀린 단어</div>
+              <div className="lbl">틀린 단어</div>
               <span className="digital">{next.wrongWords.length || next.wrongCount}</span>
             </div>
             {next.wrongWords.length === 0 ? (
@@ -101,7 +98,7 @@ export default async function RetakePage() {
       <div className="col">
         {issued.length > 1 && (
           <section className="card card-body">
-            <div className="lbl mb-1">Up next · 마감 순</div>
+            <div className="lbl mb-1">마감 순</div>
             <ul>
               {issued
                 .filter((r) => r !== next)
@@ -110,10 +107,10 @@ export default async function RetakePage() {
                     <div className="min-w-0">
                       <div className="truncate text-[14px] font-medium">{r.retakeExam?.title ?? r.sourceExam.title}</div>
                       <div className="lbl mt-0.5">
-                        {r.retakeExam?.questionCount ?? r.wrongCount} Q · {r.dueAt ? `${fmtMDHM(r.dueAt)}까지` : "마감 없음"}
+                        {r.retakeExam?.questionCount ?? r.wrongCount}문항 · {r.dueAt ? `${fmtMDHM(r.dueAt)}까지` : "마감 없음"}
                       </div>
                     </div>
-                    {r.retakeAssignment?.canStart ? <StartButton assignmentId={r.retakeAssignment.assignmentId} label="시작" compact /> : <span className="badge-gray">WAIT</span>}
+                    {r.retakeAssignment?.canStart ? <StartButton assignmentId={r.retakeAssignment.assignmentId} label="시작" compact /> : <span className="badge-gray">대기</span>}
                   </li>
                 ))}
             </ul>
@@ -122,7 +119,7 @@ export default async function RetakePage() {
 
         {preparing.length > 0 && (
           <section className="card card-body">
-            <div className="lbl mb-1">Preparing · 선생님이 준비 중</div>
+            <div className="lbl mb-1">선생님이 준비 중</div>
             <ul>
               {preparing.map((r) => (
                 <li key={r.id} className="row">
@@ -142,12 +139,12 @@ export default async function RetakePage() {
 
         {done.length > 0 && (
           <section className="card card-body">
-            <div className="lbl mb-1">Done · 지난 재시험</div>
+            <div className="lbl mb-1">지난 재시험</div>
             <ul>
               {done.slice(0, 10).map((r) => (
                 <li key={r.id} className="row">
                   <span className="min-w-0 truncate text-[14px]">{r.retakeExam?.title ?? r.sourceExam.title}</span>
-                  {r.retakeScore ? <span className={r.retakeScore.passed ? "badge-green" : "badge-red"}>{r.retakeScore.passed ? "PASSED" : "RETRY"} · {r.retakeScore.score}</span> : <span className="badge-green">PASSED</span>}
+                  {r.retakeScore ? <span className={r.retakeScore.passed ? "badge-green" : "badge-red"}>{r.retakeScore.passed ? "통과" : "다시"} · {r.retakeScore.score}</span> : <span className="badge-green">통과</span>}
                 </li>
               ))}
             </ul>

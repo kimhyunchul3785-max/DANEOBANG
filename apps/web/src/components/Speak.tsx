@@ -68,8 +68,8 @@ export function SpeakButton({ text, size = 36, light = false, autoKey, className
         </svg>
       </button>
       {autoKey && (
-        <button type="button" onClick={toggleAuto} className="lbl" style={{ color: auto ? fg : light ? "rgba(255,244,240,0.55)" : "var(--ink-3)", fontSize: 9.5 }} aria-pressed={auto} title="단어가 바뀔 때 자동으로 읽기">
-          AUTO {auto ? "ON" : "OFF"}
+        <button type="button" onClick={toggleAuto} className="lbl min-h-[32px] px-1" style={{ color: auto ? fg : light ? "rgba(255,244,240,0.55)" : "var(--ink-3)", fontSize: 11 }} aria-pressed={auto} title="단어가 바뀔 때 자동으로 읽기">
+          자동 발음 {auto ? "켬" : "끔"}
         </button>
       )}
     </span>

@@ -26,7 +26,7 @@ export async function Onboarding({ ctx }: { ctx: AcademyContext }) {
     <div className="mb-5 grid gap-3 lg:grid-cols-[minmax(0,1fr)_320px]" data-testid="onboarding">
       <section className="card card-body">
         <div className="flex items-center justify-between">
-          <div className="lbl">Getting started · 단어방 시작하기</div>
+          <div className="lbl">단어방 시작하기</div>
           <span className="digital">{doneN}/3</span>
         </div>
         <ol className="mt-3 grid gap-2 sm:grid-cols-3">

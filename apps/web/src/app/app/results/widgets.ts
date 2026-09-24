@@ -10,28 +10,32 @@ export const GAP_PX = 12;
 
 export const WIDGETS: Record<WidgetType, { title: string; hint: string; minW: number; minH: number; w: number; h: number }> = {
   avg: { title: "평균 점수", hint: "첫 응시 점수의 평균. 지난 기간과 비교", minW: 2, minH: 2, w: 3, h: 2 },
-  pass: { title: "통과율", hint: "첫 응시에서 통과 기준을 넘긴 비율", minW: 2, minH: 2, w: 3, h: 2 },
+  pass: { title: "통과율 (첫 응시)", hint: "첫 응시에서 통과 기준을 넘긴 비율", minW: 2, minH: 2, w: 3, h: 2 },
   retake: { title: "재시험", hint: "아직 끝나지 않은 재시험 (출제 전 포함)", minW: 2, minH: 2, w: 3, h: 2 },
   missed: { title: "미응시", hint: "마감이 지났는데 시작하지 않은 시험", minW: 2, minH: 2, w: 3, h: 2 },
   groups: { title: "그룹별 평균", hint: "반·학교·학년별 평균. 막대를 누르면 그 학생들만", minW: 4, minH: 4, w: 6, h: 6 },
   trend: { title: "성적 추이", hint: "주별 평균 점수. 점선이 통과 기준, 빨간 점은 미달", minW: 4, minH: 3, w: 6, h: 6 },
-  distribution: { title: "점수 분포", hint: "점수대별 응시 수와 통과·미달·미응시 비율", minW: 3, minH: 4, w: 4, h: 6 },
+  distribution: { title: "점수 분포", hint: "점수대별 응시 수와 통과·미달·미응시 건수", minW: 3, minH: 4, w: 4, h: 6 },
   heatmap: { title: "누가 언제 봤나", hint: "학생 × 주. 빈 칸은 그 주 응시 없음, 빨강은 60점 미만", minW: 4, minH: 4, w: 4, h: 6 },
   watch: { title: "챙겨야 할 학생", hint: "연속 미달·미응시·급락·평균 60 미만", minW: 3, minH: 3, w: 4, h: 6 },
   recent: { title: "최근 시험", hint: "최근에 낸 시험의 평균과 응시 인원", minW: 3, minH: 3, w: 4, h: 6 },
 };
 
+// 기본 배치(v5.5): 숫자 4개 → [추이(넓게) | 챙겨야 할 학생] → [그룹 | 분포 | 히트맵]. 높이 5줄로 낮춰 빈 면적을 줄인다
 export const DEFAULT_LAYOUT: LayoutItem[] = [
   { i: "avg", x: 0, y: 0, w: 3, h: 2 },
   { i: "pass", x: 3, y: 0, w: 3, h: 2 },
   { i: "retake", x: 6, y: 0, w: 3, h: 2 },
   { i: "missed", x: 9, y: 0, w: 3, h: 2 },
-  { i: "trend", x: 0, y: 2, w: 6, h: 6 },
-  { i: "groups", x: 6, y: 2, w: 6, h: 6 },
-  { i: "distribution", x: 0, y: 8, w: 4, h: 6 },
-  { i: "heatmap", x: 4, y: 8, w: 4, h: 6 },
-  { i: "watch", x: 8, y: 8, w: 4, h: 6 },
+  { i: "trend", x: 0, y: 2, w: 8, h: 5 },
+  { i: "watch", x: 8, y: 2, w: 4, h: 5 },
+  { i: "groups", x: 0, y: 7, w: 4, h: 5 },
+  { i: "distribution", x: 4, y: 7, w: 4, h: 5 },
+  { i: "heatmap", x: 8, y: 7, w: 4, h: 5 },
 ];
+
+/** 휴대폰(한 열)에서 보이는 순서: 숫자 → 할 일(챙길 학생) → 추이 → 나머지 */
+export const MOBILE_ORDER: WidgetType[] = ["avg", "pass", "retake", "missed", "watch", "trend", "recent", "groups", "heatmap", "distribution"];
 
 export function normalizeLayout(raw: unknown): LayoutItem[] {
   if (!Array.isArray(raw)) return DEFAULT_LAYOUT;
@@ -99,6 +103,22 @@ export function fitCols(layout: LayoutItem[], cols: number): LayoutItem[] {
       }
     }
     out.push({ ...it });
+  }
+  return fillRows(out, cols);
+}
+
+/**
+ * 줄마다 오른쪽 빈 칸이 남지 않게: 같은 줄(y 겹침)의 마지막 위젯을 남은 폭만큼 늘린다.
+ * (QA: 태블릿 폭에서 오른쪽 90px 이 비고 가운데 빈 칸이 생기던 것)
+ */
+export function fillRows(layout: LayoutItem[], cols = COLS): LayoutItem[] {
+  const out = layout.map((l) => ({ ...l }));
+  for (const it of out) {
+    const rightEdge = it.x + it.w;
+    if (rightEdge >= cols) continue;
+    // 이 위젯의 오른쪽에 같은 세로 구간에서 겹치는 위젯이 없으면 끝까지 늘린다
+    const blocked = out.some((o) => o !== it && o.x >= rightEdge && o.y < it.y + it.h && o.y + o.h > it.y);
+    if (!blocked) it.w = cols - it.x;
   }
   return out;
 }

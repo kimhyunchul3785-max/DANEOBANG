@@ -11,13 +11,22 @@ import { RetakeQueue, type RetakeRow } from "./RetakeQueue";
  * 재시험: 통과 미달 → (출제 전) 범위·마감 정해 출제 → 학생 앱·알림 → 응시 → 통과면 완료, 미달이면 다음 차수로 이어짐.
  * 보강 일정 개념 없음. 마감(dueAt)이 곧 언제까지 치는지.
  */
-export default async function RetakesPage({ searchParams }: { searchParams: Promise<{ all?: string }> }) {
+type View = "open" | "pending" | "waiting" | "all";
+const VIEWS: [View, string][] = [
+  ["open", "미완료"],
+  ["pending", "출제 전"],
+  ["waiting", "응시 대기"],
+  ["all", "완료 포함"],
+];
+
+export default async function RetakesPage({ searchParams }: { searchParams: Promise<{ all?: string; view?: string; student?: string }> }) {
   const ctx = await requireAcademy();
   const sp = await searchParams;
+  const view: View = VIEWS.some(([k]) => k === sp.view) ? (sp.view as View) : sp.all ? "all" : "open";
   const week = seoulWeekRange();
   const now = new Date();
   const tasks = await prisma.retakeTask.findMany({
-    where: { student: studentScope(ctx), ...(sp.all ? {} : { status: { in: ["pending", "issued"] } }) },
+    where: { student: studentScope(ctx), ...(sp.student ? { studentId: sp.student } : {}), ...(view === "all" ? {} : { status: { in: ["pending", "issued"] } }) },
     include: RETAKE_INCLUDE,
     orderBy: [{ status: "asc" }, { dueAt: { sort: "asc", nulls: "last" } }, { createdAt: "desc" }],
     take: 300,
@@ -52,7 +61,9 @@ export default async function RetakesPage({ searchParams }: { searchParams: Prom
       status: t.status,
       dueAt: (asg?.dueAt ?? t.dueAt)?.toISOString() ?? null,
       issuedAt: t.issuedAt?.toISOString() ?? null,
+      createdAt: t.createdAt.toISOString(),
       retakeExamId: t.retakeExamId,
+      retakeTitle: rex?.title ?? null,
       retakeState,
       retakeScore: rg ? Math.round(rg.score) : null,
       retakePassed: rg?.passed ?? null,
@@ -68,7 +79,8 @@ export default async function RetakesPage({ searchParams }: { searchParams: Prom
   const waiting = open.filter((r) => r.retakeExamId && r.retakeState !== "done").length;
   const dueThisWeek = open.filter((r) => r.dueAt && new Date(r.dueAt) >= week.start && new Date(r.dueAt) < week.end).length;
   const passedThisWeek = tasks.filter((t) => t.status === "completed" && t.completedAt && t.completedAt >= week.start).length;
-  const passedAll = sp.all ? tasks.filter((t) => t.status === "completed").length : null;
+  const passedAll = view === "all" ? tasks.filter((t) => t.status === "completed").length : null;
+  const listed = view === "pending" ? rows.filter((r) => (r.status === "pending" || r.status === "issued") && !r.retakeExamId) : view === "waiting" ? rows.filter((r) => (r.status === "pending" || r.status === "issued") && !!r.retakeExamId && r.retakeState !== "done") : rows;
 
   // 앞으로 14일, 마감일별 응시 대기 인원
   const dayStart = new Date(Date.now() - ((Date.now() + 9 * 3600e3) % 86400e3));
@@ -82,60 +94,68 @@ export default async function RetakesPage({ searchParams }: { searchParams: Prom
   const overdueN = open.filter((r) => r.retakeExamId && r.retakeState !== "done" && r.dueAt && new Date(r.dueAt) < now).length;
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="mx-auto max-w-6xl" data-width="wide">
       <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <div className="kicker">Retake · 재시험</div>
-          <h1 className="h1 mt-1">재시험</h1>
-          <p className="muted mt-1">통과 기준 미달이면 자동으로 들어옵니다. 오답만·같은 범위와 마감을 정해 출제하세요.</p>
+          <h1 className="h1">재시험</h1>
         </div>
-        <Link href={sp.all ? "/app/retakes" : "/app/retakes?all=1"} className="btn-ghost btn-sm">
-          {sp.all ? "미완료만" : "완료 포함 전체"}
-        </Link>
+        <div className="seg" role="tablist" aria-label="보기" data-testid="retake-views">
+          {VIEWS.map(([k, l]) => (
+            <Link key={k} href={k === "open" ? "/app/retakes" : `/app/retakes?view=${k}`} className={`seg-item${view === k ? " on" : ""}`} role="tab" aria-selected={view === k} data-view={k}>
+              {l}
+            </Link>
+          ))}
+        </div>
       </header>
 
-      {/* 숫자 세 개는 휴대폰에서도 한 줄 */}
-      <div className="mb-4 grid grid-cols-3 gap-2 sm:gap-3">
-        <div className="card-sm card-body">
-          <div className="lbl">출제 전</div>
-          <div className="num-lg mt-2" style={notIssued ? { color: "var(--accent)" } : undefined}>
+      {/* 숫자 세 개: 한 표면 · 칸막이 (휴대폰에서도 한 줄) */}
+      <div className="kpis k3 mb-4">
+        <div>
+          <span className="lbl">출제 전</span>
+          <span className="kpi-v" style={notIssued ? { color: "var(--warn)" } : undefined}>
             <CountUp value={notIssued} />
-          </div>
-          <div className="muted hidden sm:block">범위·마감을 정해 내면 됩니다</div>
+          </span>
+          <span className="kpi-s hidden sm:block">범위·마감을 정해 내면 됩니다</span>
         </div>
-        <div className="card-sm card-body">
-          <div className="lbl">응시 대기</div>
-          <div className="num-lg mt-2">
+        <div>
+          <span className="lbl">응시 대기</span>
+          <span className="kpi-v">
             <CountUp value={waiting} />
-          </div>
-          <div className="muted hidden sm:block">출제됨 · 학생이 칠 차례{overdueN ? ` · 마감 지남 ${overdueN}` : ""}</div>
+          </span>
+          <span className="kpi-s hidden sm:block">출제됨 · 학생이 칠 차례{overdueN ? ` · 마감 지남 ${overdueN}` : ""}</span>
         </div>
-        <div className="card-sm card-body">
-          <div className="lbl">이번 주</div>
-          <div className="num-lg mt-2">
+        <div>
+          <span className="lbl">이번 주 마감</span>
+          <span className="kpi-v">
             <CountUp value={dueThisWeek} />
-          </div>
-          <div className="muted hidden sm:block">
-            이번 주 마감 · 통과 {passedThisWeek}
+          </span>
+          <span className="kpi-s hidden sm:block">
+            통과 {passedThisWeek}
             {passedAll !== null ? ` · 누적 통과 ${passedAll}` : ""}
-          </div>
+          </span>
         </div>
       </div>
+      {/* 마감일별: 재시험이 있는 날만 칩으로 (빈 날 점은 그리지 않는다) */}
       {byDay.some((d) => d.n > 0) && (
-        <div className="card-dark mb-4 flex items-center gap-5 overflow-x-auto rounded-full px-6 py-3" data-testid="due-strip">
-          <span className="lbl shrink-0" style={{ color: "rgba(236,233,227,0.55)" }}>
-            마감일별
+        <div className="mb-4 flex flex-wrap items-center gap-2" data-testid="due-strip">
+          <span className="lbl">마감일별 응시 대기</span>
+          {byDay
+            .filter((d) => d.n > 0)
+            .map((d) => (
+              <span key={d.key} className={d.key === 0 ? "badge-red" : "badge-blue"} title={`${d.label} 마감 ${d.n}명: ${d.names}`}>
+                {d.key === 0 ? "오늘" : `${d.label}(${d.dow})`} · {d.n}명
+              </span>
+            ))}
+        </div>
+      )}
+      {sp.student && (
+        <div className="card-2 mb-3 flex items-center justify-between rounded-xl px-4 py-2 text-[13px]" data-testid="student-filter">
+          <span>
+            <b>{tasks[0]?.student.name ?? "이 학생"}</b>의 재시험만 보고 있어요.
           </span>
-          {byDay.map((d) => (
-            <div key={d.key} className="flex shrink-0 flex-col items-center" title={d.n ? `${d.label} 마감 ${d.n}명: ${d.names}` : `${d.label} 마감 없음`}>
-              <span className="digital" style={{ color: d.n ? "#fff4f0" : "rgba(236,233,227,0.35)", fontSize: 14 }}>
-                {d.n ? String(d.n).padStart(2, "0") : "··"}
-              </span>
-              <span className="lbl" style={{ fontSize: 9, color: d.key === 0 ? "var(--accent)" : "rgba(236,233,227,0.5)" }}>
-                {d.label} {d.dow}
-              </span>
-            </div>
-          ))}
+          <Link href="/app/retakes" className="lbl-ink hover:underline">
+            전체 보기
+          </Link>
         </div>
       )}
 
@@ -143,7 +163,7 @@ export default async function RetakesPage({ searchParams }: { searchParams: Prom
         <div className="card-body">
           <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
             <div className="flex flex-wrap items-center gap-4">
-              <div className="lbl">Queue · 학생별</div>
+              <div className="lbl">학생별</div>
               <span className="lbl">
                 <SortHeader target="#retake-queue" attr="score">점수순</SortHeader>
               </span>
@@ -154,9 +174,9 @@ export default async function RetakesPage({ searchParams }: { searchParams: Prom
                 <SortHeader target="#retake-queue" attr="when">마감순</SortHeader>
               </span>
             </div>
-            <span className="digital">{rows.length}</span>
+            <span className="digital">{listed.length}</span>
           </div>
-          {rows.length === 0 ? <p className="muted">재시험 대상이 없습니다.</p> : <RetakeQueue rows={rows} />}
+          {listed.length === 0 ? <p className="muted">{view === "open" ? "재시험 대상이 없습니다." : "해당하는 항목이 없어요."}</p> : <RetakeQueue rows={listed} />}
         </div>
       </section>
     </div>

@@ -33,13 +33,12 @@ export default async function TeachersPage() {
     <div className="mx-auto max-w-5xl">
       <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <div className="kicker">Teachers · 선생님</div>
-          <h1 className="h1 mt-1">선생님</h1>
+          <h1 className="h1">선생님</h1>
           <p className="muted mt-1">담당 학생은 학생 상세에서 지정합니다. 선생님은 담당 학생만 봅니다.</p>
         </div>
         {usage.unlimited ? (
           <span className="digital" data-testid="seat-summary">
-            {usage.used} TEACHERS{usage.pending ? ` · ${usage.pending} INVITED` : ""}
+            선생님 {usage.used}명{usage.pending ? ` · 초대 대기 ${usage.pending}` : ""}
           </span>
         ) : (
         <Link href="/app/billing" className="card-sm card-body flex items-center gap-4 !py-2.5" data-testid="seat-summary" title="요금제 및 결제">
@@ -63,16 +62,16 @@ export default async function TeachersPage() {
         <div className="space-y-4 lg:col-span-2">
           <section className="card card-body">
             <div className="mb-3 flex items-center justify-between">
-              <div className="lbl">By teacher · 최근 4주 담당 학생 평균</div>
-              <span className="digital">{grades.filter((g) => !g.isRetake).length} GRADED</span>
+              <div className="lbl">최근 4주 담당 학생 평균</div>
+              <span className="digital">채점 {grades.filter((g) => !g.isRetake).length}건</span>
             </div>
             <HBars rows={rows.map(({ m, s }) => ({ key: m.id, label: m.user.name, value: s.avg, sub: `${m.students.length}명` }))} accentBelow={70} />
           </section>
 
           <section className="card">
             <div className="card-body">
-              <div className="lbl mb-2">Members · 구성원</div>
-              <table className="tbl">
+              <div className="lbl mb-2">구성원</div>
+              <table className="tbl tbl-cards">
                 <thead>
                   <tr>
                     <th>이름</th>
@@ -88,24 +87,26 @@ export default async function TeachersPage() {
                     const s = stat(m.students.map((x) => x.studentId));
                     return (
                       <tr key={m.id} data-member-status={m.status}>
-                        <td>
-                          <div className="font-medium">{m.user.name}</div>
-                          <div className="muted text-[12px]">
-                            {m.user.email} · {m.user.provider}
+                        <td data-label="_title">
+                          <div>
+                            <div className="font-medium">{m.user.name}</div>
+                            <div className="muted text-[12px] font-normal">
+                              {m.user.email} · {m.user.provider}
+                            </div>
                           </div>
                         </td>
-                        <td className="whitespace-nowrap">
+                        <td className="whitespace-nowrap" data-label="역할">
                           {m.role === "OWNER" ? "학원장" : m.role === "ADMIN" ? "관리자" : "선생님"}
                           {m.role === "OWNER" && (m.isTeacher ? " · 선생님" : " · 관리만")}
                           {m.role !== "OWNER" && !m.isTeacher && " · 관리만"}
                         </td>
-                        <td className="whitespace-nowrap">
-                          <Link href={`/app/students?teacher=${m.id}`} className="hover:underline">
+                        <td className="whitespace-nowrap" data-label="담당">
+                          <Link href={`/app/students?teacher=${m.id}`} className="hover:underline" style={{ padding: "4px 0" }}>
                             {m.students.length}명
                           </Link>
                         </td>
-                        <td className="whitespace-nowrap">{s.pass === null ? "–" : `${s.pass}%`}</td>
-                        <td>{m.status === "active" ? <span className="badge-green">ACTIVE</span> : <span className="badge-gray">DISABLED</span>}</td>
+                        <td className="whitespace-nowrap" data-label="4주 통과율">{s.pass === null ? "–" : `${s.pass}%`}</td>
+                        <td data-label="상태">{m.status === "active" ? <span className="badge-green">활성</span> : <span className="badge-gray">중지</span>}</td>
                         <td className="text-right">
                           {m.role !== "OWNER" && (
                             <ActionButton action={setMemberStatusAction.bind(null, m.id, m.status === "active" ? "disabled" : "active")} className="btn-ghost btn-sm" confirm={m.status === "active" ? `${m.user.name} 선생님의 접근을 중지할까요? 자리는 비지만 구매 자리 수는 그대로입니다.` : undefined}>

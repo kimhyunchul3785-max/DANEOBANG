@@ -43,6 +43,10 @@ const MIGRATIONS: { table: string; column: string; ddl: string }[] = [
   { table: "StudentLinkRequest", column: "classId", ddl: 'ALTER TABLE "StudentLinkRequest" ADD COLUMN "classId" TEXT' },
   { table: "StudentLinkRequest", column: "name", ddl: 'ALTER TABLE "StudentLinkRequest" ADD COLUMN "name" TEXT' },
   { table: "ClassRoom", column: "teacherMemberId", ddl: 'ALTER TABLE "ClassRoom" ADD COLUMN "teacherMemberId" TEXT' },
+  // v5.2 — 단어장 폴더
+  { table: "VocabBook", column: "folderId", ddl: 'ALTER TABLE "VocabBook" ADD COLUMN "folderId" TEXT REFERENCES "BookFolder"("id") ON DELETE SET NULL' },
+  // v5.6 — 병합 원본 (성적의 단어장 필터)
+  { table: "VocabBook", column: "mergedFrom", ddl: 'ALTER TABLE "VocabBook" ADD COLUMN "mergedFrom" TEXT' },
 ];
 
 /**
@@ -90,6 +94,14 @@ const DATA_FIXES: string[] = [
   `CREATE UNIQUE INDEX IF NOT EXISTS "ClassRoom_joinCode_key" ON "ClassRoom"("joinCode")`,
   // 기존 반에 반 코드 부여 (보관된 반 제외)
   `UPDATE "ClassRoom" SET "joinCode" = printf('%06d', abs(random()) % 1000000) WHERE "joinCode" IS NULL AND "archived" = 0`,
+  // v5.6 — 폴더(단어장당 1개) → 태그(여러 개): 기존 폴더 배정을 태그 연결로 옮긴다
+  `INSERT OR IGNORE INTO "VocabBookTag" ("bookId", "tagId", "createdAt")
+     SELECT "id", "folderId", CURRENT_TIMESTAMP FROM "VocabBook" WHERE "folderId" IS NOT NULL`,
+  // v5.6 — 예전 병합 기록(AuditLog book.merge: "A+B → …")에서 원본 id 를 채운다
+  `UPDATE "VocabBook" SET "mergedFrom" = (
+     SELECT '["' || replace(substr(l."detail", 1, instr(l."detail", ' →') - 1), '+', '","') || '"]'
+     FROM "AuditLog" l WHERE l."action" = 'book.merge' AND l."target" = "VocabBook"."id" AND instr(l."detail", ' →') > 0 LIMIT 1)
+   WHERE "mergedFrom" IS NULL AND EXISTS (SELECT 1 FROM "AuditLog" l WHERE l."action" = 'book.merge' AND l."target" = "VocabBook"."id")`,
   `INSERT INTO "Subscription" ("id", "academyId", "provider", "seatQuantity", "unitPrice", "status", "currentPeriodStart", "currentPeriodEnd", "createdAt", "updatedAt")
      SELECT 'sub_' || lower(hex(randomblob(10))), a."id", 'legacy',
        MAX(1, (SELECT count(*) FROM "AcademyMember" m WHERE m."academyId" = a."id" AND m."status" = 'active' AND m."isTeacher" = 1)),
@@ -106,14 +118,25 @@ async function main() {
   } catch (e) {
     console.log("warn: could not set WAL:", e instanceof Error ? e.message : e);
   }
-  await client.executeMultiple(sql);
-  for (const m of MIGRATIONS) {
-    const cols = await client.execute(`PRAGMA table_info("${m.table}")`);
-    if (!cols.rows.some((r) => r.name === m.column)) {
-      await client.execute(m.ddl);
-      console.log(`migrated: ${m.table}.${m.column}`);
+  // init.sql 은 멱등이지만, 기존 DB 에 새 컬럼의 인덱스(CREATE INDEX … "folderId")가 들어 있으면 컬럼 추가(MIGRATIONS) 전엔 실패한다.
+  // → 1차 실행(실패해도 그 앞의 CREATE TABLE 은 반영됨) → 컬럼 추가 → 2차 실행으로 나머지 인덱스·테이블을 만든다.
+  const applyMigrations = async () => {
+    for (const m of MIGRATIONS) {
+      const cols = await client.execute(`PRAGMA table_info("${m.table}")`);
+      if (cols.rows.length === 0) continue; // 아직 없는 테이블은 init.sql 이 새 컬럼째로 만든다
+      if (!cols.rows.some((r) => r.name === m.column)) {
+        await client.execute(m.ddl);
+        console.log(`migrated: ${m.table}.${m.column}`);
+      }
     }
+  };
+  try {
+    await client.executeMultiple(sql);
+  } catch (e) {
+    console.log("init.sql: paused for column migration —", e instanceof Error ? e.message.split("\n")[0] : e);
   }
+  await applyMigrations();
+  await client.executeMultiple(sql);
   const rt = await client.execute(`PRAGMA table_info("RetakeTask")`);
   if (rt.rows.length && !rt.rows.some((r) => r.name === "kind")) {
     await client.execute("PRAGMA foreign_keys = OFF");

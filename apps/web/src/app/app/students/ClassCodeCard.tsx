@@ -28,11 +28,12 @@ export function ClassCodeCard({ cls, academyName, compact }: { cls: { id: string
   };
   const code = cls.joinCode;
   return (
-    <section className={`card-accent card-body flex flex-col ${compact ? "" : "min-h-[190px]"}`} data-testid="class-code" data-class={cls.id} data-code={code ?? ""}>
+    // 코드가 켜져 있을 때만 강조색 — 꺼진 반 코드는 경고처럼 보이지 않게 흐린 카드
+    <section className={`${code ? "card-accent" : "card"} card-body flex flex-col ${compact || !code ? "" : "min-h-[190px]"}`} data-testid="class-code" data-class={cls.id} data-code={code ?? ""}>
       <div className="flex items-center justify-between">
-        <div className="lbl-on">{compact ? "학생 초대" : "Invite"} · {cls.name}</div>
+        <div className={code ? "lbl-on" : "lbl"}>학생 초대 · {cls.name}</div>
         {!compact && (
-          <Link href="/app/students" className="lbl-on hover:underline">
+          <Link href="/app/students" className={`${code ? "lbl-on" : "lbl-ink"} hover:underline`}>
             명단 →
           </Link>
         )}
@@ -61,15 +62,12 @@ export function ClassCodeCard({ cls, academyName, compact }: { cls: { id: string
         </>
       ) : (
         <>
-          <div className="mt-3 digital-lg" style={{ fontSize: compact ? 34 : 40, color: "rgba(255,244,240,0.5)" }}>
-            ·· ····
-          </div>
-          <p className="mt-1 text-[12.5px]" style={{ color: "rgba(255,244,240,0.85)" }}>
-            반 코드가 꺼져 있습니다. 코드로 참여할 수 없습니다.
+          <p className="mt-2 text-[13px]" style={{ color: "var(--ink-2)" }}>
+            반 코드가 꺼져 있어요. 켜면 학생이 코드로 이 반에 들어올 수 있어요.
           </p>
           <div className="mt-3">
-            <button type="button" className="btn btn-sm" style={{ background: "#fff4f0", color: "var(--accent)" }} disabled={pending} onClick={() => run("new")} data-testid="class-code-on">
-              코드 만들기
+            <button type="button" className="btn-secondary btn-sm" disabled={pending} onClick={() => run("new")} data-testid="class-code-on">
+              반 코드 켜기
             </button>
           </div>
         </>
@@ -79,8 +77,8 @@ export function ClassCodeCard({ cls, academyName, compact }: { cls: { id: string
 }
 
 /** 반이 여러 개일 때: 첫 반은 펼치고 나머지는 접힌 목록 */
-export function ClassCodeList({ classes, academyName }: { classes: { id: string; name: string; joinCode: string | null; count: number }[]; academyName: string }) {
-  const [openId, setOpenId] = useState<string | null>(classes[0]?.id ?? null);
+export function ClassCodeList({ classes, academyName, initialId }: { classes: { id: string; name: string; joinCode: string | null; count: number }[]; academyName: string; initialId?: string }) {
+  const [openId, setOpenId] = useState<string | null>(initialId ?? classes[0]?.id ?? null);
   if (!classes.length) return null;
   const open = classes.find((c) => c.id === openId) ?? classes[0];
   return (
@@ -91,7 +89,7 @@ export function ClassCodeList({ classes, academyName }: { classes: { id: string;
           {classes.map((c) => (
             <button key={c.id} type="button" role="tab" aria-selected={c.id === open.id} className={`chip${c.id === open.id ? " on" : ""}`} onClick={() => setOpenId(c.id)}>
               {c.name}
-              <span className="chip-sub">{c.joinCode ? c.joinCode : "off"}</span>
+              <span className="chip-sub">{c.joinCode ? `${c.joinCode.slice(0, 3)} ${c.joinCode.slice(3)}` : "off"}</span>
             </button>
           ))}
         </div>

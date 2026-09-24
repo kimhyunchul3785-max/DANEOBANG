@@ -39,7 +39,7 @@ export function UploadForm({ action, books, ocr = false, tip }: { action: (f: Fo
   const ext = file?.name.split(".").pop()?.toUpperCase() ?? "";
   const totalSize = files.reduce((a, f) => a + f.size, 0);
   const visibleBooks = useMemo(() => (q.trim() ? books.filter((b) => b.title.toLowerCase().includes(q.trim().toLowerCase())) : books), [books, q]);
-  const state = pending ? "UPLOADING" : files.length === 0 ? "READY" : isImages ? `${files.length} PHOTO${files.length > 1 ? "S" : ""}` : "1 FILE";
+  const state = pending ? "올리는 중" : files.length === 0 ? "파일을 고르세요" : isImages ? `사진 ${files.length}장` : "파일 1개";
 
   const pick = (list: File[]) => {
     setFiles(list);
@@ -59,15 +59,15 @@ export function UploadForm({ action, books, ocr = false, tip }: { action: (f: Fo
   return (
     <>
       <div className="flex items-center justify-between">
-        <div className="lbl-on">Upload</div>
-        <span className="digital" style={{ color: "rgba(255,244,240,0.85)" }} data-testid="upload-state" aria-live="polite">
+        <div className="flex items-center gap-1.5">
+          <h2 className="sec-t">단어장 올리기</h2>
+          {tip}
+        </div>
+        <span className="text-[12.5px]" style={{ color: "var(--ink-3)" }} data-testid="upload-state" aria-live="polite">
           {state}
         </span>
       </div>
-      <div className="mt-1.5 mb-4 flex items-center gap-2">
-        <div className="text-[20px] font-semibold leading-tight">파일 올리면 끝</div>
-        {tip}
-      </div>
+      <div className="mb-3" />
     <form
       className="space-y-3"
       data-testid="upload-form"
@@ -83,7 +83,7 @@ export function UploadForm({ action, books, ocr = false, tip }: { action: (f: Fo
             return;
           }
           const id = (r.data as { id?: string })?.id;
-          if (id) router.push(`/app/imports/${id}`);
+          if (id) router.push(`/app/vocabulary/imports/${id}`);
           else router.refresh();
         });
       }}
@@ -162,8 +162,8 @@ export function UploadForm({ action, books, ocr = false, tip }: { action: (f: Fo
       </div>
 
       <div>
-        <div className="lbl-on mb-1.5">Save to · 저장 위치</div>
-        <div className="seg seg-on-accent w-full" role="radiogroup" aria-label="저장 위치">
+        <div className="label mb-1.5">저장 위치</div>
+        <div className="seg w-full" role="radiogroup" aria-label="저장 위치">
           <button type="button" className={`seg-item flex-1${mode === "new" ? " on" : ""}`} onClick={() => setMode("new")} role="radio" aria-checked={mode === "new"} data-testid="mode-new">
             새 단어장
           </button>
@@ -182,11 +182,7 @@ export function UploadForm({ action, books, ocr = false, tip }: { action: (f: Fo
         </div>
       </div>
 
-      {mode === "new" ? (
-        <p className="text-[12px] leading-snug" style={{ color: "rgba(255,244,240,0.78)" }}>
-          제목은 파일 이름 그대로 · 나중에 바꿀 수 있어요
-        </p>
-      ) : (
+      {mode === "append" && (
         <div className="book-pick" data-testid="book-pick">
           {books.length > 6 && <input className="book-pick-q" value={q} onChange={(e) => setQ(e.target.value)} placeholder="단어장 이름 검색" aria-label="단어장 검색" />}
           <div className="book-pick-list" role="radiogroup" aria-label="이어 붙일 단어장">
@@ -200,7 +196,7 @@ export function UploadForm({ action, books, ocr = false, tip }: { action: (f: Fo
                       {b.title}
                     </span>
                     <span className="digital block" style={{ fontSize: 11, opacity: 0.7, marginTop: 3 }}>
-                      {b.words} W · DAY {b.days}
+                      {b.words}단어 · DAY {b.days}개
                     </span>
                   </span>
                 </button>
@@ -208,12 +204,11 @@ export function UploadForm({ action, books, ocr = false, tip }: { action: (f: Fo
             })}
             {visibleBooks.length === 0 && <p className="px-3 py-2 text-[12.5px]" style={{ color: "var(--ink-3)" }}>검색 결과가 없어요.</p>}
           </div>
-          <p className="px-1 pt-1.5 text-[11.5px]" style={{ color: "var(--ink-3)" }}>새 단어는 마지막 DAY 뒤에 이어 붙습니다.</p>
         </div>
       )}
 
       {error && (
-        <p className="text-[12.5px] font-semibold" style={{ color: "#fff4f0" }} role="alert" data-testid="upload-error">
+        <p className="text-[12.5px] font-semibold" style={{ color: "var(--accent)" }} role="alert" data-testid="upload-error">
           {error}
           {existingBookId && (
             <a href={`/app/vocabulary/${existingBookId}`} className="ml-1 underline" data-testid="upload-existing-link">
@@ -223,8 +218,7 @@ export function UploadForm({ action, books, ocr = false, tip }: { action: (f: Fo
         </p>
       )}
 
-      {/* 비활성 모양은 globals.css 의 .card-accent 버튼 규칙이 맡는다 */}
-      <button className="btn w-full py-3 text-[13px]" style={!uploadDisabled ? { background: "#fff4f0", color: "var(--accent)" } : undefined} disabled={uploadDisabled} data-testid="upload-submit">
+      <button className="btn-primary w-full" disabled={uploadDisabled} data-testid="upload-submit">
         {pending ? "올리는 중…" : isImages ? `사진 ${files.length}장 OCR · 자동 저장 →` : mode === "append" ? "업로드 · 이어 붙이기 →" : "업로드 · 자동 저장 →"}
       </button>
     </form>

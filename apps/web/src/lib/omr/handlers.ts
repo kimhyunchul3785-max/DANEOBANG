@@ -166,7 +166,13 @@ export async function autoAcceptStudentScan(scanId: string): Promise<string> {
   }
   const r = await gradeAttempt(attempt.id, { reason: "paper_student_submitted", by: null });
   const g = r.grade;
-  await notify(studentUserId, `채점 완료 · ${Math.round(g.score)}점 ${g.passed ? "통과" : "재시험"}`, `${attempt.assignment.exam.title} · ${g.correctCount}/${g.totalCount}${g.passed ? "" : " · 틀린 문항을 모아 보세요"}`, `/learn/results/${attempt.id}`);
+  const showScore = attempt.assignment.exam.scoreVisibility === "immediate" || attempt.assignment.exam.answersReleased;
+  await notify(
+    studentUserId,
+    showScore ? `채점 완료 · ${Math.round(g.score)}점 ${g.passed ? "통과" : "재시험"}` : "채점 완료 · 점수는 선생님이 공개한 뒤",
+    showScore ? `${attempt.assignment.exam.title} · ${g.correctCount}/${g.totalCount}${g.passed ? "" : " · 틀린 문항을 모아 보세요"}` : attempt.assignment.exam.title,
+    `/learn/results/${attempt.id}`,
+  );
   writeLog({ kind: "job", academy: scan.academyId, event: "scan:auto_graded", detail: { scanId, attemptId: attempt.id, score: g.score, uncertain } });
   return "graded";
 }

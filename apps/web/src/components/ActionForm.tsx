@@ -61,6 +61,7 @@ export function ActionButton({
   onDone,
   style,
   testId,
+  title,
 }: {
   action: () => Promise<ActionResult>;
   children: React.ReactNode;
@@ -69,6 +70,7 @@ export function ActionButton({
   onDone?: (r: ActionResult) => void;
   style?: React.CSSProperties;
   testId?: string;
+  title?: string;
 }) {
   const [pending, start] = useTransition();
   const [msg, setMsg] = useState<string | null>(null);
@@ -80,6 +82,8 @@ export function ActionButton({
         className={className}
         style={style}
         data-testid={testId}
+        title={title}
+        aria-label={title}
         disabled={pending}
         onClick={() => {
           if (confirmText && !window.confirm(confirmText)) return;
@@ -92,7 +96,7 @@ export function ActionButton({
           });
         }}
       >
-        {pending ? "처리 중..." : children}
+        {pending && !title ? "처리 중..." : children}
       </button>
       {msg && <span className="sr-only">{msg}</span>}
     </span>

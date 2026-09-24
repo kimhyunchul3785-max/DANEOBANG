@@ -3,17 +3,23 @@ import { prisma } from "@/lib/db";
 import { requireAcademy, type AcademyContext } from "@/lib/auth";
 import { studentScope } from "@/lib/scope";
 import { fmtDate, fmtMD, fmtMDHM, seoulWeekRange } from "@/lib/util";
-import { StatusBadge } from "@/components/StatusBadge";
-import { Ring, PulseBars, HBars, Donut, Sparkline } from "@/components/Viz";
+import { HBars, Donut, Sparkline } from "@/components/Viz";
 import { CountUp } from "@/components/Motion";
+import { Icon } from "@/components/Icon";
 import { StudentRotator } from "./StudentRotator";
 import { loadGrades, avg, rate, recentWeeks, weeklySeries, weekLabel, trendDelta } from "@/lib/stats";
 import { Onboarding } from "./Onboarding";
+import { Suspense } from "react";
+import { DeniedNotice } from "./DeniedNotice";
+import { todayAssignmentWhere, overdueAssignmentWhere, MIN_SAMPLE } from "@/lib/metrics";
 
 export default async function HomePage() {
   const ctx = await requireAcademy();
   return (
     <div className="mx-auto max-w-6xl">
+      <Suspense fallback={null}>
+        <DeniedNotice />
+      </Suspense>
       <Onboarding ctx={ctx} />
       {ctx.isOwner ? <OwnerOverview ctx={ctx} /> : <TeacherToday ctx={ctx} />}
     </div>
@@ -39,8 +45,8 @@ async function OwnerOverview({ ctx }: { ctx: AcademyContext }) {
   const first = grades8.filter((g) => !g.isRetake);
   const thisWeek = first.filter((g) => g.at >= week.start);
   const weekAvg = avg(thisWeek.map((g) => g.score));
-  const weekPass = rate(thisWeek.filter((g) => g.passed).length, thisWeek.length);
-  const byDay = Array.from({ length: 7 }, (_, i) => thisWeek.filter((g) => Math.floor((g.at.getTime() - week.start.getTime()) / 86400e3) === i).length);
+  const enough = thisWeek.length >= MIN_SAMPLE;
+  const weekPass = enough ? rate(thisWeek.filter((g) => g.passed).length, thisWeek.length) : null;
   const series8 = weeklySeries(first, weeks8);
   const delta8 = trendDelta(series8);
 
@@ -67,146 +73,161 @@ async function OwnerOverview({ ctx }: { ctx: AcademyContext }) {
       return { key: t.id, label: t.user.name, value: avg(g.map((x) => x.score)), sub: `${ids.length}명` };
     });
 
+  const ranked = [...classStats].sort((a, b) => (a.n >= 3 ? 0 : 1) - (b.n >= 3 ? 0 : 1) || (a.pass ?? 101) - (b.pass ?? 101));
+  const weekParts = [
+    { label: "통과", value: thisWeek.filter((g) => g.passed).length, color: "var(--ink)" },
+    { label: "재시험", value: thisWeek.filter((g) => !g.passed).length, color: "var(--accent)" },
+    { label: "미응시", value: missed, color: "rgba(27,26,24,0.2)" },
+  ];
+
   return (
     <div className="mx-auto max-w-6xl">
-      <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
+      <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <div className="kicker">Overview · 학원 전체</div>
-          <h1 className="h1 mt-1">{ctx.member.academy.name} 운영 현황</h1>
+          <div className="kicker">
+            {fmtDate(now, false)} · 이번 주 {fmtMD(week.start)}–{fmtMD(new Date(week.end.getTime() - 1))}
+          </div>
+          <h1 className="h1 mt-0.5">운영 현황</h1>
+        </div>
+        <div className="flex gap-2">
+          <Link href="/app/teachers" className="btn-secondary">
+            선생님 관리
+          </Link>
         </div>
       </header>
 
-      <div className="bento">
-        <section className="card span-4 card-body flex min-h-[250px] flex-col justify-between">
-          <div className="flex items-start justify-between">
-            <div className="lbl">This week · 학원 전체</div>
-            <span className="digital">
-              {fmtMD(week.start)} — {fmtMD(new Date(week.end.getTime() - 1))}
-            </span>
+      {/* 학원 전체 숫자 5개: 한 줄. 표본이 적으면 '—' + 이유를 같은 칸에 */}
+      <div className="kpis" style={{ ["--n" as string]: 5 }}>
+        <div>
+          <span className="lbl">이번 주 평균</span>
+          <span className="kpi-v">{weekAvg === null ? "—" : <CountUp value={weekAvg} />}</span>
+          <span className="kpi-s">
+            시험 {thisWeek.length}건 확정{!enough && thisWeek.length > 0 ? " · 표본 적음" : ""}
+          </span>
+        </div>
+        <div>
+          <span className="lbl">통과율</span>
+          <span className="kpi-v">{weekPass === null ? "—" : <CountUp value={weekPass} suffix="%" />}</span>
+          <span className="kpi-s">{enough ? `첫 응시 ${thisWeek.length}건` : `${MIN_SAMPLE}건 이상부터 표시`}</span>
+        </div>
+        <Link href="/app/retakes">
+          <span className="lbl">재시험 진행</span>
+          <span className="kpi-v" style={retakeOpen ? { color: "var(--warn)" } : undefined}>
+            <CountUp value={retakeOpen} />
+            <small>건</small>
+          </span>
+          <span className="kpi-s">출제 전 + 응시 대기</span>
+        </Link>
+        <Link href="/app/results?filter=overdue">
+          <span className="lbl">이번 주 미응시</span>
+          <span className="kpi-v" style={missed ? { color: "var(--accent)" } : undefined}>
+            {missed}
+            <small>건</small>
+          </span>
+          <span className="kpi-s">학생 {students.length}명 중</span>
+        </Link>
+        <Link href="/app/vocabulary">
+          <span className="lbl">단어장</span>
+          <span className="kpi-v">
+            <CountUp value={books} />
+            <small>권 · {wordCount.toLocaleString()}단어</small>
+          </span>
+          <span className="kpi-s">이번 주 새 단어장 {newBooks}</span>
+        </Link>
+      </div>
+
+      <div className="mt-4 grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
+        {/* 반별: 가장 약한 반을 맨 위에, '주의' 표시로만 강조 (주황 카드 대신) */}
+        <section className="card overflow-hidden" data-testid="class-health">
+          <div className="sec-h px-5 pb-2 pt-4">
+            <h2 className="sec-t">반별 현황 · 최근 4주</h2>
+            <Link href="/app/students?group=class" className="sec-link">
+              반 전체 →
+            </Link>
           </div>
-          <div className="flex flex-wrap items-end justify-between gap-6">
-            <div>
-              <div className="num-xl">
-                <CountUp value={weekAvg} />
-              </div>
-              <div className="muted mt-2">이번 주 평균 점수 · 시험 {thisWeek.length}건 확정</div>
-              <div className="mt-3">
-                <PulseBars values={byDay} labels={["월", "화", "수", "목", "금", "토", "일"]} height={34} />
-              </div>
-            </div>
-            {/* 통과율은 링 하나로만 (같은 숫자를 옆에 한 번 더 쓰지 않는다) */}
-            <div className="flex items-end gap-6">
-              <div className="flex flex-col items-center gap-2">
-                <Ring value={weekPass ?? 0} size={96} stroke={6}>
-                  <span className="digital">
-                    <CountUp value={weekPass} suffix="%" />
-                  </span>
-                </Ring>
-                <div className="lbl">Pass rate</div>
-              </div>
-              <div className="flex gap-6 pb-7">
-                <div>
-                  <div className="lbl">Retake open</div>
-                  <div className="num-md mt-1" style={retakeOpen ? { color: "var(--accent)" } : undefined}>
-                    <CountUp value={retakeOpen} />
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          <table className="tbl">
+            <thead>
+              <tr>
+                <th style={{ paddingLeft: 20 }}>반</th>
+                <th>학생</th>
+                <th>통과율</th>
+                <th>평균</th>
+                <th>추세</th>
+                <th className="hidden sm:table-cell">8주</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ranked.map((c) => {
+                const warn = attention?.name === c.name;
+                return (
+                  <tr key={c.name}>
+                    <td style={{ paddingLeft: 20 }}>
+                      <Link href={`/app/students?group=class&pick=${encodeURIComponent(c.name)}`} className="flex items-center gap-2 font-semibold hover:underline">
+                        {c.name}
+                        {warn && <span className="badge-red">주의</span>}
+                      </Link>
+                      {warn && attentionTeachers.length > 0 && <div className="text-[12px]" style={{ color: "var(--ink-3)" }}>담당 {attentionTeachers.join(", ")}</div>}
+                    </td>
+                    <td className="tabular-nums">{c.ids.length}명</td>
+                    <td className="font-semibold tabular-nums" style={warn ? { color: "var(--accent)" } : undefined}>
+                      {c.n >= 3 && c.pass !== null ? `${c.pass}%` : "—"}
+                    </td>
+                    <td className="tabular-nums">{c.avg ?? "—"}</td>
+                    <td className="tabular-nums text-[13px]" style={{ color: c.delta !== null && c.delta < 0 ? "var(--accent)" : "var(--ink-3)" }}>
+                      {c.delta === null ? "—" : c.delta > 0 ? `▲ ${c.delta}` : c.delta < 0 ? `▼ ${-c.delta}` : "–"}
+                    </td>
+                    <td className="hidden w-[120px] sm:table-cell">
+                      <Sparkline values={c.series} width={110} height={26} showDots={false} strokeWidth={1.5} color={warn ? "var(--accent)" : "var(--ink)"} fill="transparent" />
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+          {classStats.length === 0 && <p className="muted px-5 pb-5">반이 없습니다.</p>}
         </section>
 
-        <section className="card-accent span-2 card-body flex min-h-[250px] flex-col justify-between">
-          <div className="flex items-start justify-between">
-            <div className="lbl-on">Attention</div>
-            <span className="badge-gray" style={{ background: "rgba(255,244,240,0.2)", color: "#fff4f0" }}>
-              {classStats.length} CLASSES
+        <section className="card card-body">
+          <div className="sec-h">
+            <h2 className="sec-t">이번 주 결과 구성</h2>
+            <span className="text-[12.5px] tabular-nums" style={{ color: "var(--ink-3)" }}>
+              {thisWeek.length + missed}건
             </span>
           </div>
-          {attention ? (
-            <>
-              <div>
-                <div className="text-[26px] font-bold leading-tight">{attention.name}</div>
-                <div className="mt-1 text-[13px]" style={{ color: "rgba(255,244,240,0.9)" }}>
-                  통과율 {attention.pass ?? "--"}% · 평균 {attention.avg ?? "--"}
-                  {attention.delta !== null && attention.delta < 0 ? ` · 최근 ${-attention.delta}점 하락` : ""}
-                </div>
-                <div className="mt-2">
-                  <Sparkline values={attention.series} height={44} color="#fff4f0" fill="rgba(255,244,240,0.18)" showDots={false} />
-                </div>
-              </div>
-              <div className="mt-3 flex items-center justify-between">
-                <span className="text-[12px]" style={{ color: "rgba(255,244,240,0.85)" }}>
-                  담당 {attentionTeachers.join(", ") || "없음"}
-                </span>
-                <Link href={`/app/students?group=class&pick=${encodeURIComponent(attention.name)}`} className="btn-primary btn-sm" style={{ background: "#fff4f0", color: "var(--accent)" }}>
-                  상세
-                </Link>
-              </div>
-            </>
+          {thisWeek.length + missed === 0 ? (
+            <div className="py-8 text-center">
+              <p className="text-[14px] font-semibold">아직 이번 주 결과가 없어요</p>
+            </div>
           ) : (
-            <p className="text-[13px]" style={{ color: "rgba(255,244,240,0.85)" }}>
-              아직 비교할 만큼 채점 결과가 없습니다. 시험이 쌓이면 통과율이 가장 낮은 반이 여기에 뜹니다.
-            </p>
+            <div className="mt-4">
+              <Donut parts={weekParts} unit="count" />
+            </div>
           )}
         </section>
 
-        <section className="card span-2 card-body">
-          <div className="flex items-center justify-between">
-            <div className="lbl">Teachers · 담당별 4주 평균</div>
-            <span className="digital">{teacherRows.length}</span>
+        <section className="card card-body">
+          <div className="sec-h">
+            <h2 className="sec-t">선생님별 담당 학생 · 4주 평균</h2>
+            <Link href="/app/teachers" className="sec-link">
+              전체 →
+            </Link>
           </div>
           <div className="mt-4">{teacherRows.length ? <HBars rows={teacherRows} accentBelow={70} hrefFor={(k) => `/app/students?teacher=${k}`} /> : <p className="muted">담당 지정된 선생님이 없습니다.</p>}</div>
-          <Link href="/app/teachers" className="lbl-ink mt-3 inline-block">
-            All →
-          </Link>
         </section>
 
-        <section className="card span-2 card-body">
-          <div className="flex items-center justify-between">
-            <div className="lbl">This week · 결과 구성</div>
-            <span className="digital">{thisWeek.length + missed}</span>
-          </div>
-          <div className="mt-4">
-            <Donut
-              parts={[
-                { label: "통과", value: thisWeek.filter((g) => g.passed).length, color: "var(--ink)" },
-                { label: "재시험", value: thisWeek.filter((g) => !g.passed).length, color: "var(--accent)" },
-                { label: "미응시", value: missed, color: "rgba(27,26,24,0.25)" },
-              ]}
-            />
-          </div>
-        </section>
-
-        <section className="card span-2 card-body">
-          <div className="flex items-center justify-between">
-            <div className="lbl">Weekly · 8주 추이</div>
-            <span className="badge-gray" style={delta8 !== null && delta8 < 0 ? { color: "var(--accent)" } : undefined}>
-              {delta8 === null ? "··" : delta8 > 0 ? `+${delta8}` : delta8}
-            </span>
+        <section className="card card-body">
+          <div className="sec-h">
+            <h2 className="sec-t">8주 평균 추이</h2>
+            {enough && delta8 !== null && <span className={delta8 < 0 ? "badge-red" : "badge-green"}>{delta8 > 0 ? `+${delta8}` : delta8}</span>}
           </div>
           <div className="mt-3">
             <Sparkline values={series8} baseline={90} labels={weeks8.map(weekLabel)} height={90} />
           </div>
-          <div className="muted mt-1 flex justify-between text-[11px]">
+          <div className="mt-1 flex justify-between text-[12px]" style={{ color: "var(--ink-3)" }}>
             <span>{weekLabel(weeks8[0])}</span>
-            <span>이번 주 {series8[7] ?? "--"}</span>
+            <span>이번 주 {series8[7] ?? "—"}</span>
           </div>
         </section>
-
-        <Link href="/app/vocabulary" className="card-dark span-6 flex flex-wrap items-center justify-between gap-4 rounded-full px-6 py-4">
-          <div className="flex items-center gap-4">
-            <span className="lbl" style={{ color: "rgba(236,233,227,0.55)" }}>
-              Words
-            </span>
-            <span className="digital-lg">
-              <CountUp value={books} /> BOOKS · <CountUp value={wordCount} /> WORDS
-            </span>
-          </div>
-          <span className="text-[13px]" style={{ color: "rgba(236,233,227,0.75)" }}>
-            이번 주 새 단어장 {newBooks} · 학생 {students.length}명 · 미응시 {missed}
-          </span>
-        </Link>
       </div>
     </div>
   );
@@ -219,29 +240,19 @@ async function TeacherToday({ ctx }: { ctx: AcademyContext }) {
   const now = new Date();
   const week = seoulWeekRange(now);
   const weeks = recentWeeks(4);
-  const dayStart = new Date(now.getTime() - ((now.getTime() + 9 * 3600e3) % 86400e3));
-  const dayEnd = new Date(dayStart.getTime() + 86400e3);
-  const [students, grades, todayAssignments, weekAssignments, overdue, retakes, scansPending] = await Promise.all([
+  const todayWhere = todayAssignmentWhere(academyId, scope, now);
+  const [todayTotal, todayDone, students, grades, todayAssignments, overdue, retakes, scansPending] = await Promise.all([
+    prisma.assignment.count({ where: todayWhere }),
+    prisma.assignment.count({ where: { ...todayWhere, status: "completed" } }),
     prisma.student.findMany({ where: { ...scope, status: "active" }, include: { classRoom: true } }),
     loadGrades(academyId, scope, weeks[0]),
-    prisma.assignment.findMany({ where: { exam: { academyId }, student: scope, OR: [{ dueAt: { gte: dayStart, lt: dayEnd } }, { createdAt: { gte: dayStart, lt: dayEnd } }] }, include: { exam: true, student: true }, take: 50 }),
-    prisma.assignment.findMany({ where: { exam: { academyId, isRetake: false }, student: scope, OR: [{ dueAt: { gte: week.start, lt: week.end } }, { createdAt: { gte: week.start } }] }, include: { exam: { select: { id: true, title: true } } } }),
-    prisma.assignment.count({ where: { exam: { academyId }, student: scope, status: { in: ["assigned", "in_progress"] }, dueAt: { lt: now } } }),
+    prisma.assignment.findMany({ where: todayWhere, include: { exam: true, student: true }, orderBy: [{ status: "asc" }, { dueAt: "asc" }], take: 80 }),
+    prisma.assignment.count({ where: overdueAssignmentWhere(academyId, scope, now) }),
     prisma.retakeTask.findMany({ where: { student: scope, status: { in: ["pending", "issued"] } }, include: { student: true, sourceAttempt: { include: { assignment: { include: { exam: true } } } } }, orderBy: [{ dueAt: { sort: "asc", nulls: "last" } }, { createdAt: "desc" }], take: 60 }),
     prisma.scanUpload.count({ where: { academyId, status: { in: ["needs_review", "queued", "processing", "unrecognized"] } } }),
   ]);
   const first = grades.filter((g) => !g.isRetake);
-  const todayDone = todayAssignments.filter((a) => a.status === "completed").length;
-  const todayPct = todayAssignments.length ? Math.round((todayDone / todayAssignments.length) * 100) : 0;
-  // 이번 주 대표 시험 (배정 수 최다)
-  const examCount = new Map<string, { title: string; total: number; done: number }>();
-  for (const a of weekAssignments) {
-    const e = examCount.get(a.examId) ?? { title: a.exam.title, total: 0, done: 0 };
-    e.total++;
-    if (a.status === "completed") e.done++;
-    examCount.set(a.examId, e);
-  }
-  const weekExam = [...examCount.entries()].sort((a, b) => b[1].total - a[1].total)[0];
+  const todayPct = todayTotal ? Math.round((todayDone / todayTotal) * 100) : 0;
   // 마감이 가까운 시험부터: 아직 안 친 배정이 있는 발행 시험을 마감 오름차순으로 (마감 없음은 뒤)
   const openAssign = await prisma.assignment.findMany({ where: { exam: { academyId, status: "published" }, student: scope, status: { in: ["assigned", "in_progress"] } }, select: { examId: true, dueAt: true, exam: { select: { title: true, isRetake: true } } } });
   const dueMap = new Map<string, { title: string; due: Date | null; remaining: number; isRetake: boolean }>();
@@ -253,12 +264,12 @@ async function TeacherToday({ ctx }: { ctx: AcademyContext }) {
   }
   // 마감 임박 순: 아직 남은 시험(가까운 마감부터) → 마감 없는 시험 → 이미 지난 시험(경과)
   const rank = (d: Date | null) => (d === null ? 1 : d.getTime() >= now.getTime() ? 0 : 2);
-  const dueSoon = [...dueMap.entries()]
-    .sort((x, y) => rank(x[1].due) - rank(y[1].due) || (x[1].due?.getTime() ?? 0) - (y[1].due?.getTime() ?? 0))
-    .slice(0, 5);
+  const dueAll = [...dueMap.entries()].sort((x, y) => rank(x[1].due) - rank(y[1].due) || (x[1].due?.getTime() ?? 0) - (y[1].due?.getTime() ?? 0));
+  const dueSoon = dueAll.filter(([, e]) => rank(e.due) !== 2).slice(0, 4);
+  // 기한 지남은 상위 몇 개가 아니라 전체로 센다 → '기한 지남' 카드 숫자와 같다
+  const overdueExams = dueAll.filter(([, e]) => rank(e.due) === 2);
+  const overdueStudents = overdueExams.reduce((n, [, e]) => n + e.remaining, 0);
   const dday = (d: Date | null) => (d ? Math.ceil((d.getTime() - now.getTime()) / 86400e3) : null);
-  const weekGrades = first.filter((g) => g.at >= week.start);
-  const byDay = Array.from({ length: 7 }, (_, i) => weekGrades.filter((g) => Math.floor((g.at.getTime() - week.start.getTime()) / 86400e3) === i).length);
   // 학생별 평균·추세
   const rows = students
     .map((s) => {
@@ -279,173 +290,217 @@ async function TeacherToday({ ctx }: { ctx: AcademyContext }) {
   }
   const retakeGroups = [...retakeByDue.values()].sort((a, b) => a.at - b.at);
 
+  // 진행 중 시험별 학생 현황 (마감 임박 목록 안에서 펼쳐 보인다 — 따로 '학생별' 카드를 두지 않는다)
+  const byExam = new Map<string, { done: number; total: number; pending: string[] }>();
+  for (const a of todayAssignments) {
+    const e = byExam.get(a.examId) ?? { done: 0, total: 0, pending: [] };
+    e.total++;
+    if (a.status === "completed") e.done++;
+    else e.pending.push(a.student.name);
+    byExam.set(a.examId, e);
+  }
+  const retakeWaiting = retakeIssued.length;
+  const names = (xs: string[], n = 4) => `${xs.slice(0, n).join(", ")}${xs.length > n ? ` 외 ${xs.length - n}명` : ""}`;
+
   return (
     <div className="mx-auto max-w-6xl">
-      <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
+      <header className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <div className="kicker">Today · {fmtDate(now, false)}</div>
-          <h1 className="h1 mt-1">오늘 할 일</h1>
+          <div className="kicker">{fmtDate(now, false)}</div>
+          <h1 className="h1 mt-0.5">오늘 할 일</h1>
         </div>
         <div className="flex flex-wrap gap-2">
-          <Link href="/app/tests/new" className="btn-primary">
-            + 시험 출제
-          </Link>
-          <Link href="/app/vocabulary" className="btn-secondary">
+          <Link href="/app/vocabulary" className="btn-secondary hidden sm:inline-flex">
+            <Icon name="upload" size={16} />
             단어장 업로드
           </Link>
-          <Link href="/app/scans" className="btn-ghost">
-            사진 채점
+          <Link href="/app/tests/new" className="btn-primary">
+            <Icon name="plus" size={16} strokeWidth={2.2} />
+            시험 만들기
           </Link>
         </div>
       </header>
 
-      <div className="bento">
-        <Link href="/app/tests" className="card span-4 card-body flex min-h-[220px] flex-col justify-between">
-          <div className="flex items-start justify-between">
-            <div className="lbl">Today · 오늘 시험 진행</div>
-            <span className="digital">{todayAssignments.length ? `${todayDone}/${todayAssignments.length}` : "--"}</span>
+      {/* 상태 요약: 카드 4장 대신 한 표면을 칸막이로 — 숫자는 같은 크기, 색은 문제일 때만 */}
+      <div className="kpis" style={{ ["--n" as string]: 4 }}>
+        <Link href="/app/tests" className="kpi">
+          <span className="lbl">진행 중인 시험 · 오늘 기준</span>
+          <span className="kpi-v">
+            {todayDone}
+            <small>/ {todayTotal} 완료</small>
+          </span>
+          <div className="meter" aria-hidden>
+            <i className="tick" style={{ width: `${todayPct}%` }} />
           </div>
-          <div className="flex items-end justify-between gap-6">
-            <div>
-              <div className="num-xl">
-                <CountUp value={todayPct} />
-                <span className="num-md align-top" style={{ color: "var(--ink-3)" }}>
-                  %
-                </span>
-              </div>
-              <div className="muted mt-2">오늘 마감·배정된 시험의 완료율 · 미응시 {overdue}</div>
-            </div>
-            <Ring value={todayPct} size={88} stroke={5}>
-              <span className="lbl-ink">
-                <CountUp value={todayDone} />
-              </span>
-            </Ring>
-          </div>
+          <span className="kpi-s" data-testid="today-line">
+            {todayTotal ? `완료 ${todayDone} / 배정 ${todayTotal} · 남음 ${todayTotal - todayDone}` : "지금 진행 중인 시험이 없어요"}
+          </span>
         </Link>
+        <Link href="/app/results?filter=overdue" className="kpi" data-testid="kpi-overdue">
+          <span className="lbl">기한 지남</span>
+          <span className="kpi-v" style={overdue ? { color: "var(--accent)" } : undefined} data-testid="kpi-overdue-v">
+            {overdue}
+            <small>건</small>
+          </span>
+          <span className="kpi-s">{overdue ? "마감이 지났는데 안 친 배정" : "밀린 시험이 없어요"}</span>
+        </Link>
+        <Link href="/app/retakes" className="kpi">
+          <span className="lbl">재시험 출제 전</span>
+          <span className="kpi-v" style={retakeNotIssued.length ? { color: "var(--warn)" } : undefined}>
+            {retakeNotIssued.length}
+            <small>건</small>
+          </span>
+          <span className="kpi-s">응시 대기 {retakeWaiting}건</span>
+        </Link>
+        <Link href="/app/tests/scans" className="kpi">
+          <span className="lbl">사진 채점 대기</span>
+          <span className="kpi-v" style={scansPending ? { color: "var(--warn)" } : undefined}>
+            {scansPending}
+            <small>장</small>
+          </span>
+          <span className="kpi-s">{scansPending ? "확인이 필요해요" : "확인할 사진 없음"}</span>
+        </Link>
+      </div>
 
-        <div className="card-accent span-2 card-body flex min-h-[220px] flex-col justify-between" data-testid="due-soon">
-          <div className="flex items-start justify-between">
-            <div className="lbl-on">Due soon · 마감 임박 순</div>
-            <span className="digital">{weekExam ? `${weekExam[1].done}/${weekExam[1].total}` : "--"}</span>
-          </div>
-          <div>
-            {dueSoon.length === 0 ? (
-              <>
-                <div className="num-lg">--</div>
-                <div className="lbl-on mt-2">안 친 시험이 없습니다</div>
-              </>
-            ) : (
-              <ul className="mt-1">
-                {dueSoon.map(([id, e]) => {
-                  const d = dday(e.due);
-                  return (
-                    <li key={id} className="flex items-center justify-between gap-2 py-1.5" style={{ borderTop: "1px solid rgba(255,244,240,0.2)" }}>
-                      <Link href={d !== null && d < 0 ? `/app/tests/${id}?step=3#due` : `/app/tests/${id}`} className="min-w-0 truncate text-[13.5px] font-semibold hover:underline" title={d !== null && d < 0 ? "기한 경과 · 마감기한 변경" : undefined}>
-                        {e.title}
-                      </Link>
-                      <span className="flex shrink-0 items-center gap-2">
-                        <span className="lbl-on">{e.remaining}명 남음</span>
-                        <span className="digital" style={{ color: d !== null && d <= 1 ? "#ffd9cc" : undefined, opacity: d !== null && d < 0 ? 0.7 : 1 }}>
-                          {d === null ? "NO DUE" : d < 0 ? `경과 ${-d}일` : d === 0 ? "D-DAY" : `D-${d}`}
-                        </span>
-                      </span>
-                    </li>
-                  );
-                })}
-              </ul>
-            )}
-          </div>
-          <PulseBars values={byDay} labels={["월", "화", "수", "목", "금", "토", "일"]} color="#fff4f0" dim="rgba(255,244,240,0.3)" height={34} />
-        </div>
-
-        <section className="card span-3 card-body">
-          <div className="mb-2 flex items-center justify-between">
-            <div className="lbl">Students · 담당 {students.length}명 · 4주</div>
-            <Link href="/app/students" className="lbl-ink">
-              Dashboard →
+      <div className="mt-4 grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_320px] xl:grid-cols-[minmax(0,1fr)_380px] 2xl:grid-cols-[minmax(0,1fr)_440px]">
+        {/* 왼쪽: 해야 할 일의 본체 — 마감 순 시험 + 안 친 학생 */}
+        <section className="card overflow-hidden" data-testid="due-soon">
+          <div className="sec-h px-5 pb-3 pt-4">
+            <h2 className="sec-t">마감 임박 시험</h2>
+            <Link href="/app/tests" className="sec-link">
+              시험 전체 →
             </Link>
           </div>
-          <StudentRotator rows={rows.map((r) => ({ id: r.s.id, name: r.s.name, className: r.s.classRoom?.name ?? null, a: r.a, delta: r.delta, last: r.last }))} pageSize={6} />
-        </section>
-
-        <section className="card span-3 card-body" data-testid="retake-today">
-          <div className="mb-2 flex items-center justify-between">
-            <div className="lbl">Retake · 재시험 · 마감일별</div>
-            <span className={retakes.length ? "badge-red" : "badge-gray"}>{retakes.length}</span>
-          </div>
-          {retakes.length === 0 ? (
-            <p className="muted">재시험 대상이 없습니다.</p>
+          {dueSoon.length === 0 && overdueExams.length === 0 ? (
+            <div className="px-5 pb-8 pt-4 text-center">
+              <p className="text-[14px] font-semibold">안 친 시험이 없습니다</p>
+              <Link href="/app/tests/new" className="btn-secondary btn-sm mt-3">
+                시험 만들기
+              </Link>
+            </div>
           ) : (
             <ul>
-              {retakeNotIssued.length > 0 && (
-                <li className="row">
-                  <span className="min-w-0 truncate text-[14px]">
-                    <b>출제 전</b> <span className="muted">· {[...new Set(retakeNotIssued.map((r) => r.student.name))].slice(0, 4).join(", ")}{new Set(retakeNotIssued.map((r) => r.student.name)).size > 4 ? ` 외 ${new Set(retakeNotIssued.map((r) => r.student.name)).size - 4}명` : ""}</span>
+              {dueSoon.map(([id, e]) => {
+                const d = dday(e.due);
+                const st = byExam.get(id);
+                const done = st?.done ?? 0;
+                const total = st?.total ?? e.remaining;
+                return (
+                  <li key={id} className="border-t border-[var(--line)] px-5 py-3.5">
+                    <div className="flex items-center gap-4">
+                      <div className="min-w-0 flex-1">
+                        <Link href={`/app/tests/${id}`} className="block truncate text-[14.5px] font-semibold hover:underline">
+                          {e.title}
+                        </Link>
+                        <div className="mt-0.5 flex items-center gap-2 text-[12.5px]" style={{ color: "var(--ink-3)" }}>
+                          <span className={d !== null && d <= 1 ? "badge-red" : "badge-gray"}>{d === null ? "마감 없음" : d === 0 ? "오늘 마감" : `D-${d}`}</span>
+                          {e.due && <span>{fmtMDHM(e.due)} 마감</span>}
+                          {e.isRetake && <span>· 재시험</span>}
+                        </div>
+                      </div>
+                      <div className="hidden w-[160px] shrink-0 sm:block">
+                        <div className="flex justify-between text-[12.5px]">
+                          <span style={{ color: "var(--ink-3)" }}>완료</span>
+                          <span className="font-semibold tabular-nums">
+                            {done}/{total}
+                          </span>
+                        </div>
+                        <div className="meter mt-1.5" aria-hidden>
+                          <i style={{ width: `${total ? (done / total) * 100 : 0}%` }} />
+                        </div>
+                      </div>
+                    </div>
+                    {st && st.pending.length > 0 && (
+                      <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                        <span className="mr-1 text-[12px]" style={{ color: "var(--ink-3)" }}>
+                          안 친 학생 {e.remaining}
+                        </span>
+                        {st.pending.slice(0, 8).map((n) => (
+                          <span key={n} className="badge-gray" style={{ fontWeight: 500 }}>
+                            {n}
+                          </span>
+                        ))}
+                        {st.pending.length > 8 && <span className="text-[12px]" style={{ color: "var(--ink-3)" }}>외 {st.pending.length - 8}명</span>}
+                      </div>
+                    )}
+                  </li>
+                );
+              })}
+              {/* 지난 시험은 섞지 않고 따로 한 줄 */}
+              {overdueExams.length > 0 && (
+                <li className="flex items-center justify-between gap-3 border-t border-[var(--line)] px-5 py-3" style={{ background: "var(--accent-soft)" }} data-testid="due-overdue-line">
+                  <span className="flex min-w-0 items-center gap-2.5 text-[14px]">
+                    <span className="dot red" />
+                    <span className="truncate">
+                      <b>기한 지남</b> · {overdueExams.length}개 시험 · {overdueStudents}명
+                    </span>
                   </span>
-                  <Link href="/app/retakes" className="badge-amber">
-                    {retakeNotIssued.length}건 내기
+                  <Link href="/app/tests?filter=overdue" className="btn-secondary btn-sm shrink-0">
+                    마감 늘리기
                   </Link>
                 </li>
               )}
-              {retakeGroups.slice(0, 5).map((g) => (
-                <li key={g.label} className="row">
-                  <span className="min-w-0 truncate text-[14px]">
-                    <b style={g.overdue ? { color: "var(--accent)" } : undefined}>{g.at === Infinity ? "마감 없음" : `${g.label}${g.overdue ? " 지남" : " 마감"}`}</b> <span className="muted">· {g.names.slice(0, 4).join(", ")}{g.names.length > 4 ? ` 외 ${g.names.length - 4}명` : ""}</span>
-                  </span>
-                  <span className={g.overdue ? "badge-red" : "badge-blue"}>{g.names.length}명</span>
-                </li>
-              ))}
             </ul>
           )}
-          <Link href="/app/retakes" className="lbl-ink mt-2 inline-block">
-            재시험 화면 →
-          </Link>
         </section>
 
-        <Link href="/app/scans" className="card-sm span-2 card-body">
-          <div className="lbl">Scan queue</div>
-          <div className="mt-3 flex items-baseline gap-3">
-            <div className="num-lg">
-              <CountUp value={scansPending} />
+        {/* 오른쪽: 후속 조치 — 재시험 · 챙길 학생 */}
+        <div className="flex flex-col gap-4">
+          <section className="card" data-testid="retake-today">
+            <div className="sec-h px-5 pb-2 pt-4">
+              <h2 className="sec-t">재시험</h2>
+              <Link href="/app/retakes" className="sec-link">
+                재시험 화면 →
+              </Link>
             </div>
-            <span className={scansPending ? "badge-amber" : "badge-gray"}>{scansPending ? "REVIEW" : "CLEAR"}</span>
-          </div>
-        </Link>
-        <Link href="/app/results?filter=overdue" className="card-sm span-2 card-body">
-          <div className="lbl">Overdue</div>
-          <div className="num-lg mt-3" style={overdue ? { color: "var(--accent)" } : undefined}>
-            <CountUp value={overdue} />
-          </div>
-          <div className="muted mt-1">미응시 · 기한 경과</div>
-        </Link>
-        <div className="card-dark span-2 card-body">
-          <div className="lbl" style={{ color: "rgba(236,233,227,0.55)" }}>
-            Next retake due
-          </div>
-          <div className="digital-lg mt-3">{retakeGroups[0]?.at !== undefined && retakeGroups[0].at !== Infinity ? retakeGroups[0].label : "--"}</div>
-          <div className="mt-1 text-[12px]" style={{ color: "rgba(236,233,227,0.7)" }}>
-            {retakeGroups[0] ? `${retakeGroups[0].names.length}명 · ${retakeGroups[0].names.slice(0, 3).join(", ")}` : retakeNotIssued.length ? `출제 전 ${retakeNotIssued.length}명` : "가까운 재시험 마감 없음"}
-          </div>
-        </div>
-
-        {todayAssignments.length > 0 && (
-          <section className="card span-6 card-body">
-            <div className="mb-2 flex items-center justify-between">
-              <div className="lbl">Assigned today</div>
-              <span className="digital">{todayAssignments.length}</span>
-            </div>
-            <ul className="grid gap-x-6 sm:grid-cols-2">
-              {todayAssignments.slice(0, 10).map((a) => (
-                <li key={a.id} className="row">
-                  <span className="text-[14px]">
-                    {a.student.name} <span className="muted">· {a.exam.title}</span>
-                  </span>
-                  <StatusBadge s={a.status} />
-                </li>
-              ))}
-            </ul>
+            {retakes.length === 0 ? (
+              <p className="muted px-5 pb-5">재시험 대상이 없습니다.</p>
+            ) : (
+              <ul className="px-5 pb-3">
+                {retakeNotIssued.length > 0 && (
+                  <li className="row">
+                    <span className="min-w-0">
+                      <span className="flex items-center gap-2 text-[14px] font-semibold">
+                        <span className="dot amber" />
+                        출제 전 {retakeNotIssued.length}건
+                      </span>
+                      <span className="muted block truncate pl-[15px] text-[12.5px]">{names([...new Set(retakeNotIssued.map((r) => r.student.name))], 3)}</span>
+                    </span>
+                    <Link href="/app/retakes" className="btn-primary btn-sm shrink-0">
+                      출제하기
+                    </Link>
+                  </li>
+                )}
+                {retakeGroups.slice(0, 4).map((g) => (
+                  <li key={g.label} className="row">
+                    <span className="min-w-0">
+                      <span className="flex items-center gap-2 text-[14px] font-semibold" style={g.overdue ? { color: "var(--accent)" } : undefined}>
+                        <span className={`dot ${g.overdue ? "red" : "blue"}`} />
+                        {g.at === Infinity ? "마감 없음" : `${g.label}${g.overdue ? " 지남" : " 마감"}`}
+                      </span>
+                      <span className="muted block truncate pl-[15px] text-[12.5px]">{names(g.names, 3)}</span>
+                    </span>
+                    <span className="text-[13px] font-semibold tabular-nums" style={{ color: "var(--ink-3)" }}>
+                      {g.names.length}명
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
           </section>
-        )}
+
+          <section className="card px-5 pb-4 pt-4">
+            <div className="sec-h mb-1">
+              <h2 className="sec-t">
+                담당 학생 <span style={{ color: "var(--ink-3)", fontWeight: 500 }}>{students.length}</span>
+              </h2>
+              <Link href="/app/students" className="sec-link">
+                4주 평균 · 전체 →
+              </Link>
+            </div>
+            <StudentRotator rows={rows.map((r) => ({ id: r.s.id, name: r.s.name, className: r.s.classRoom?.name ?? null, a: r.a, delta: r.delta, last: r.last }))} pageSize={5} />
+          </section>
+        </div>
       </div>
     </div>
   );

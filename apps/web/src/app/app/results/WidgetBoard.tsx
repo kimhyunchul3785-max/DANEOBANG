@@ -4,7 +4,7 @@ import Link from "next/link";
 import { CountUp } from "@/components/Motion";
 import { Sparkline, HBars, Columns, Donut, Heatmap, type HeatCell } from "@/components/Viz";
 import { toast } from "@/components/Toaster";
-import { WIDGETS, DEFAULT_LAYOUT, COLS, ROW_PX, GAP_PX, compact, place, fitCols, type LayoutItem, type WidgetType } from "./widgets";
+import { WIDGETS, DEFAULT_LAYOUT, MOBILE_ORDER, COLS, ROW_PX, GAP_PX, compact, place, fitCols, fillRows, type LayoutItem, type WidgetType } from "./widgets";
 import { saveDashboardLayoutAction } from "./layout-actions";
 
 /** 대시보드 데이터 (서버에서 계산해 직렬화) */
@@ -47,7 +47,8 @@ export function WidgetBoard({ data, initialLayout }: { data: DashboardData; init
   // 보드 폭 기준 열 수: 휴대폰 1열(세로 쌓기) · 태블릿 6열 · 데스크톱(보드 900px 이상) 12열
   const cols = width === 0 ? COLS : width < 560 ? 1 : width < 900 ? 6 : COLS;
   const colW = cols === 1 ? width : (width - GAP_PX * (cols - 1)) / cols;
-  const shown = useMemo(() => (cols === COLS ? layout : cols === 1 ? layout : fitCols(layout, cols)), [layout, cols]);
+  // 데스크톱은 저장된 배치 그대로 보되(편집 중이 아니면) 줄 끝의 빈 칸만 채운다 · 태블릿은 6열로 다시 맞춤
+  const shown = useMemo(() => (cols === COLS ? (edit ? layout : fillRows(layout, COLS)) : cols === 1 ? layout : fitCols(layout, cols)), [layout, cols, edit]);
   const canEdit = cols === COLS;
 
   const persist = useCallback((next: LayoutItem[] | null) => {
@@ -110,10 +111,7 @@ export function WidgetBoard({ data, initialLayout }: { data: DashboardData; init
   return (
     <div data-testid="widget-board" data-edit={edit ? "1" : "0"} data-cols={cols}>
       {/* 휴대폰·좁은 화면에서는 편집할 수 없으므로 안내·버튼을 숨긴다 */}
-      <div className={`mb-3 flex flex-wrap items-center justify-between gap-2 px-1 ${!canEdit && !edit ? "hidden" : ""}`}>
-        <p className="muted text-[12.5px]">
-          {edit ? "제목 부분을 끌어 옮기고, 오른쪽 아래 모서리를 끌어 크기를 바꾸세요. ✕ 로 빼고 아래 팔레트에서 다시 넣을 수 있습니다." : "위젯은 편집에서 옮기고·키우고·빼고·넣을 수 있습니다."}
-        </p>
+      <div className={`mb-3 flex flex-wrap items-center justify-end gap-2 px-1 ${!canEdit && !edit ? "hidden" : ""}`}>
         <div className="flex items-center gap-2">
           {edit && (
             <button type="button" className="btn-ghost btn-sm" onClick={reset} data-testid="widgets-reset">
@@ -127,7 +125,7 @@ export function WidgetBoard({ data, initialLayout }: { data: DashboardData; init
       </div>
 
       <div ref={ref} className="relative" style={cols === 1 ? { display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: GAP_PX } : { height: totalRows * (ROW_PX + GAP_PX) - GAP_PX, visibility: width === 0 ? "hidden" : undefined }} onPointerMove={onPointerMove} onPointerUp={onPointerUp} onPointerCancel={onPointerUp}>
-        {(cols === 1 ? [...shown].sort((a, b) => a.y - b.y || a.x - b.x) : shown).map((item) => {
+        {(cols === 1 ? [...shown].sort((a, b) => MOBILE_ORDER.indexOf(a.i) - MOBILE_ORDER.indexOf(b.i)) : shown).map((item) => {
           const def = WIDGETS[item.i];
           const compactHead = item.h <= 2;
           const style: React.CSSProperties =
@@ -146,14 +144,13 @@ export function WidgetBoard({ data, initialLayout }: { data: DashboardData; init
                 };
           // 2칸 높이(숫자 위젯)는 설명 줄을 숨기고 제목 툴팁으로 — 큰 숫자와 설명이 겹치지 않게
           // 머리(pt-4 + 제목/설명 줄) + 본문 위아래 여백
-          const headPx = compactHead ? 16 + 20 + 4 + 16 : 16 + 40 + 12 + 16;
+          const headPx = compactHead ? 16 + 20 + 4 + 16 : 16 + 20 + 12 + 16;
           const bodyPx = cols === 1 ? Math.max(120, Math.min(item.h, 5) * (ROW_PX + GAP_PX) - GAP_PX - headPx) : item.h * (ROW_PX + GAP_PX) - GAP_PX - headPx;
           return (
             <section key={item.i} className="card flex flex-col overflow-hidden" style={{ ...style, boxShadow: active === item.i ? "0 12px 32px rgba(27,26,24,0.18)" : undefined, outline: edit ? "1.5px dashed rgba(27,26,24,0.25)" : undefined }} data-testid={`widget-${item.i}`} data-w={item.w} data-h={item.h} data-x={item.x} data-y={item.y}>
               <header className={`flex items-start justify-between gap-2 px-5 pt-4 ${edit ? "cursor-grab select-none active:cursor-grabbing" : ""}`} onPointerDown={(e) => onPointerDown(e, item, "move")} data-testid="widget-handle">
                 <div className="min-w-0" title={def.hint}>
                   <div className="text-[13.5px] font-semibold leading-5">{def.title}</div>
-                  {!compactHead && <div className="muted truncate text-[12px] leading-5">{def.hint}</div>}
                 </div>
                 {edit && (
                   <button type="button" className="btn-ghost btn-sm shrink-0" onPointerDown={(e) => e.stopPropagation()} onClick={() => remove(item.i)} aria-label={`${def.title} 빼기`} data-testid="widget-remove">
@@ -188,7 +185,7 @@ export function WidgetBoard({ data, initialLayout }: { data: DashboardData; init
 // ───────────────── 위젯 내용 ─────────────────
 
 function Delta({ now, prev, suffix = "" }: { now: number | null; prev: number | null; suffix?: string }) {
-  if (now === null || prev === null) return <span className="muted text-[12px]">비교할 지난 기간 없음</span>;
+  if (now === null || prev === null) return <span className="muted text-[12px]">&nbsp;</span>;
   const d = now - prev;
   return (
     <span className="text-[12px]" style={{ color: d < 0 ? "var(--accent)" : "var(--ink-2)" }}>
@@ -215,7 +212,7 @@ function Widget({ type, data, bodyPx, w }: { type: WidgetType; data: DashboardDa
     case "avg":
       return <Stat value={kpi.avg} sub={<Delta now={kpi.avg} prev={kpi.avgPrev} />} />;
     case "pass":
-      return <Stat value={kpi.pass} suffix="%" sub={<Delta now={kpi.pass} prev={kpi.passPrev} suffix="%" />} />;
+      return <Stat value={kpi.pass} suffix="%" sub={<span className="text-[12px]" style={{ color: "var(--ink-2)" }}>첫 응시 {kpi.graded}건 · <Delta now={kpi.pass} prev={kpi.passPrev} suffix="%" /></span>} />;
     case "retake":
       return (
         <Stat
@@ -245,10 +242,9 @@ function Widget({ type, data, bodyPx, w }: { type: WidgetType; data: DashboardDa
       return (
         <div className="h-full overflow-y-auto">
           <div className="lbl mb-2">
-            {data.groupLabel} · 최근 {data.rangeLabel} · {data.students}명
+            {data.groupLabel} · {data.rangeLabel} · {data.students}명
           </div>
           {rows.length === 0 ? <p className="muted">학생이 없습니다.</p> : <HBars rows={rows} accentBelow={data.warnLine} hrefFor={data.isWeekGroup ? undefined : (k) => hrefs.get(k) ?? "#"} />}
-          <p className="muted mt-2 text-[11.5px]">빨간 막대 = 평균 {data.warnLine} 미만 (통과 기준 {data.passLine})</p>
         </div>
       );
     }
@@ -312,6 +308,7 @@ function Widget({ type, data, bodyPx, w }: { type: WidgetType; data: DashboardDa
               ]}
               size={72}
               stroke={11}
+              unit="count"
             />
           </div>
         </div>
@@ -325,13 +322,13 @@ function Widget({ type, data, bodyPx, w }: { type: WidgetType; data: DashboardDa
       );
     case "watch":
       return data.watch.length === 0 ? (
-        <p className="muted">지금은 없습니다. 연속 미달·미응시·급락이 생기면 여기에 나타납니다.</p>
+        <p className="muted">없음</p>
       ) : (
         <ul className="h-full overflow-y-auto">
           {data.watch.map((p) => (
             <li key={p.id} className="row">
               <div className="min-w-0">
-                <Link href={`/app/students/${p.id}`} className="card-title hover:underline">
+                <Link href={`/app/students?q=${encodeURIComponent(p.name)}`} className="card-title hover:underline" title="→ 학생 탭">
                   {p.name}
                 </Link>
                 <span className="muted ml-1">{p.className}</span>
@@ -349,13 +346,13 @@ function Widget({ type, data, bodyPx, w }: { type: WidgetType; data: DashboardDa
       );
     case "recent":
       return data.recent.length === 0 ? (
-        <p className="muted">이 기간에 채점된 시험이 없습니다.</p>
+        <p className="muted">채점된 시험이 없습니다.</p>
       ) : (
         <ul className="h-full overflow-y-auto">
           {data.recent.map((e) => (
             <li key={e.examId} className="row">
               <div className="min-w-0">
-                <Link href={`/app/tests/${e.examId}?step=3`} className="block truncate text-[13.5px] font-medium hover:underline">
+                <Link href={`/app/tests?q=${encodeURIComponent(e.title)}`} className="block truncate text-[13.5px] font-medium hover:underline" title="→ 시험 탭">
                   {e.title}
                 </Link>
                 <div className="muted text-[12px]">

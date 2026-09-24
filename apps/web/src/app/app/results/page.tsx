@@ -2,27 +2,50 @@ import Link from "next/link";
 import { prisma } from "@/lib/db";
 import { requireAcademy } from "@/lib/auth";
 import { studentScope } from "@/lib/scope";
-import { fmtDate } from "@/lib/util";
-import { StatusBadge } from "@/components/StatusBadge";
+import { fmtMDHM } from "@/lib/util";
 import { SortHeader } from "@/components/Motion";
-import { GradesDashboard } from "./Dashboard";
+import { DuePopover } from "@/components/DuePopover";
+import { GradesDashboard, ResultsTabs, VIEWS, type View } from "./Dashboard";
+import { DetailFilter } from "./DetailFilter";
+import { extendAssignmentDueAction } from "../tests/actions";
 
-export default async function ResultsPage({ searchParams }: { searchParams: Promise<{ filter?: string; examId?: string; classId?: string; group?: string; range?: string; teacher?: string; q?: string; pick?: string; view?: string; all?: string }> }) {
+/**
+ * 성적 = [요약 | 학생별 | 학교별 | 학년별 | 반별] ‹ 항목 칩 › · [단어장 ▾]  (Dashboard)
+ * 시험 기록(?examId · ?studentId · ?classId · ?tab=exams)과 미응시(?filter=overdue)는 다른 화면에서 오는 링크로만 연다.
+ */
+export default async function ResultsPage({ searchParams }: { searchParams: Promise<{ tab?: string; filter?: string; examId?: string; classId?: string; studentId?: string; group?: string; teacher?: string; q?: string; pick?: string; view?: string; all?: string; book?: string }> }) {
   const ctx = await requireAcademy();
   const sp = await searchParams;
   const academyId = ctx.member.academyId;
   const scope = studentScope(ctx);
+  const records = sp.tab === "exams" || (!sp.tab && (sp.examId || sp.studentId || sp.classId || sp.filter === "overdue"));
+  if (!records) {
+    // 예전 링크(?group=school 등)도 받는다
+    const legacy = sp.group === "school" || sp.group === "grade" || sp.group === "class" ? sp.group : sp.q ? "students" : null;
+    const view: View = VIEWS.some(([k]) => k === sp.tab) ? (sp.tab as View) : (legacy ?? "summary");
+    return (
+      <div className="mx-auto max-w-6xl" data-width="wide">
+        <GradesDashboard ctx={ctx} sp={sp} view={view} />
+      </div>
+    );
+  }
+  const tabs = (
+    <div className="mt-3">
+      <ResultsTabs view={null} />
+    </div>
+  );
   const exams = await prisma.exam.findMany({ where: { academyId, status: { not: "draft" } }, orderBy: { createdAt: "desc" }, select: { id: true, title: true } });
   const classes = await prisma.classRoom.findMany({ where: { academyId }, orderBy: { name: "asc" } });
 
   if (sp.filter === "overdue") {
-    const overdue = await prisma.assignment.findMany({ where: { exam: { academyId }, student: scope, status: { in: ["assigned", "in_progress"] }, dueAt: { lt: new Date() } }, include: { student: true, exam: true }, orderBy: { dueAt: "asc" } });
+    const overdue = await prisma.assignment.findMany({ where: { exam: { academyId, status: { not: "archived" } }, student: scope, status: { in: ["assigned", "in_progress"] }, dueAt: { lt: new Date() } }, include: { student: true, exam: true }, orderBy: { dueAt: "asc" } });
     return (
-      <div>
-        <h1 className="h1 mb-4">미응시 · 기한 경과</h1>
-        <p className="muted mb-3">기한이 지났지만 시작하지 않은 배정입니다. 0점 평균에 포함하지 않습니다. <b>MISSED</b>를 누르면 시험을 열어 마감기한을 바꿀 수 있고, 학생 이름을 누르면 이행률·성적 추이가 보입니다.</p>
-        <div className="card">
-          <table className="tbl">
+      <div className="mx-auto max-w-6xl" data-width="wide">
+        <div className="kicker">성적</div>
+        <h1 className="h1 mt-1">미응시 · 기한 경과</h1>
+        {tabs}
+        <div className="card mt-4">
+          <table className="tbl tbl-cards">
             <thead>
               <tr>
                 <th>학생</th>
@@ -34,21 +57,21 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
             <tbody>
               {overdue.map((a) => (
                 <tr key={a.id} data-testid="overdue-row">
-                  <td>
-                    <Link href={`/app/students/${a.studentId}`} className="font-medium hover:underline">
+                  <td data-label="_title">
+                    <Link href={`/app/students?q=${encodeURIComponent(a.student.name)}`} className="font-medium hover:underline" title="→ 학생 탭">
                       {a.student.name}
                     </Link>
                   </td>
-                  <td>
-                    <Link href={`/app/tests/${a.examId}?step=3`} className="hover:underline">
+                  <td data-label="시험">
+                    <Link href={`/app/tests/${a.exam.id}`} className="hover:underline">
                       {a.exam.title}
                     </Link>
                   </td>
-                  <td className="text-xs">{fmtDate(a.dueAt)}</td>
-                  <td>
-                    <Link href={`/app/tests/${a.examId}?step=3#due`} title="시험을 열어 마감기한 수정">
-                      <StatusBadge s="expired" />
-                    </Link>
+                  <td className="text-xs" data-label="기한">{fmtMDHM(a.dueAt)}</td>
+                  <td data-label="상태">
+                    <DuePopover action={extendAssignmentDueAction} fields={{ assignmentId: a.id }} current={a.dueAt} question="마감기한을 늘릴까요?" submitLabel="늘리기" className="badge-red due-miss" testId="overdue-extend" align="right">
+                      미응시
+                    </DuePopover>
                   </td>
                 </tr>
               ))}
@@ -69,7 +92,7 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
   const grades = await prisma.gradeRevision.findMany({
     where: {
       current: true,
-      attempt: { status: "graded", assignment: { exam: { academyId, ...(sp.examId ? { id: sp.examId } : {}) }, student: { ...scope, ...(sp.classId ? { classId: sp.classId } : {}) } } },
+      attempt: { status: "graded", assignment: { exam: { academyId, ...(sp.examId ? { id: sp.examId } : {}) }, student: { ...scope, ...(sp.classId ? { classId: sp.classId } : {}), ...(sp.studentId ? { id: sp.studentId } : {}) } } },
     },
     include: { attempt: { include: { assignment: { include: { student: { include: { classRoom: true } }, exam: true } } } } },
     orderBy: { createdAt: "desc" },
@@ -82,39 +105,116 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
   const passRate = initial.length ? Math.round((initial.filter((g) => g.passed).length / initial.length) * 100) : null;
   const shownGrades = sp.all ? grades : grades.slice(0, 30);
   const retakePass = retakes.length ? Math.round((retakes.filter((g) => g.passed).length / retakes.length) * 100) : null;
+  const filteredStudent = sp.studentId ? await prisma.student.findFirst({ where: { id: sp.studentId, ...scope }, select: { name: true } }) : null;
+  // 시험별 = 기본은 시험 한 줄씩 요약. 시험을 누르거나 학생·반 필터가 있으면 그 응시 기록(학생 × 시험)
+  const byExamView = !sp.examId && !sp.studentId && !sp.classId && sp.view !== "attempts";
+  const examRows = byExamView
+    ? await (async () => {
+        const map = new Map<string, { id: string; title: string; isRetake: boolean; n: number; sum: number; passed: number; firstN: number; firstPassed: number; last: Date }>();
+        for (const g of grades) {
+          const e = g.attempt.assignment.exam;
+          const r = map.get(e.id) ?? { id: e.id, title: e.title, isRetake: e.isRetake, n: 0, sum: 0, passed: 0, firstN: 0, firstPassed: 0, last: g.createdAt };
+          r.n++;
+          r.sum += g.score;
+          if (g.passed) r.passed++;
+          if (g.attempt.attemptNo === 1 && !e.isRetake) {
+            r.firstN++;
+            if (g.passed) r.firstPassed++;
+          }
+          if (g.createdAt > r.last) r.last = g.createdAt;
+          map.set(e.id, r);
+        }
+        const ids = [...map.keys()];
+        const asg = ids.length ? await prisma.assignment.groupBy({ by: ["examId", "status"], where: { examId: { in: ids }, student: scope }, _count: { _all: true } }) : [];
+        return [...map.values()]
+          .sort((a, b) => b.last.getTime() - a.last.getTime())
+          .map((r) => {
+            const mine = asg.filter((x) => x.examId === r.id);
+            const total = mine.reduce((n, x) => n + x._count._all, 0);
+            const open = mine.filter((x) => x.status === "assigned" || x.status === "in_progress").reduce((n, x) => n + x._count._all, 0);
+            return { ...r, avg: Math.round(r.sum / r.n), passRate: Math.round((r.passed / r.n) * 100), total, open };
+          });
+      })()
+    : [];
 
   return (
-    <div className="mx-auto max-w-6xl">
-      <GradesDashboard ctx={ctx} sp={sp} />
-
-      <div className="mb-3 mt-10 flex flex-wrap items-end justify-between gap-3">
+    <div className="mx-auto max-w-6xl" data-width="wide">
+      <header className="mb-4">
+        <div className="kicker">성적 · {ctx.isOwner ? "학원 전체" : "담당 학생"}</div>
+        <h1 className="h1 mt-1">성적</h1>
+        {tabs}
+      </header>
+      <div className="mb-3 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <div className="kicker">Detail · 확정 성적</div>
-          <div className="h3">시험별 상세 성적</div>
+          <div className="kicker">확정 성적 · 전체 기간 · 최근 {grades.length}건 기준</div>
+          <div className="h3">{byExamView ? "시험별 요약" : sp.examId ? `${exams.find((e) => e.id === sp.examId)?.title ?? "시험"} · 학생별 결과` : "응시 기록"}</div>
         </div>
+        {byExamView ? (
+          <Link href="/app/results?tab=exams&view=attempts" className="btn-ghost btn-sm" data-testid="attempts-link">
+            응시 기록 전체 (학생 × 시험) →
+          </Link>
+        ) : (
+          <Link href="/app/results?tab=exams" className="btn-ghost btn-sm">
+            ← 시험별 요약
+          </Link>
+        )}
       </div>
-      <form className="mb-3 flex flex-wrap gap-2" method="get" id="detail">
-        <select className="input w-64" name="examId" defaultValue={sp.examId ?? ""}>
-          <option value="">모든 시험</option>
-          {exams.map((e) => (
-            <option key={e.id} value={e.id}>
-              {e.title}
-            </option>
-          ))}
-        </select>
-        <select className="input w-40" name="classId" defaultValue={sp.classId ?? ""}>
-          <option value="">현재 모든 반</option>
-          {classes.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-        <button className="btn-secondary">조회</button>
-        <Link href="/app/results?filter=overdue" className="btn-ghost">
+      <div className="mb-3 flex flex-wrap items-center gap-2">
+        <DetailFilter exams={exams} classes={classes.map((c) => ({ id: c.id, name: c.name }))} examId={sp.examId} classId={sp.classId} studentId={sp.studentId} studentName={filteredStudent?.name} />
+        <Link href="/app/results?tab=exams&filter=overdue" className="btn-ghost mb-3">
           미응시·기한 경과
         </Link>
-      </form>
+      </div>
+      {byExamView ? (
+        <div className="card overflow-x-auto" data-testid="exam-summary">
+          <table className="tbl tbl-cards">
+            <thead>
+              <tr className="[&>th]:whitespace-nowrap">
+                <th>시험</th>
+                <th>응시</th>
+                <th>평균</th>
+                <th>통과율</th>
+                <th>안 친 학생</th>
+                <th>최근 확정</th>
+              </tr>
+            </thead>
+            <tbody>
+              {examRows.map((r) => (
+                <tr key={r.id} data-testid="exam-summary-row">
+                  <td data-label="_title">
+                    <Link href={`/app/results?tab=exams&examId=${r.id}`} className="font-medium hover:underline">
+                      {r.title}
+                    </Link>
+                    {r.isRetake && <span className="badge-gray ml-1.5">재시험</span>}
+                  </td>
+                  <td data-label="응시">
+                    {r.n}
+                    {r.total ? <span className="muted"> / {r.total}명</span> : null}
+                  </td>
+                  <td className="num-md" data-label="평균" style={{ fontSize: 18 }}>
+                    {r.avg}
+                  </td>
+                  <td data-label="통과율" style={{ color: r.passRate < 60 ? "var(--accent)" : undefined }}>
+                    {r.passRate}%
+                  </td>
+                  <td data-label="안 친 학생">{r.open ? <span className="badge-red">{r.open}명</span> : <span className="muted">-</span>}</td>
+                  <td className="text-xs" data-label="최근 확정" style={{ color: "var(--ink-3)" }}>
+                    {fmtMDHM(r.last)}
+                  </td>
+                </tr>
+              ))}
+              {examRows.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="text-center" style={{ color: "var(--ink-3)" }}>
+                    확정된 성적이 없습니다.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+      <>
       {/* 위 위젯과 겹치는 KPI 카드 대신 한 줄 요약 (필터 결과 기준) */}
       <div className="mb-3 flex flex-wrap items-center gap-x-5 gap-y-1 px-1 text-[13px]" style={{ color: "var(--ink-2)" }} data-testid="detail-summary">
         <span>
@@ -131,7 +231,7 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
         </span>
       </div>
       <div className="card overflow-x-auto">
-        <table className="tbl">
+        <table className="tbl tbl-cards">
           <thead>
             <tr className="[&>th]:whitespace-nowrap">
               <th>학생</th>
@@ -150,30 +250,35 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
           <tbody id="results-body">
             {shownGrades.map((g) => (
               <tr key={g.id} data-score={Math.round(g.score)} data-at={g.createdAt.getTime()}>
-                <td>
-                  <Link href={`/app/students/${g.attempt.assignment.studentId}`} className="hover:underline">
-                    {g.attempt.assignment.student.name}
-                  </Link>
+                <td data-label="_title">
+                  <span>
+                    <Link href={`/app/students?q=${encodeURIComponent(g.attempt.assignment.student.name)}`} className="hover:underline" title="→ 학생 탭">
+                      {g.attempt.assignment.student.name}
+                    </Link>
+                    <span className="ml-1.5 text-[12px] font-normal sm:hidden" style={{ color: "var(--ink-3)" }}>{g.attempt.assignment.student.classRoom?.name ?? ""}</span>
+                  </span>
                 </td>
-                <td className="text-xs">{g.attempt.assignment.student.classRoom?.name ?? "-"}</td>
-                <td>
-                  <Link href={`/app/results/${g.attemptId}`} className="text-blue-700 hover:underline">
+                <td className="hidden text-xs sm:table-cell">{g.attempt.assignment.student.classRoom?.name ?? "-"}</td>
+                <td data-label="시험">
+                  <Link href={`/app/tests?q=${encodeURIComponent(g.attempt.assignment.exam.title)}`} className="hover:underline" title="→ 시험 탭">
                     {g.attempt.assignment.exam.title}
                   </Link>
                 </td>
-                <td className="text-xs">
+                <td className="text-xs" data-label="방식">
                   {g.attempt.mode === "online" ? "온라인" : "종이"} · {g.attempt.assignment.exam.isRetake ? "재시험" : `${g.attempt.attemptNo}차`}
                 </td>
-                <td>
-                  <span className="num-md" style={{ fontSize: 18, color: g.passed ? undefined : "var(--accent)" }}>
-                    {Math.round(g.score)}
-                  </span>
-                  <span className="muted ml-1">
-                    ({g.correctCount}/{g.totalCount}){g.revisionNo > 1 && <span className="ml-1 text-[10px]">r{g.revisionNo}</span>}
-                  </span>
+                <td data-label="점수">
+                  <Link href={`/app/results/${g.attemptId}`} className="hover:underline" title="응시 결과 · 오답 · 재채점" data-testid="result-open">
+                    <span className="num-md" style={{ fontSize: 18, color: g.passed ? undefined : "var(--accent)" }}>
+                      {Math.round(g.score)}
+                    </span>
+                    <span className="muted ml-1">
+                      ({g.correctCount}/{g.totalCount}){g.revisionNo > 1 && <span className="ml-1 text-[10px]">r{g.revisionNo}</span>}
+                    </span>
+                  </Link>
                 </td>
-                <td>{g.passed ? <span className="badge-green">통과</span> : <span className="badge-red">미달</span>}</td>
-                <td className="text-xs text-slate-500">{fmtDate(g.createdAt)}</td>
+                <td data-label="결과">{g.passed ? <span className="badge-green">통과</span> : <span className="badge-red">미달</span>}</td>
+                <td className="text-xs text-slate-500" data-label="확정">{fmtMDHM(g.createdAt)}</td>
               </tr>
             ))}
             {grades.length === 0 && (
@@ -187,12 +292,14 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
         </table>
         {shownGrades.length < grades.length && (
           <div className="border-t px-4 py-3 text-center" style={{ borderColor: "var(--line)" }}>
-            <Link href={`/app/results?${new URLSearchParams({ ...(sp.examId ? { examId: sp.examId } : {}), ...(sp.classId ? { classId: sp.classId } : {}), all: "1" }).toString()}#detail`} className="btn-ghost btn-sm" scroll={false}>
+            <Link href={`/app/results?${new URLSearchParams({ tab: "exams", ...(sp.examId ? { examId: sp.examId } : {}), ...(sp.classId ? { classId: sp.classId } : {}), ...(sp.studentId ? { studentId: sp.studentId } : {}), ...(sp.view ? { view: sp.view } : {}), all: "1" }).toString()}#detail`} className="btn-ghost btn-sm" scroll={false}>
               {grades.length - shownGrades.length}건 더 보기
             </Link>
           </div>
         )}
       </div>
+      </>
+      )}
     </div>
   );
 }

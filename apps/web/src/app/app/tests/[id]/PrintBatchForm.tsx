@@ -9,8 +9,8 @@ export function PrintBatchForm({ examId, assignments }: { examId: string; assign
   const eligible = assignments.filter((a) => a.mode !== "online" && a.status !== "completed");
   return (
     <div className="w-full">
-      <button type="button" className="btn-secondary btn-sm" onClick={() => setOpen(!open)} data-testid="print-open">
-        종이 시험지 발급 · 학생별 PDF {open ? "▲" : "▼"}
+      <button type="button" className="btn-secondary btn-sm w-full" onClick={() => setOpen(!open)} data-testid="print-open">
+        종이 시험지 발급 {open ? "▲" : "▼"}
       </button>
       {open && (
         <ActionForm action={printAssignmentsAction} className="mt-2" onSuccess={() => setOpen(false)}>

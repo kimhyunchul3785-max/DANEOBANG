@@ -12,14 +12,14 @@ export default async function PracticeAttemptPage({ params }: { params: Promise<
     return (
       <div className="space-y-3">
         <Link href={`/learn/results/${attemptId}`} className="lbl-ink inline-block px-1">
-          ← Result
+          ← 결과
         </Link>
         <div className="card card-body">
-          <div className="lbl">Practice</div>
+          <div className="lbl">연습</div>
           <p className="muted mt-2">정답이 공개된 뒤 연습할 수 있습니다.</p>
         </div>
       </div>
     );
   }
-  return <PracticeRunner title={set.title} words={set.words} meaningPool={set.meaningPool} englishPool={set.englishPool} backHref={`/learn/results/${attemptId}`} backLabel="Result" />;
+  return <PracticeRunner title={set.title} words={set.words} meaningPool={set.meaningPool} englishPool={set.englishPool} backHref={`/learn/results/${attemptId}`} backLabel="결과" />;
 }

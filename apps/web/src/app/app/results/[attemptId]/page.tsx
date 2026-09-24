@@ -96,7 +96,7 @@ export default async function ResultDetailPage({ params }: { params: Promise<{ a
         <div className="card lg:col-span-2">
           <div className="card-body">
             <h2 className="h2 mb-2">문항별 결과</h2>
-            <table className="tbl">
+            <table className="tbl tbl-cards">
               <thead>
                 <tr>
                   <th>#</th>
@@ -114,11 +114,11 @@ export default async function ResultDetailPage({ params }: { params: Promise<{ a
                   const r = results.find((x) => x.itemId === it.id);
                   return (
                     <tr key={it.id} className={r && !r.correct ? "bg-red-50/50" : ""}>
-                      <td>{it.position}</td>
-                      <td className="font-medium">{it.prompt}</td>
-                      <td>{chosen ? `${chosen.position}. ${chosen.text}` : <span className="text-slate-400">무응답</span>}</td>
-                      <td>{correct ? `${correct.position}. ${correct.text}` : "-"}</td>
-                      <td>{r ? r.correct ? <span className="badge-green">O</span> : <span className="badge-red">X</span> : "-"}</td>
+                      <td data-label="_check">{it.position}</td>
+                      <td className="font-medium" data-label="_title">{it.prompt}</td>
+                      <td data-label="학생 답">{chosen ? `${chosen.position}. ${chosen.text}` : <span className="text-slate-400">무응답</span>}</td>
+                      <td data-label="정답">{correct ? `${correct.position}. ${correct.text}` : "-"}</td>
+                      <td data-label="결과">{r ? r.correct ? <span className="badge-green">O</span> : <span className="badge-red">X</span> : "-"}</td>
                     </tr>
                   );
                 })}

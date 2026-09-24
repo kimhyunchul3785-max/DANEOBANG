@@ -44,7 +44,7 @@ export function Meter({ value, color = INK, track = TRACK, height = 6 }: { value
 }
 
 /** 추이 선: 면적 채움 + 점, 통과 기준선(옵션). 값이 없는 지점은 건너뛴다. */
-export function Sparkline({ values, width = 320, height = 72, color = INK, fill = "rgba(27,26,24,0.10)", baseline, accentBelow, min = 0, max = 100, labels, showDots = true, strokeWidth = 2 }: { values: (number | null)[]; width?: number; height?: number; color?: string; fill?: string; baseline?: number; accentBelow?: number; min?: number; max?: number; labels?: string[]; showDots?: boolean; strokeWidth?: number }) {
+export function Sparkline({ values, width = 320, height = 72, color = INK, fill = "rgba(27,26,24,0.05)", baseline, accentBelow, min = 0, max = 100, labels, showDots = true, strokeWidth = 2 }: { values: (number | null)[]; width?: number; height?: number; color?: string; fill?: string; baseline?: number; accentBelow?: number; min?: number; max?: number; labels?: string[]; showDots?: boolean; strokeWidth?: number }) {
   const n = values.length;
   const padX = 6;
   const padY = 6;
@@ -102,7 +102,7 @@ export function HBars({ rows, max = 100, accentBelow, hrefFor }: { rows: { key: 
             <span className="h-[8px] flex-1 rounded-full" style={{ background: TRACK }} title={`${r.label}: ${r.value ?? "-"}`}>
               <span className="block h-full rounded-full tick anim-grow-x" style={{ width: `${Math.max(0, Math.min(100, (v / max) * 100))}%`, background: warn ? ACCENT : INK, animationDelay: `${idx * 60}ms` }} />
             </span>
-            <span className="num-md w-[44px] shrink-0 text-right" style={{ fontSize: 20, color: warn ? ACCENT : undefined }}>
+            <span className="w-[40px] shrink-0 text-right text-[15px] font-bold tabular-nums" style={{ color: warn ? ACCENT : undefined }}>
               {r.value ?? "–"}
             </span>
           </>
@@ -144,7 +144,7 @@ export function Columns({ bins, height = 96, accentIndexBelow }: { bins: { label
 }
 
 /** 도넛: 통과 / 재시험 / 미응시 등 상태 비율 (상태색: 잉크·강조·트랙) */
-export function Donut({ parts, size = 108, stroke = 14 }: { parts: { label: string; value: number; color: string }[]; size?: number; stroke?: number }) {
+export function Donut({ parts, size = 108, stroke = 14, unit = "pct" }: { parts: { label: string; value: number; color: string }[]; size?: number; stroke?: number; unit?: "pct" | "count" }) {
   const total = Math.max(1, parts.reduce((s, p) => s + p.value, 0));
   const r = (size - stroke) / 2;
   const c = 2 * Math.PI * r;
@@ -170,8 +170,8 @@ export function Donut({ parts, size = 108, stroke = 14 }: { parts: { label: stri
           <li key={p.label} className="flex items-center gap-2 text-[13px]">
             <span className="inline-block h-2.5 w-2.5 rounded-full" style={{ background: p.color }} />
             <span style={{ color: "var(--ink-2)" }}>{p.label}</span>
-            <span className="num-md" style={{ fontSize: 18 }}>
-              {Math.round((p.value / total) * 100)}%
+            <span className="text-[15px] font-bold tabular-nums">
+              {unit === "count" ? `${p.value}건` : `${Math.round((p.value / total) * 100)}%`}
             </span>
           </li>
         ))}

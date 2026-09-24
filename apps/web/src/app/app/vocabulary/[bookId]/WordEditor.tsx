@@ -20,16 +20,19 @@ export function WordEditor({
   if (!edit) {
     return (
       <tr className={word.excluded ? "opacity-50" : ""}>
-        <td className="text-slate-400">{index}</td>
-        <td className="font-medium">
-          {word.english}
-          {word.excluded && <span className="badge-gray ml-1">제외</span>}
-          {word.revision > 1 && <span className="ml-1 text-[10px] text-slate-400">r{word.revision}</span>}
+        <td className="text-slate-400" data-label="_check">{index}</td>
+        <td className="font-medium" data-label="_title">
+          <span>
+            {word.english}
+            {word.pos && <span className="ml-1.5 text-[12px] font-normal text-slate-500 sm:hidden">{word.pos}</span>}
+            {word.excluded && <span className="badge-gray ml-1">제외</span>}
+            {word.revision > 1 && <span className="ml-1 text-[10px] text-slate-400">r{word.revision}</span>}
+          </span>
         </td>
-        <td className="text-slate-500">{word.pos ?? ""}</td>
-        <td>{word.meaning}</td>
-        <td className="text-xs text-slate-500">{word.synonyms ?? ""}</td>
-        <td className="text-xs text-slate-400">{word.section ?? ""}</td>
+        <td className="hidden text-slate-500 sm:table-cell">{word.pos ?? ""}</td>
+        <td data-label="뜻">{word.meaning}</td>
+        <td className="text-xs text-slate-500" data-label="유의어">{word.synonyms ?? ""}</td>
+        <td className="text-xs text-slate-400" data-label="원문">{word.section ?? ""}</td>
         <td className="whitespace-nowrap text-right">
           <button type="button" className="btn-ghost btn-sm" onClick={() => setEdit(true)}>
             수정

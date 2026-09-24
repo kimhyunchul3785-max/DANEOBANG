@@ -38,6 +38,9 @@ async function takeExam(s: Page, assignmentId: string, wrongCount: number) {
   await s.goto(`${BASE}/learn/attempts/${attemptId}`);
   const at = await prisma.attempt.findUniqueOrThrow({ where: { id: attemptId }, include: { assignment: { include: { form: { include: { items: { include: { options: true }, orderBy: { position: "asc" } } } } } } } });
   const items = at.assignment.form.items;
+  // v5.2 러너: 준비 화면 → [시작] → 3·2·1
+  const ready = s.locator("[data-testid='runner-start']");
+  if (await ready.isVisible({ timeout: 5000 }).catch(() => false)) await ready.click();
   for (let i = 0; i < items.length; i++) {
     const wrong = i >= items.length - wrongCount;
     const pick = wrong ? items[i].options.find((o) => !o.isCorrect)! : items[i].options.find((o) => o.isCorrect)!;
@@ -88,10 +91,10 @@ async function main() {
   await t1.waitForSelector("#retake-queue");
   const row2 = t1.locator(`[data-task='${pendingTask2.id}']`);
   await row2.locator("[data-testid='retake-mode-wrong']").click();
-  const summary = await row2.locator("[data-testid='retake-mode-summary']").innerText();
-  if (!/틀린 단어 \d+개만/.test(summary)) fail("mode summary should describe the selection: " + summary);
+  if ((await row2.locator("[data-testid='retake-mode-wrong']").getAttribute("aria-checked")) !== "true" || !/오답만 \d+/.test(await row2.locator("[data-testid='retake-mode-wrong']").innerText())) fail("오답만 should be selected with a count");
   await row2.locator("[data-testid='retake-mode-same']").click();
-  if (!/전체/.test(await row2.locator("[data-testid='retake-mode-summary']").innerText())) fail("same-range summary");
+  if ((await row2.locator("[data-testid='retake-mode-same']").getAttribute("aria-checked")) !== "true") fail("같은 범위 should be selectable");
+  if ((await t1.locator("#retake-queue button:has-text('조정')").count()) !== 0) fail("v5.6: 조정 button must be gone");
   await row2.locator("[data-testid='retake-mode-wrong']").click();
   const due = new Date(Date.now() + 2 * 86400e3 + 9 * 3600e3).toISOString().slice(0, 10) + "T21:00";
   await row2.locator("[data-testid='issue-due']").fill(due);
@@ -133,6 +136,10 @@ async function main() {
   const row3 = t1.locator(`[data-task='${pendingTask3.id}']`);
   await row3.locator("[data-testid='retake-mode-same']").click();
   await row3.locator("[data-testid='issue-submit']").click();
+  await t1.waitForSelector("text=출제", { timeout: 20000 }).catch(() => {});
+  await t1.waitForLoadState("networkidle");
+  // 학생03 은 항목이 많아 출제된 행이 접힌 쪽으로 간다 → 응시 대기 보기에서 확인
+  await t1.goto(`${BASE}/app/retakes?view=waiting`);
   await t1.waitForSelector(`[data-task='${pendingTask3.id}'] [data-testid='retake-status']:has-text('응시 대기')`, { timeout: 20000 });
   const task3 = await prisma.retakeTask.findUniqueOrThrow({ where: { id: pendingTask3.id } });
   const exam3 = await prisma.exam.findUniqueOrThrow({ where: { id: task3.retakeExamId! } });
@@ -152,11 +159,11 @@ async function main() {
   log("재시험 미달 → 2차 task 자동 생성, 큐에 '2차'와 재시험 점수 표시 (후속 관리)");
 
   // ── 5. 성적 화면: 재시험 통과율이 계산되고 첫 응시 평균에 재시험이 섞이지 않음
-  await t1.goto(`${BASE}/app/results`);
+  await t1.goto(`${BASE}/app/results?tab=exams&view=attempts`);
   const kpi = await t1.locator("main").innerText();
   const m = kpi.match(/재시험 통과율/);
   if (!m) fail("retake pass KPI label");
-  const rp = await t1.locator("text=재시험 통과율").locator("xpath=..").innerText();
+  const rp = await t1.locator("[data-testid='detail-summary'] span", { hasText: "재시험 통과율" }).innerText();
   if (!/\d+%/.test(rp)) fail("retake pass rate should be a number now: " + rp);
   log("성적: 재시험 통과율 계산됨 (첫 응시/재시험 분리)");
 
@@ -189,7 +196,10 @@ async function main() {
   const n0 = await t1.locator("[data-testid^='widget-'][data-w]").count();
   if (n0 !== 9) fail("default 9 widgets, got " + n0);
   if ((await t1.locator("[role='tablist'][aria-label='그룹 기준'] a").allInnerTexts()).some((t) => t.includes("선생님별"))) fail("선생님별 tab must be removed");
+  await t1.goto(`${BASE}/app/results?tab=students`);
   if ((await t1.locator("#students-body").locator("xpath=..").innerText()).includes("계정")) fail("계정 column must be removed");
+  await t1.goto(`${BASE}/app/results`);
+  await t1.waitForSelector("[data-testid='widget-board']");
   await t1.click("[data-testid='widgets-edit']");
   await t1.locator("[data-testid='widget-missed'] [data-testid='widget-remove']").click();
   await t1.waitForTimeout(900);

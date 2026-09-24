@@ -16,7 +16,7 @@ export function WelcomeShell({ children, back, backLabel = "← 이전", user }:
           {user && (
             <form action="/api/auth/logout" method="post">
               <button className="lbl hover:text-[var(--ink)]" title={user.name}>
-                Sign out
+                로그아웃
               </button>
             </form>
           )}

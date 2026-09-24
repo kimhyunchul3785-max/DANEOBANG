@@ -17,10 +17,10 @@ export type GradeRow = {
   mode: string;
 };
 
-/** 학생 범위 안의 현재 채점 결과 (최근 since 이후) */
-export async function loadGrades(academyId: string, studentWhere: Prisma.StudentWhereInput, since?: Date): Promise<GradeRow[]> {
+/** 학생 범위 안의 현재 채점 결과 (최근 since 이후 · bookIds 가 있으면 그 단어장으로 만든 시험만) */
+export async function loadGrades(academyId: string, studentWhere: Prisma.StudentWhereInput, since?: Date, bookIds?: string[] | null): Promise<GradeRow[]> {
   const gs = await prisma.gradeRevision.findMany({
-    where: { current: true, ...(since ? { createdAt: { gte: since } } : {}), attempt: { assignment: { exam: { academyId }, student: studentWhere } } },
+    where: { current: true, ...(since ? { createdAt: { gte: since } } : {}), attempt: { assignment: { exam: { academyId, ...(bookIds ? { bookId: { in: bookIds } } : {}) }, student: studentWhere } } },
     include: { attempt: { select: { id: true, attemptNo: true, mode: true, submittedAt: true, assignment: { select: { studentId: true, examId: true, exam: { select: { title: true, isRetake: true } } } } } } },
     orderBy: { createdAt: "asc" },
   });
@@ -102,4 +102,29 @@ export function trendDelta(series: (number | null)[]) {
   const before = vals.slice(-2 * k, -k);
   if (!before.length) return null;
   return avg(recent)! - avg(before)!;
+}
+
+/**
+ * 단어장 계보: 고른 단어장 + (병합으로 만든 단어장이면) 원본 단어장들, 원본이 또 병합본이면 거슬러 올라가며 모두.
+ * 병합본을 고르면 원본으로 만든 과거 시험 성적까지 함께 본다.
+ */
+export async function bookLineage(academyId: string, bookId: string): Promise<string[]> {
+  const books = await prisma.vocabBook.findMany({ where: { academyId }, select: { id: true, mergedFrom: true } });
+  const byId = new Map(books.map((b) => [b.id, b]));
+  if (!byId.has(bookId)) return [];
+  const out = new Set<string>();
+  const stack = [bookId];
+  while (stack.length) {
+    const id = stack.pop()!;
+    if (out.has(id)) continue;
+    out.add(id);
+    let src: unknown = [];
+    try {
+      src = JSON.parse(byId.get(id)?.mergedFrom ?? "[]");
+    } catch {
+      src = [];
+    }
+    if (Array.isArray(src)) for (const s of src) if (typeof s === "string" && byId.has(s)) stack.push(s);
+  }
+  return [...out];
 }

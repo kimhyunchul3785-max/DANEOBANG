@@ -105,30 +105,42 @@ async function sweep(browser: Browser, label: string, email: string | null, mobi
       async (p) => (await p.goto(`${BASE}/app/students`), firstHref(p, "#roster-body a[href^='/app/students/']")),
       "/app/classes",
       "/app/vocabulary",
-      async (p) => (await p.goto(`${BASE}/app/vocabulary`), firstHref(p, "a[href^='/app/vocabulary/']")),
-      async (p) => (await p.goto(`${BASE}/app/vocabulary`), firstHref(p, "a[href^='/app/imports/']")),
+      async (p) => (await p.goto(`${BASE}/app/vocabulary`), firstHref(p, "a[href^='/app/vocabulary/']:not([href*='/imports/']):not([href$='/new-test'])")),
+      async (p) => (await p.goto(`${BASE}/app/vocabulary`), firstHref(p, "a[href^='/app/vocabulary/'][href$='/new-test']")),
+      async (p) => (await p.goto(`${BASE}/app/vocabulary`), firstHref(p, "a[href^='/app/vocabulary/imports/']")),
+      async (p) => {
+        // 병합: 활성 단어장 앞의 두 개
+        await p.goto(`${BASE}/app/vocabulary`);
+        const ids = (await p.locator("a[href^='/app/vocabulary/'][href$='/new-test']").evaluateAll((els) => els.map((e) => (e as HTMLAnchorElement).getAttribute("href")?.split("/")[3] ?? ""))).filter(Boolean).slice(0, 2);
+        return ids.length === 2 ? `/app/vocabulary/merge?ids=${ids.join(",")}` : null;
+      },
       "/app/tests",
       "/app/tests/new",
-      async (p) => (await p.goto(`${BASE}/app/tests`), firstHref(p, "a[href^='/app/tests/']:not([href$='/new'])")),
+      async (p) => (await p.goto(`${BASE}/app/tests`), firstHref(p, "a[href^='/app/tests/']:not([href$='/new']):not([href$='/scans'])")),
       async (p) => {
         await p.goto(`${BASE}/app/tests`);
-        const h = await firstHref(p, "a[href^='/app/tests/']:not([href$='/new'])");
-        return h ? `${h.split("?")[0]}?step=2` : null;
+        const h = await firstHref(p, "a[href^='/app/tests/']:not([href$='/new']):not([href$='/scans'])");
+        return h ? `${h.split("?")[0]}/items` : null;
       },
       async (p) => {
         await p.goto(`${BASE}/app/tests`);
-        const h = await firstHref(p, "a[href^='/app/tests/']:not([href$='/new'])");
-        return h ? `${h.split("?")[0]}?step=3` : null;
+        const h = await firstHref(p, "a[href^='/app/tests/']:not([href$='/new']):not([href$='/scans'])");
+        return h ? `${h.split("?")[0]}/targets` : null;
       },
-      "/app/scans",
+      "/app/tests?filter=draft",
+      "/app/tests/scans",
       "/app/results",
-      async (p) => (await p.goto(`${BASE}/app/results`), firstHref(p, "a[href^='/app/results/']")),
+      "/app/results?tab=students",
+      "/app/results?tab=exams",
+      async (p) => (await p.goto(`${BASE}/app/results?tab=exams`), firstHref(p, "a[href^='/app/results/']")),
       "/app/retakes",
       "/app/teachers",
       "/app/settings",
       "/app/billing",
       "/switch",
     ]);
+    // 선생님 (담당 학생만 · 하단 탭 바)
+    await sweep(browser, "teacher", "tester.t1@daneobang.dev", mobile, ["/app", "/app/students", "/app/tests", "/app/retakes", "/app/tests/scans"]);
     // 학생
     await sweep(browser, "student", "tester.s01@daneobang.dev", mobile, [
       "/learn",

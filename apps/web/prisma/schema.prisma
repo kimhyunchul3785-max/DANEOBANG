@@ -71,6 +71,7 @@ model Academy {
   classes     ClassRoom[]
   students    Student[]
   books       VocabBook[]
+  bookFolders BookFolder[]
   imports     Import[]
   exams       Exam[]
   scans       ScanUpload[]
@@ -260,17 +261,50 @@ model VocabBook {
   createdById String
   title       String
   level       String?
-  status      String   @default("active")
+  status      String   @default("active") // active | archived (v5.6 부터 "휴지통")
+  folderId    String?  // v5.2 — 단어장 폴더 (1단계). v5.6 부터는 태그(VocabBookTag)를 쓰고 이 값은 읽지 않는다
+  mergedFrom  String?  // v5.6 — 병합으로 만든 단어장이면 원본 단어장 id 들 (JSON 배열). 성적의 단어장 필터가 원본 시험까지 포함하는 데 쓴다
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  academy Academy   @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  academy Academy     @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  folder  BookFolder? @relation(fields: [folderId], references: [id], onDelete: SetNull)
   days    BookDay[]
   words   Word[]
   imports Import[]
   exams   Exam[]
+  tags    VocabBookTag[]
 
   @@index([academyId])
+  @@index([academyId, folderId])
+}
+
+/** v5.2 — 단어장 폴더 → v5.6 부터 "태그" (학원 단위). 단어장 하나에 여러 태그 (VocabBookTag) */
+model BookFolder {
+  id        String   @id @default(cuid())
+  academyId String
+  name      String
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  academy Academy        @relation(fields: [academyId], references: [id], onDelete: Cascade)
+  books   VocabBook[]
+  links   VocabBookTag[]
+
+  @@index([academyId])
+}
+
+/** v5.6 — 단어장 ↔ 태그 (다대다) */
+model VocabBookTag {
+  bookId    String
+  tagId     String
+  createdAt DateTime @default(now())
+
+  book VocabBook  @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  tag  BookFolder @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([bookId, tagId])
+  @@index([tagId])
 }
 
 model BookDay {
@@ -383,7 +417,7 @@ model Exam {
   scoreVisibility  String   @default("immediate") // immediate | after_release
   answerVisibility String   @default("after_release") // immediate | after_release
   answersReleased  Boolean  @default(false)
-  status           String   @default("draft") // draft | published | archived
+  status           String   @default("draft") // draft | published | archived(v5.6 휴지통)
   isRetake         Boolean  @default(false)
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt

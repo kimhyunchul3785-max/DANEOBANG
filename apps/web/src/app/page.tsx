@@ -30,7 +30,7 @@ export default async function Home() {
         </nav>
       </header>
       <section className="mx-auto flex w-full max-w-5xl flex-1 flex-col justify-center px-5 pb-24">
-        <div className="lbl mb-6">Vocabulary tests for English academies</div>
+        <div className="lbl mb-6">영어학원 단어 시험</div>
         <h1 className="anim-fade-up">
           <Logo variant="full" height={170} href={null} />
         </h1>
@@ -38,7 +38,7 @@ export default async function Home() {
           영어 단어 시험을 더 간단하게<span style={{ color: "var(--accent)" }}>.</span>
         </p>
         <p className="mt-2 text-[15px]" style={{ color: "var(--ink-2)" }}>
-          등록 → 출제 → 채점 → 재시험{billingEnabled() ? <> · <span className="digital">월 9,900원 / 선생님</span> · 학생 무료</> : <> · <span className="digital">무료 체험 중</span></>}
+          등록 → 출제 → 채점 → 재시험{billingEnabled() ? <> · <span className="digital">월 9,900원 / 선생님</span> · 학생 무료</> : null}
         </p>
         <div className="mt-9 flex flex-wrap items-center gap-3">
           {user ? (

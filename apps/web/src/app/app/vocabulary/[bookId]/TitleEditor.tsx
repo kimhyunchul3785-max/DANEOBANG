@@ -15,7 +15,7 @@ export function TitleEditor({ bookId, title, level }: { bookId: string; title: s
         <h1 className="h1 flex items-center gap-2">
           <span>{title}</span>
           <button type="button" className="btn-ghost btn-sm" onClick={() => setEdit(true)} aria-label="제목 수정">
-            edit
+            이름 바꾸기
           </button>
         </h1>
         {level && <div className="muted">{level}</div>}

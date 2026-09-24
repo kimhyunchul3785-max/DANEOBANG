@@ -139,6 +139,7 @@ CREATE TABLE IF NOT EXISTS "ClassRoom" (
   "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT "ClassRoom_academyId_fkey" FOREIGN KEY ("academyId") REFERENCES "Academy" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
+CREATE UNIQUE INDEX IF NOT EXISTS "ClassRoom_joinCode_key" ON "ClassRoom"("joinCode");
 CREATE INDEX IF NOT EXISTS "ClassRoom_academyId_idx" ON "ClassRoom"("academyId");
 CREATE TABLE IF NOT EXISTS "Student" (
   "id" TEXT NOT NULL PRIMARY KEY,
@@ -193,11 +194,33 @@ CREATE TABLE IF NOT EXISTS "VocabBook" (
   "title" TEXT NOT NULL,
   "level" TEXT,
   "status" TEXT NOT NULL DEFAULT 'active',
+  "folderId" TEXT,
+  "mergedFrom" TEXT,
   "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   "updatedAt" DATETIME NOT NULL,
-  CONSTRAINT "VocabBook_academyId_fkey" FOREIGN KEY ("academyId") REFERENCES "Academy" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+  CONSTRAINT "VocabBook_academyId_fkey" FOREIGN KEY ("academyId") REFERENCES "Academy" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "VocabBook_folderId_fkey" FOREIGN KEY ("folderId") REFERENCES "BookFolder" ("id") ON DELETE SET NULL ON UPDATE CASCADE
 );
 CREATE INDEX IF NOT EXISTS "VocabBook_academyId_idx" ON "VocabBook"("academyId");
+CREATE INDEX IF NOT EXISTS "VocabBook_academyId_folderId_idx" ON "VocabBook"("academyId", "folderId");
+CREATE TABLE IF NOT EXISTS "BookFolder" (
+  "id" TEXT NOT NULL PRIMARY KEY,
+  "academyId" TEXT NOT NULL,
+  "name" TEXT NOT NULL,
+  "sortOrder" INTEGER NOT NULL DEFAULT 0,
+  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT "BookFolder_academyId_fkey" FOREIGN KEY ("academyId") REFERENCES "Academy" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE INDEX IF NOT EXISTS "BookFolder_academyId_idx" ON "BookFolder"("academyId");
+CREATE TABLE IF NOT EXISTS "VocabBookTag" (
+  "bookId" TEXT NOT NULL,
+  "tagId" TEXT NOT NULL,
+  "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY ("bookId", "tagId"),
+  CONSTRAINT "VocabBookTag_bookId_fkey" FOREIGN KEY ("bookId") REFERENCES "VocabBook" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT "VocabBookTag_tagId_fkey" FOREIGN KEY ("tagId") REFERENCES "BookFolder" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+);
+CREATE INDEX IF NOT EXISTS "VocabBookTag_tagId_idx" ON "VocabBookTag"("tagId");
 CREATE TABLE IF NOT EXISTS "BookDay" (
   "id" TEXT NOT NULL PRIMARY KEY,
   "bookId" TEXT NOT NULL,

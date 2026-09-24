@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { requireUser, listContexts, setAcademyCookie, setStudentCookie } from "@/lib/auth";
+import { requireUser, listContexts } from "@/lib/auth";
 import { ROLE_LABEL } from "@/lib/constants";
 import { Logo } from "@/components/Logo";
 import { selectContextAction } from "./actions";
@@ -14,18 +14,8 @@ export default async function SwitchPage({ searchParams }: { searchParams: Promi
   const user = await requireUser("/switch");
   const sp = await searchParams;
   const { memberships, students, pending } = await listContexts(user.id);
-  if (sp.to) {
-    const studentId = sp.to.startsWith("student:") ? sp.to.slice(8) : null;
-    if (studentId && students.some((s) => s.id === studentId)) {
-      await setStudentCookie(studentId);
-      redirect("/learn");
-    }
-    const academyId = sp.to.startsWith("member:") ? sp.to.slice(7) : null;
-    if (academyId && memberships.some((m) => m.academyId === academyId)) {
-      await setAcademyCookie(academyId);
-      redirect("/app");
-    }
-  }
+  // ?to= 는 쿠키를 구워야 하므로 Route Handler 로 (Server Component 에서 cookies().set 은 500)
+  if (sp.to && (sp.to.startsWith("student:") || sp.to.startsWith("member:"))) redirect(`/api/auth/switch?to=${encodeURIComponent(sp.to)}`);
   if (memberships.length === 0 && students.length === 0 && pending.length === 0) redirect("/welcome");
 
   return (
@@ -33,7 +23,7 @@ export default async function SwitchPage({ searchParams }: { searchParams: Promi
       <div className="mb-8 flex items-center justify-between">
         <Logo height={20} href="/" />
         <form action="/api/auth/logout" method="post">
-          <button className="lbl hover:text-[var(--ink)]">Sign out</button>
+          <button className="lbl hover:text-[var(--ink)]">로그아웃</button>
         </form>
       </div>
       <div className="anim-fade-up">

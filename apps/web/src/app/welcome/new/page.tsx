@@ -9,7 +9,7 @@ export default async function NewAcademyPage() {
   return (
     <WelcomeShell user={user} back="/welcome/teacher">
       <div className="anim-fade-up">
-        <div className="lbl">New academy</div>
+        <div className="lbl">새 학원</div>
         <h1 className="h1 mt-1">학원 이름을 알려주세요</h1>
         <p className="muted mt-1">나머지는 나중에 설정에서 바꿀 수 있어요.</p>
       </div>

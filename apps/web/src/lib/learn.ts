@@ -8,7 +8,7 @@ export async function studentRetakes(userId: string, studentId?: string) {
     where: { student: { userId, status: "active", ...(studentId ? { id: studentId } : {}) } },
     include: {
       student: { select: { id: true, name: true, academy: { select: { name: true } } } },
-      sourceAttempt: { include: { grades: { where: { current: true } }, assignment: { include: { exam: { select: { id: true, title: true, passScore: true, answersReleased: true, answerVisibility: true } }, form: { select: { id: true } } } } } },
+      sourceAttempt: { include: { grades: { where: { current: true } }, assignment: { include: { exam: { select: { id: true, title: true, passScore: true, answersReleased: true, answerVisibility: true, scoreVisibility: true } }, form: { select: { id: true } } } } } },
     },
     orderBy: [{ status: "asc" }, { dueAt: { sort: "asc", nulls: "last" } }, { createdAt: "desc" }],
   });
@@ -43,7 +43,7 @@ export async function studentRetakes(userId: string, studentId?: string) {
         studentName: t.student.name,
         academyName: t.student.academy.name,
         sourceExam: exam ? { id: exam.id, title: exam.title, passScore: exam.passScore } : { id: null, title: "반복 오답 재시험", passScore: rex?.passScore ?? 90 },
-        sourceScore: g ? Math.round(g.score) : null,
+        sourceScore: g && (!exam || exam.scoreVisibility === "immediate" || exam.answersReleased) ? Math.round(g.score) : null,
         wrongCount: wrongIds.length || wrongWords.length,
         wrongWords,
         retakeExam: rex,

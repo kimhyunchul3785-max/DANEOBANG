@@ -62,7 +62,7 @@ type IssueResult = { ok: true; examId: string; questionCount: number } | { ok: f
  * 재시험 출제: 시험 생성 → 문항 → 발행 → 배정(마감) → 알림.
  * mode=wrong: 오답 단어만(보기 후보는 원 범위 전체), same: 원 시험과 같은 범위·문항 수, words: 지정 단어(wordIds).
  */
-export async function issueRetake(ctx: AcademyContext, taskId: string, opts: { mode: RetakeMode; dueAt: Date | null; wordIds?: string[] }): Promise<IssueResult> {
+export async function issueRetake(ctx: AcademyContext, taskId: string, opts: { mode: RetakeMode; dueAt: Date | null; wordIds?: string[]; title?: string }): Promise<IssueResult> {
   const t = await ownRetakeTask(ctx, taskId);
   if (!t) return { ok: false, message: "권한이 없습니다." };
   if (t.status === "completed" || t.status === "cancelled") return { ok: false, message: "이미 끝난 재시험입니다." };
@@ -89,7 +89,7 @@ export async function issueRetake(ctx: AcademyContext, taskId: string, opts: { m
     onlyWordIds = picked.map((w) => w.id);
     questionCount = picked.length;
     const l = new Date(Date.now() + 9 * 3600e3);
-    title = `${t.student.name} 반복 오답 재시험 (${l.getUTCMonth() + 1}/${l.getUTCDate()})`;
+    title = opts.title ?? `${t.student.name} 반복 오답 재시험 (${l.getUTCMonth() + 1}/${l.getUTCDate()})`;
   } else {
     const src = t.sourceAttempt;
     if (!src) return { ok: false, message: "원 응시가 없습니다." };
@@ -168,4 +168,25 @@ export async function issueWeakWordsRetake(ctx: AcademyContext, studentId: strin
   const r = await issueRetake(ctx, task.id, { mode: "words", dueAt, wordIds });
   if (!r.ok) await prisma.retakeTask.delete({ where: { id: task.id } });
   return r;
+}
+
+/**
+ * 한 학생의 출제 전 재시험 여러 건을 "누적 오답"으로 한 번에 출제한다.
+ * 각 원 응시의 오답 단어를 모아(중복 제거) 시험 하나를 만들고, 묶인 task 들은 모두 같은 재시험(retakeExamId)을 가리킨다.
+ * 채점 시 syncRetakeState 가 같은 retakeExamId 의 task 를 함께 완료 처리한다.
+ */
+export async function issueCombinedRetake(ctx: AcademyContext, taskIds: string[], dueAt: Date | null): Promise<IssueResult & { tasks?: number }> {
+  const tasks = (await Promise.all(taskIds.map((id) => ownRetakeTask(ctx, id)))).filter((t): t is NonNullable<typeof t> => !!t && (t.status === "pending" || t.status === "issued") && !t.retakeExamId);
+  if (!tasks.length) return { ok: false, message: "출제 전 재시험이 없습니다." };
+  const studentIds = new Set(tasks.map((t) => t.studentId));
+  if (studentIds.size > 1) return { ok: false, message: "누적 오답 재시험은 한 학생씩 낼 수 있어요." };
+  const wordIds = [...new Set(tasks.flatMap((t) => (t.kind === "weak_words" ? parseJSON<string[]>(t.wordIds, []) : wrongWordIdsOf(t))))];
+  if (!wordIds.length) return { ok: false, message: "모을 오답이 없습니다." };
+  const [head, ...rest] = tasks;
+  const l = new Date(Date.now() + 9 * 3600e3);
+  const title = `${head.student.name} 누적 오답 재시험 · ${tasks.length}건 (${l.getUTCMonth() + 1}/${l.getUTCDate()})`;
+  const r = await issueRetake(ctx, head.id, { mode: "words", dueAt, wordIds, title });
+  if (!r.ok) return r;
+  if (rest.length) await prisma.retakeTask.updateMany({ where: { id: { in: rest.map((t) => t.id) } }, data: { retakeExamId: r.examId, status: "issued", mode: "words", dueAt, issuedAt: new Date() } });
+  return { ...r, tasks: tasks.length };
 }

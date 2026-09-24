@@ -16,7 +16,7 @@ export default async function WelcomePage({ searchParams }: { searchParams: Prom
   return (
     <WelcomeShell user={user} back={sp.force ? "/switch" : undefined} backLabel="← 계정 전환">
       <div className="anim-fade-up">
-        <div className="lbl">Welcome · {user.name}</div>
+        <div className="lbl">환영해요 · {user.name}</div>
         <h1 className="h1 mt-1">단어방을 어떻게 사용하시나요?</h1>
       </div>
       <div className="mt-6 grid gap-3 anim-fade-up" style={{ animationDelay: "60ms" }}>

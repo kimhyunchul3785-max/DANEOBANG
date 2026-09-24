@@ -36,7 +36,7 @@ function buildRound(words: PracticeWord[], mode: Mode, meaningPool: string[], en
   });
 }
 
-export function PracticeRunner({ title, words, meaningPool, englishPool, backHref, backLabel }: { title: string; words: PracticeWord[]; meaningPool: string[]; englishPool: string[]; backHref: string; backLabel: string }) {
+export function PracticeRunner({ title, words, meaningPool, englishPool, backHref, backLabel }: { title: string; words: PracticeWord[]; meaningPool: string[]; englishPool: string[]; backHref?: string; backLabel?: string }) {
   const [mode, setMode] = useState<Mode>("en2ko");
   const [round, setRound] = useState<Q[] | null>(null);
   const [idx, setIdx] = useState(0);
@@ -135,14 +135,16 @@ export function PracticeRunner({ title, words, meaningPool, englishPool, backHre
     <div className="mx-auto w-full space-y-3 select-none lg:max-w-[640px]" data-testid="practice">
       <div className="flex items-center justify-between gap-2 px-1">
         <span className="flex min-w-0 items-center gap-2">
-          <Link href={backHref} className="lbl-ink shrink-0">
-            ← {backLabel}
-          </Link>
+          {backHref && (
+            <Link href={backHref} className="lbl-ink shrink-0">
+              ← {backLabel}
+            </Link>
+          )}
           <span className="lbl min-w-0 truncate">{title}</span>
         </span>
         <span className="flex shrink-0 items-center gap-2">
           {speakText && <SpeakButton text={speakText} size={32} autoKey="practice" />}
-          <span className="digital">PRACTICE</span>
+          <span className="digital">연습</span>
         </span>
       </div>
 
@@ -162,7 +164,7 @@ export function PracticeRunner({ title, words, meaningPool, englishPool, backHre
 
       {words.length === 0 ? (
         <div className="card card-body">
-          <div className="lbl">Nothing to practice</div>
+          <div className="lbl">연습할 단어 없음</div>
           <p className="muted mt-2">틀린 단어가 없습니다. 잘했어요!</p>
         </div>
       ) : !round ? (
@@ -222,7 +224,7 @@ export function PracticeRunner({ title, words, meaningPool, englishPool, backHre
                 <span style={{ color: "var(--ink-3)" }}>/{String(round.length).padStart(2, "0")}</span>
               </span>
               <span className="lbl" style={{ color: picked ? (picked === q.answer ? "var(--ok)" : "var(--accent)") : "var(--ink-3)" }}>
-                {picked ? (picked === q.answer ? "CORRECT" : "WRONG") : "NO TIMER"}
+                {picked ? (picked === q.answer ? "정답" : "오답") : "시간 제한 없음"}
               </span>
             </div>
             <div className="my-7 text-center tracking-tight" style={{ fontFamily: "var(--font-num)", fontWeight: 300, fontSize: mode === "en2ko" ? "clamp(40px, 12vw, 64px)" : "clamp(24px, 7vw, 36px)", lineHeight: 1.1, wordBreak: "keep-all" }}>
@@ -262,7 +264,7 @@ export function PracticeRunner({ title, words, meaningPool, englishPool, backHre
             <span className="lbl">
               {correctCount} correct · {results.length - correctCount} wrong
             </span>
-            <span className="lbl">{q.w.from ? q.w.from : "1–4 keys"}</span>
+            <span className="lbl">{q.w.from ? q.w.from : "키보드 1–4"}</span>
           </div>
         </>
       ) : null}

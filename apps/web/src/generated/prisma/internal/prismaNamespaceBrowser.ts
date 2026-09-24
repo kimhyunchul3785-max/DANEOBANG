@@ -64,6 +64,8 @@ export const ModelName = {
   TeacherStudent: 'TeacherStudent',
   StudentLinkRequest: 'StudentLinkRequest',
   VocabBook: 'VocabBook',
+  BookFolder: 'BookFolder',
+  VocabBookTag: 'VocabBookTag',
   BookDay: 'BookDay',
   Word: 'Word',
   WordRevision: 'WordRevision',
@@ -312,11 +314,33 @@ export const VocabBookScalarFieldEnum = {
   title: 'title',
   level: 'level',
   status: 'status',
+  folderId: 'folderId',
+  mergedFrom: 'mergedFrom',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type VocabBookScalarFieldEnum = (typeof VocabBookScalarFieldEnum)[keyof typeof VocabBookScalarFieldEnum]
+
+
+export const BookFolderScalarFieldEnum = {
+  id: 'id',
+  academyId: 'academyId',
+  name: 'name',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt'
+} as const
+
+export type BookFolderScalarFieldEnum = (typeof BookFolderScalarFieldEnum)[keyof typeof BookFolderScalarFieldEnum]
+
+
+export const VocabBookTagScalarFieldEnum = {
+  bookId: 'bookId',
+  tagId: 'tagId',
+  createdAt: 'createdAt'
+} as const
+
+export type VocabBookTagScalarFieldEnum = (typeof VocabBookTagScalarFieldEnum)[keyof typeof VocabBookTagScalarFieldEnum]
 
 
 export const BookDayScalarFieldEnum = {

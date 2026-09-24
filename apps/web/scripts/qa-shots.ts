@@ -354,7 +354,7 @@ const shot = async (page: Page, name: string) => {
       await p.waitForSelector("[data-testid='runner'] button.tile", { timeout: 15000 });
       await p.waitForTimeout(400);
       await p.screenshot({ path: path.join(OUT, "38-student-test-runner.png"), fullPage: true });
-      check("test runner has top-right speaker + AUTO toggle", (await p.locator("[data-testid='runner'] [data-testid='speak']").count()) === 1 && (await p.locator("[data-testid='runner'] button:has-text('AUTO')").count()) === 1);
+      check("test runner has top-right speaker + AUTO toggle", (await p.locator("[data-testid='runner'] [data-testid='speak']").count()) === 1 && (await p.locator("[data-testid='runner'] button:has-text('자동 발음')").count()) === 1);
       await p.locator("[data-testid='runner'] button.tile").first().click();
       await p.waitForTimeout(400);
       await p.screenshot({ path: path.join(OUT, "38b-student-test-runner-next.png"), fullPage: true });

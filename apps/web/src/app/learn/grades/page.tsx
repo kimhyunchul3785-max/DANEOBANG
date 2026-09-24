@@ -3,7 +3,7 @@ import { requireStudent } from "@/lib/auth";
 import { studentGrades } from "@/lib/learn";
 import { fmtDate } from "@/lib/util";
 import { recentWeeks, weeklySeries, weekLabel, avg } from "@/lib/stats";
-import { Ring, Sparkline, Columns } from "@/components/Viz";
+import { Sparkline, Columns } from "@/components/Viz";
 import { CountUp } from "@/components/Motion";
 import { scoreBins } from "@/lib/stats";
 
@@ -24,98 +24,95 @@ export default async function GradesPage() {
     <div className="learn-grid">
       <div className="col">
       <div className="flex items-end justify-between px-1">
+        <h1 className="text-[18px] font-bold tracking-tight">내 성적</h1>
+        <span className="text-[13px]" style={{ color: "var(--ink-3)" }}>
+          최근 12주 · 시험 {grades.length}회
+        </span>
+      </div>
+
+      {/* 숫자 네 개는 한 표면 · 칸막이 (링·카드 여러 장 대신) */}
+      <div className="kpis" style={{ ["--n" as string]: 4 }} data-testid="grade-kpis">
         <div>
-          <div className="lbl">Grades</div>
-          <div className="mt-1 text-[15px] font-semibold">내 성적 · 최근 12주</div>
+          <span className="lbl">평균</span>
+          <span className="kpi-v">
+            <CountUp value={a} />
+          </span>
+          <span className="kpi-s">첫 응시 {recent.length}회</span>
         </div>
-        <span className="digital">{String(grades.length).padStart(2, "0")} TESTS</span>
+        <div>
+          <span className="lbl">통과율</span>
+          <span className="kpi-v">{pass === null ? "—" : <CountUp value={pass} suffix="%" />}</span>
+          <span className="kpi-s">기준 {passLine}점</span>
+        </div>
+        <div>
+          <span className="lbl">최고점</span>
+          <span className="kpi-v">
+            <CountUp value={best} />
+          </span>
+        </div>
+        <div>
+          <span className="lbl">재시험</span>
+          <span className="kpi-v" style={grades.filter((g) => g.isRetake).length ? { color: "var(--accent)" } : undefined}>
+            <CountUp value={grades.filter((g) => g.isRetake).length} />
+            <small>회</small>
+          </span>
+        </div>
       </div>
 
       <div className="card card-body">
-        <div className="flex items-end justify-between">
-          <div>
-            <div className="num-xl" style={{ fontSize: 64 }}>
-              <CountUp value={a} />
-            </div>
-            <div className="lbl mt-1">평균 · 첫 응시 {recent.length}회</div>
-          </div>
-          <Ring value={pass ?? 0} size={84} stroke={6}>
-            <span className="digital">
-              <CountUp value={pass} suffix="%" />
-            </span>
-          </Ring>
-        </div>
-        <div className="mt-4">
+        <h2 className="sec-t">점수 추이</h2>
+        <div className="mt-3">
           <Sparkline values={series} baseline={passLine} accentBelow={passLine} labels={weeks.map(weekLabel)} height={90} />
         </div>
-        <div className="mt-1 flex justify-between">
-          <span className="lbl" style={{ fontSize: 9 }}>
-            {weekLabel(weeks[0])}
-          </span>
-          <span className="lbl" style={{ fontSize: 9 }}>
-            점선 = 통과 {passLine}
-          </span>
-          <span className="lbl" style={{ fontSize: 9 }}>
-            {weekLabel(weeks[11])}
-          </span>
+        <div className="mt-1 flex justify-between text-[12px]" style={{ color: "var(--ink-3)" }}>
+          <span>{weekLabel(weeks[0])}</span>
+          <span>점선 = 통과 {passLine}</span>
+          <span>{weekLabel(weeks[11])}</span>
         </div>
       </div>
 
       {first.length > 0 && (
         <div className="card card-body">
-          <div className="lbl mb-3">Distribution · 점수 분포</div>
+          <h2 className="sec-t mb-3">점수 분포</h2>
           <Columns bins={scoreBins(first.map((g) => g.score))} accentIndexBelow={3} height={84} />
         </div>
       )}
       </div>
 
       <div className="col">
-      <div className="grid grid-cols-2 gap-3">
-        <div className="card-sm card-body">
-          <div className="lbl">Best</div>
-          <div className="num-lg mt-2">
-            <CountUp value={best} />
-          </div>
-        </div>
-        <div className="card-sm card-body">
-          <div className="lbl">Retakes</div>
-          <div className="num-lg mt-2" style={grades.some((g) => g.isRetake) ? { color: "var(--accent)" } : undefined}>
-            <CountUp value={grades.filter((g) => g.isRetake).length} />
-          </div>
-        </div>
-      </div>
-
       {grades.length > 0 && (
-        <Link href="/learn/practice" className="card-dark flex w-full items-center justify-between gap-3 rounded-full px-5 py-3" data-testid="practice-all">
-          <span className="flex items-center gap-3">
-            <span className="lbl" style={{ color: "rgba(236,233,227,0.55)" }}>
-              Practice
+        <Link href="/learn/practice" className="card flex w-full items-center justify-between gap-3 px-4 py-3.5" data-testid="practice-all">
+          <span className="min-w-0">
+            <span className="block text-[14px] font-semibold">틀린 단어 모아 연습</span>
+            <span className="block text-[12.5px]" style={{ color: "var(--ink-3)" }}>
+              지금까지 틀린 단어를 무작위로
             </span>
-            <span className="text-[13px] font-semibold">틀린 단어 모아 연습</span>
           </span>
-          <span className="digital">RANDOM →</span>
+          <span className="btn-primary btn-sm shrink-0">연습 시작</span>
         </Link>
       )}
 
       <section className="card card-body">
         <div className="mb-1 flex items-center justify-between">
-          <div className="lbl">History · 시험지를 누르면 틀린 문항과 연습</div>
-          <span className="digital">{grades.length}</span>
+          <h2 className="sec-t">시험 기록</h2>
+          <span className="text-[12.5px]" style={{ color: "var(--ink-3)" }}>
+            누르면 틀린 문항과 연습
+          </span>
         </div>
         {grades.length === 0 && <p className="muted">공개된 성적이 없습니다.</p>}
         <ul>
           {[...grades].reverse().map((g) => (
             <li key={g.attemptId} className="row">
-              <Link href={`/learn/results/${g.attemptId}`} className="min-w-0 flex-1">
+              <Link href={`/learn/results/${g.attemptId}?from=grades`} className="min-w-0 flex-1">
                 <div className="truncate text-[14px] font-medium">{g.title}</div>
                 <div className="lbl mt-0.5">
                   {fmtDate(g.at, false).slice(5)} · {g.correct}/{g.total}
-                  {g.isRetake ? " · RETAKE" : ""}
+                  {g.isRetake ? " · 재시험" : ""}
                 </div>
               </Link>
               <span className="flex items-center gap-2">
                 <span className="num-md">{g.score}</span>
-                <span className={g.passed ? "badge-green" : "badge-red"}>{g.passed ? "PASS" : "RETAKE"}</span>
+                <span className={g.passed ? "badge-green" : "badge-red"} data-testid="grade-badge">{g.passed ? "통과" : "미달"}</span>
               </span>
             </li>
           ))}
