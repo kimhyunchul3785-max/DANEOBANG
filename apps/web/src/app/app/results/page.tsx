@@ -185,7 +185,7 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
                     <Link href={`/app/results?tab=exams&examId=${r.id}`} className="font-medium hover:underline">
                       {r.title}
                     </Link>
-                    {r.isRetake && <span className="badge-gray ml-1.5">재시험</span>}
+                    {r.isRetake && <span className="ml-1.5 text-[12.5px]" style={{ color: "var(--ink-3)" }}>재시험</span>}
                   </td>
                   <td data-label="응시">
                     {r.n}
@@ -197,7 +197,7 @@ export default async function ResultsPage({ searchParams }: { searchParams: Prom
                   <td data-label="통과율" style={{ color: r.passRate < 60 ? "var(--accent)" : undefined }}>
                     {r.passRate}%
                   </td>
-                  <td data-label="안 친 학생">{r.open ? <span className="badge-red">{r.open}명</span> : <span className="muted">-</span>}</td>
+                  <td data-label="안 친 학생">{r.open ? <span className="font-semibold tabular-nums" style={{ color: "var(--accent)" }}>{r.open}명</span> : <span className="muted">-</span>}</td>
                   <td className="text-xs" data-label="최근 확정" style={{ color: "var(--ink-3)" }}>
                     {fmtMDHM(r.last)}
                   </td>

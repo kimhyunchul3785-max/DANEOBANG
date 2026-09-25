@@ -3,7 +3,7 @@ import { requireStudent } from "@/lib/auth";
 import { studentGrades } from "@/lib/learn";
 import { fmtDate } from "@/lib/util";
 import { recentWeeks, weeklySeries, weekLabel, avg } from "@/lib/stats";
-import { Sparkline, Columns } from "@/components/Viz";
+import { TrendChart, Distribution } from "@/components/Viz";
 import { CountUp } from "@/components/Motion";
 import { scoreBins } from "@/lib/stats";
 
@@ -60,21 +60,19 @@ export default async function GradesPage() {
       </div>
 
       <div className="card card-body">
-        <h2 className="sec-t">점수 추이</h2>
-        <div className="mt-3">
-          <Sparkline values={series} baseline={passLine} accentBelow={passLine} labels={weeks.map(weekLabel)} height={90} />
+        <div className="sec-h mb-3">
+          <h2 className="sec-t">점수 추이</h2>
+          <span className="text-[12.5px]" style={{ color: "var(--ink-3)" }}>
+            12주 · 점선 통과 기준 {passLine}
+          </span>
         </div>
-        <div className="mt-1 flex justify-between text-[12px]" style={{ color: "var(--ink-3)" }}>
-          <span>{weekLabel(weeks[0])}</span>
-          <span>점선 = 통과 {passLine}</span>
-          <span>{weekLabel(weeks[11])}</span>
-        </div>
+        <TrendChart values={series} labels={weeks.map(weekLabel)} passLine={passLine} height={180} lastLabel="이번 주" ariaLabel="내 주별 점수" />
       </div>
 
       {first.length > 0 && (
         <div className="card card-body">
           <h2 className="sec-t mb-3">점수 분포</h2>
-          <Columns bins={scoreBins(first.map((g) => g.score))} accentIndexBelow={3} height={84} />
+          <Distribution bins={scoreBins(first.map((g) => g.score))} height={104} unit="회" />
         </div>
       )}
       </div>

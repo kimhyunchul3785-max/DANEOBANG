@@ -6,9 +6,9 @@ import { studentScope } from "@/lib/scope";
 import { fmtDate, fmtMD, fmtMDHM, parseJSON } from "@/lib/util";
 import { ActionForm } from "@/components/ActionForm";
 import { StatusBadge } from "@/components/StatusBadge";
-import { Sparkline } from "@/components/Viz";
+import { TrendChart } from "@/components/Viz";
 import { CountUp } from "@/components/Motion";
-import { loadGrades, avg, rate, recentWeeks, weeklySeries, weekLabel } from "@/lib/stats";
+import { loadGrades, avg, rate, recentWeeks, weeklySeries, weekLabel, trendDelta } from "@/lib/stats";
 import { updateStudentAction } from "../actions";
 import { StudentTools } from "./StudentTools";
 import { WeakWords } from "./WeakWords";
@@ -41,6 +41,9 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
   const first = grades.filter((g) => !g.isRetake);
   const recent = first.filter((g) => g.at >= weeks[0]);
   const series = weeklySeries(recent, weeks);
+  const delta = trendDelta(series);
+  const nSeries = series.filter((v) => v !== null).length;
+  const kDelta = nSeries >= 6 ? 3 : nSeries >= 4 ? 2 : 1;
   const passLine = student.assignments.length ? Math.round(student.assignments.reduce((s, a) => s + a.exam.passScore, 0) / student.assignments.length) : 90;
   const openRetakes = student.retakes.filter((r) => r.status === "pending" || r.status === "issued");
   const stat = { avg: avg(recent.map((g) => g.score)), pass: rate(recent.filter((g) => g.passed).length, recent.length), retake: openRetakes.length };
@@ -120,7 +123,15 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
           <span className="kpi-v">
             <CountUp value={stat.avg} placeholder="–" />
           </span>
-          <span className="kpi-s hidden sm:block">첫 응시 기준</span>
+          <span className="kpi-s">
+            {delta !== null ? (
+              <span title={`최근 ${kDelta}주 평균 − 직전 ${kDelta}주 평균`}>
+                <b style={{ color: delta < 0 ? "var(--accent)" : "var(--ink-2)", fontWeight: 600 }}>{delta > 0 ? `+${delta}` : delta === 0 ? "±0" : delta}</b> 최근 {kDelta}주
+              </span>
+            ) : (
+              <span className="hidden sm:inline">첫 응시 기준</span>
+            )}
+          </span>
         </div>
         <div>
           <span className="lbl">통과율</span>
@@ -194,7 +205,11 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
             <section className="card card-body flex flex-col" data-testid="student-retakes">
               <div className="flex items-center justify-between">
                 <div className="lbl">재시험 {retakeRows.length ? `${retakeRows.length}건` : ""}</div>
-                {retakeRows.length > 0 && <span className="badge-red">출제 전 {retakeRows.filter((x) => !x.a).length}</span>}
+                {retakeRows.some((x) => !x.a) && (
+                  <span className="text-[12.5px] font-semibold tabular-nums" style={{ color: "var(--accent)" }}>
+                    출제 전 {retakeRows.filter((x) => !x.a).length}
+                  </span>
+                )}
               </div>
               {retakeRows.length === 0 ? (
                 <p className="muted mt-1 text-[13px]">진행 중인 재시험 없음</p>
@@ -232,7 +247,9 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
             <section className="card card-body flex flex-col">
               <div className="flex items-center justify-between">
                 <div className="lbl">반복 오답</div>
-                <span className={weak.length ? "badge-red" : "badge-gray"}>{weak.length}</span>
+                <span className="text-[13px] font-semibold tabular-nums" style={{ color: weak.length ? "var(--ink)" : "var(--ink-4)" }}>
+                  {weak.length}
+                </span>
               </div>
               <WeakWords studentId={student.id} words={weak} />
             </section>
@@ -240,6 +257,17 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
         </div>
 
         <div className="flex min-w-0 flex-col gap-4 xl:col-start-1 xl:row-span-2 xl:row-start-1">
+            {/* 점수 추이: 기록의 맨 위 — 숫자(위 KPI) 다음에 방향, 그다음 개별 시험 */}
+            <section className="card card-body" data-testid="student-trend">
+              <div className="sec-h mb-3">
+                <h2 className="sec-t">12주 점수 추이</h2>
+                <span className="text-[12.5px]" style={{ color: "var(--ink-3)" }}>
+                  점선 통과 기준 {passLine}
+                </span>
+              </div>
+              <TrendChart values={series} labels={weeks.map(weekLabel)} passLine={passLine} height={200} lastLabel="이번 주" ariaLabel={`${student.name} 주별 평균`} />
+            </section>
+
             {/* 이력 */}
             <section className="card card-body">
               <div className="flex items-center justify-between">
@@ -281,24 +309,6 @@ export default async function StudentDetailPage({ params }: { params: Promise<{ 
               </Link>
             </section>
 
-          <section className="card card-body">
-            <div className="sec-h">
-              <h2 className="sec-t">12주 점수 추이</h2>
-              <span className="text-[12.5px]" style={{ color: "var(--ink-3)" }}>
-                점선 = 통과 {passLine} · 빨간 점 = 미달
-              </span>
-            </div>
-            <div className="mt-3">
-              <Sparkline values={series} baseline={passLine} accentBelow={passLine} labels={weeks.map(weekLabel)} height={96} width={800} />
-            </div>
-            <div className="mt-1 flex justify-between text-[11px]" style={{ color: "var(--ink-3)" }}>
-              {weeks.map((w, i) => (
-                <span key={i} className={i % 2 ? "hidden sm:inline" : undefined}>
-                  {weekLabel(w)}
-                </span>
-              ))}
-            </div>
-          </section>
         </div>
 
         <div className="flex min-w-0 flex-col gap-4 xl:col-start-2 xl:row-start-2">

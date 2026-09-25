@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireAcademy, type AcademyContext } from "@/lib/auth";
 import { studentScope } from "@/lib/scope";
 import { fmtDate, fmtMD, fmtMDHM, seoulWeekRange } from "@/lib/util";
-import { HBars, Donut, Sparkline } from "@/components/Viz";
+import { RankBars, CompositionBar, MicroTrend } from "@/components/Viz";
 import { CountUp } from "@/components/Motion";
 import { Icon } from "@/components/Icon";
 import { StudentRotator } from "./StudentRotator";
@@ -70,15 +70,21 @@ async function OwnerOverview({ ctx }: { ctx: AcademyContext }) {
     .map((t) => {
       const ids = t.students.map((s) => s.studentId);
       const g = first.filter((x) => ids.includes(x.studentId) && x.at >= weeks8[4]);
-      return { key: t.id, label: t.user.name, value: avg(g.map((x) => x.score)), sub: `${ids.length}명` };
+      return { key: t.id, label: t.user.name, value: avg(g.map((x) => x.score)), sub: `${ids.length}명`, href: `/app/students?teacher=${t.id}` };
     });
 
   const ranked = [...classStats].sort((a, b) => (a.n >= 3 ? 0 : 1) - (b.n >= 3 ? 0 : 1) || (a.pass ?? 101) - (b.pass ?? 101));
   const weekParts = [
-    { label: "통과", value: thisWeek.filter((g) => g.passed).length, color: "var(--ink)" },
-    { label: "재시험", value: thisWeek.filter((g) => !g.passed).length, color: "var(--accent)" },
-    { label: "미응시", value: missed, color: "rgba(27,26,24,0.2)" },
+    { label: "통과", value: thisWeek.filter((g) => g.passed).length, tone: "ink" as const },
+    { label: "재시험", value: thisWeek.filter((g) => !g.passed).length, tone: "accent" as const, href: "/app/retakes" },
+    { label: "미응시", value: missed, tone: "muted" as const, href: "/app/results?filter=overdue" },
   ];
+  // 반별 8주 미니 추이는 같은 세로 범위로 — 줄끼리 높낮이를 비교할 수 있게
+  const classVals = classStats.flatMap((c) => c.series.filter((v): v is number => v !== null));
+  const classDomain: [number, number] | undefined = classVals.length ? [Math.max(0, Math.min(...classVals) - 4), Math.min(100, Math.max(...classVals) + 4)] : undefined;
+  const avg8 = avg(first.map((g) => g.score));
+  const n8 = series8.filter((v) => v !== null).length;
+  const k8 = n8 >= 6 ? 3 : n8 >= 4 ? 2 : 1;
 
   return (
     <div className="mx-auto max-w-6xl">
@@ -136,6 +142,7 @@ async function OwnerOverview({ ctx }: { ctx: AcademyContext }) {
         </Link>
       </div>
 
+      {/* 왼쪽: 반별 표 → 선생님별 비교 · 오른쪽: 이번 주 결과 + 8주 평균을 한 표면에 (카드 수를 줄인다) */}
       <div className="mt-4 grid items-start gap-4 lg:grid-cols-[minmax(0,1fr)_340px]">
         {/* 반별: 가장 약한 반을 맨 위에, '주의' 표시로만 강조 (주황 카드 대신) */}
         <section className="card overflow-hidden" data-testid="class-health">
@@ -177,7 +184,7 @@ async function OwnerOverview({ ctx }: { ctx: AcademyContext }) {
                       {c.delta === null ? "—" : c.delta > 0 ? `▲ ${c.delta}` : c.delta < 0 ? `▼ ${-c.delta}` : "–"}
                     </td>
                     <td className="hidden w-[120px] sm:table-cell">
-                      <Sparkline values={c.series} width={110} height={26} showDots={false} strokeWidth={1.5} color={warn ? "var(--accent)" : "var(--ink)"} fill="transparent" />
+                      <MicroTrend values={c.series} labels={weeks8.map(weekLabel)} height={28} domain={classDomain} warn={warn} ariaLabel={`${c.name} 8주 평균`} />
                     </td>
                   </tr>
                 );
@@ -187,46 +194,55 @@ async function OwnerOverview({ ctx }: { ctx: AcademyContext }) {
           {classStats.length === 0 && <p className="muted px-5 pb-5">반이 없습니다.</p>}
         </section>
 
-        <section className="card card-body">
-          <div className="sec-h">
-            <h2 className="sec-t">이번 주 결과 구성</h2>
-            <span className="text-[12.5px] tabular-nums" style={{ color: "var(--ink-3)" }}>
-              {thisWeek.length + missed}건
-            </span>
+        <section className="card lg:col-start-2 lg:row-span-2 lg:row-start-1" data-testid="owner-week">
+          <div className="card-body">
+            <div className="sec-h">
+              <h2 className="sec-t">이번 주 결과</h2>
+              <span className="text-[12.5px] tabular-nums" style={{ color: "var(--ink-3)" }}>
+                {thisWeek.length + missed}건
+              </span>
+            </div>
+            {thisWeek.length + missed === 0 ? (
+              <p className="muted mt-3 text-[13.5px]">아직 이번 주 결과가 없어요</p>
+            ) : (
+              <div className="mt-4">
+                <CompositionBar parts={weekParts} />
+                {weekPass !== null && (
+                  <p className="mt-3 text-[13px]" style={{ color: "var(--ink-2)" }}>
+                    통과율 <b className="font-semibold tabular-nums" style={{ color: "var(--ink)" }}>{weekPass}%</b>
+                  </p>
+                )}
+              </div>
+            )}
           </div>
-          {thisWeek.length + missed === 0 ? (
-            <div className="py-8 text-center">
-              <p className="text-[14px] font-semibold">아직 이번 주 결과가 없어요</p>
+          <div className="card-body border-t" style={{ borderColor: "var(--line)" }}>
+            <div className="lbl">8주 평균</div>
+            <div className="mt-1.5 flex items-baseline gap-2.5">
+              <span className="kpi-v" style={{ fontSize: 30 }}>{avg8 ?? "—"}</span>
+              {n8 >= 4 && delta8 !== null && delta8 !== 0 && (
+                <span className="text-[13px] font-medium tabular-nums" style={{ color: delta8 < 0 ? "var(--accent)" : "var(--ink-2)" }}>
+                  {delta8 > 0 ? `+${delta8}` : delta8} <span style={{ color: "var(--ink-3)", fontWeight: 400 }}>최근 {k8}주</span>
+                </span>
+              )}
             </div>
-          ) : (
-            <div className="mt-4">
-              <Donut parts={weekParts} unit="count" />
+            <div className="mt-3">
+              <MicroTrend values={series8} labels={weeks8.map(weekLabel)} baseline={90} height={48} tips ariaLabel="8주 평균 추이" />
             </div>
-          )}
+            <div className="mt-1 flex justify-between text-[11.5px] tabular-nums" style={{ color: "var(--ink-3)" }}>
+              <span>{weekLabel(weeks8[0])}</span>
+              <span>이번 주</span>
+            </div>
+          </div>
         </section>
 
         <section className="card card-body">
           <div className="sec-h">
-            <h2 className="sec-t">선생님별 담당 학생 · 4주 평균</h2>
+            <h2 className="sec-t">선생님별 · 담당 학생 4주 평균</h2>
             <Link href="/app/teachers" className="sec-link">
               전체 →
             </Link>
           </div>
-          <div className="mt-4">{teacherRows.length ? <HBars rows={teacherRows} accentBelow={70} hrefFor={(k) => `/app/students?teacher=${k}`} /> : <p className="muted">담당 지정된 선생님이 없습니다.</p>}</div>
-        </section>
-
-        <section className="card card-body">
-          <div className="sec-h">
-            <h2 className="sec-t">8주 평균 추이</h2>
-            {enough && delta8 !== null && <span className={delta8 < 0 ? "badge-red" : "badge-green"}>{delta8 > 0 ? `+${delta8}` : delta8}</span>}
-          </div>
-          <div className="mt-3">
-            <Sparkline values={series8} baseline={90} labels={weeks8.map(weekLabel)} height={90} />
-          </div>
-          <div className="mt-1 flex justify-between text-[12px]" style={{ color: "var(--ink-3)" }}>
-            <span>{weekLabel(weeks8[0])}</span>
-            <span>이번 주 {series8[7] ?? "—"}</span>
-          </div>
+          <div className="mt-2">{teacherRows.length ? <RankBars rows={teacherRows} warnBelow={70} limit={8} moreHref="/app/teachers" /> : <p className="muted">담당 지정된 선생님이 없습니다.</p>}</div>
         </section>
       </div>
     </div>
@@ -324,7 +340,9 @@ async function TeacherToday({ ctx }: { ctx: AcademyContext }) {
       {/* 상태 요약: 카드 4장 대신 한 표면을 칸막이로 — 숫자는 같은 크기, 색은 문제일 때만 */}
       <div className="kpis" style={{ ["--n" as string]: 4 }}>
         <Link href="/app/tests" className="kpi">
-          <span className="lbl">진행 중인 시험 · 오늘 기준</span>
+          <span className="lbl">
+            진행 중인 시험<span className="hidden sm:inline"> · 오늘 기준</span>
+          </span>
           <span className="kpi-v">
             {todayDone}
             <small>/ {todayTotal} 완료</small>
@@ -392,10 +410,15 @@ async function TeacherToday({ ctx }: { ctx: AcademyContext }) {
                         <Link href={`/app/tests/${id}`} className="block truncate text-[14.5px] font-semibold hover:underline">
                           {e.title}
                         </Link>
-                        <div className="mt-0.5 flex items-center gap-2 text-[12.5px]" style={{ color: "var(--ink-3)" }}>
-                          <span className={d !== null && d <= 1 ? "badge-red" : "badge-gray"}>{d === null ? "마감 없음" : d === 0 ? "오늘 마감" : `D-${d}`}</span>
-                          {e.due && <span>{fmtMDHM(e.due)} 마감</span>}
-                          {e.isRetake && <span>· 재시험</span>}
+                        {/* 날짜 · D-day 는 배지가 아니라 한 줄 글자로 — 급할 때(D-1 이내)만 강조색 */}
+                        <div className="mt-0.5 text-[12.5px] tabular-nums" style={{ color: "var(--ink-3)" }}>
+                          {e.due ? `${fmtMDHM(e.due)}까지` : "마감 없음"}
+                          {d !== null && <span style={d <= 1 ? { color: "var(--accent)", fontWeight: 600 } : undefined}>{d === 0 ? " · 오늘 마감" : ` · D-${d}`}</span>}
+                          {e.isRetake && " · 재시험"}
+                          <span className="sm:hidden">
+                            {" · "}
+                            {done}/{total} 완료
+                          </span>
                         </div>
                       </div>
                       <div className="hidden w-[160px] shrink-0 sm:block">
@@ -411,17 +434,11 @@ async function TeacherToday({ ctx }: { ctx: AcademyContext }) {
                       </div>
                     </div>
                     {st && st.pending.length > 0 && (
-                      <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-                        <span className="mr-1 text-[12px]" style={{ color: "var(--ink-3)" }}>
-                          안 친 학생 {e.remaining}
-                        </span>
-                        {st.pending.slice(0, 8).map((n) => (
-                          <span key={n} className="badge-gray" style={{ fontWeight: 500 }}>
-                            {n}
-                          </span>
-                        ))}
-                        {st.pending.length > 8 && <span className="text-[12px]" style={{ color: "var(--ink-3)" }}>외 {st.pending.length - 8}명</span>}
-                      </div>
+                      <p className="mt-2 break-keep text-[12.5px] leading-5" style={{ color: "var(--ink-2)" }}>
+                        <span style={{ color: "var(--ink-3)" }}>안 친 학생 {e.remaining} · </span>
+                        {st.pending.slice(0, 8).join(", ")}
+                        {st.pending.length > 8 && <span style={{ color: "var(--ink-3)" }}> 외 {st.pending.length - 8}명</span>}
+                      </p>
                     )}
                   </li>
                 );

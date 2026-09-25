@@ -7,7 +7,7 @@ import { prisma } from "@/lib/db";
 import { fmtDate, fmtMD, seoulWeekRange, fmtMDHM } from "@/lib/util";
 import { recentWeeks, weeklySeries, weekLabel, avg } from "@/lib/stats";
 import { StartButton } from "./StartButton";
-import { Sparkline } from "@/components/Viz";
+import { MicroTrend } from "@/components/Viz";
 import { CountUp } from "@/components/Motion";
 import { RefreshIfStale } from "@/components/AutoRefresh";
 
@@ -144,10 +144,15 @@ export default async function LearnHome() {
         <span className="min-w-0 flex-1">
           <span className="flex items-center gap-2 text-[14px] font-semibold">
             재시험
+            {/* 상태는 앞의 점이 말해 준다 — 여기는 배지 대신 글자 */}
             {retakeIssued ? (
-              <span className="badge-red">{nextRetake!.dueAt ? `${fmtMD(nextRetake!.dueAt)}까지` : "열림"}</span>
+              <span className="text-[12.5px] font-semibold tabular-nums" style={{ color: "var(--accent)" }}>
+                {nextRetake!.dueAt ? `${fmtMD(nextRetake!.dueAt)}까지` : "열림"}
+              </span>
             ) : (
-              <span className={nextRetake ? "badge-amber" : "badge-gray"}>{nextRetake ? "준비 중" : "없음"}</span>
+              <span className="text-[12.5px] font-medium" style={{ color: "var(--ink-3)" }}>
+                {nextRetake ? "준비 중" : "없음"}
+              </span>
             )}
           </span>
           <span className="mt-0.5 block truncate text-[12.5px]" style={{ color: "var(--ink-3)" }}>
@@ -187,7 +192,7 @@ export default async function LearnHome() {
           </div>
         </div>
         <div className="mt-4">
-          <Sparkline values={series} baseline={90} labels={weeks.map(weekLabel)} height={56} />
+          <MicroTrend values={series} labels={weeks.map(weekLabel)} baseline={90} height={48} ariaLabel="최근 6주 점수" />
         </div>
         <div className="mt-1 text-[12px]" style={{ color: "var(--ink-3)" }}>
           최근 6주 · 점선은 통과 기준 90

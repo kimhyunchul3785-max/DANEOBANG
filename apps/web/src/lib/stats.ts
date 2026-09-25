@@ -70,14 +70,11 @@ export function weeklySeries(grades: { at: Date; score: number; isRetake?: boole
 }
 
 /** 점수 분포 (10점 구간) */
+/** 점수 구간 분포 — 5구간(60 미만 · 60–69 · 70–79 · 80–89 · 90–100). 첫 구간이 '위험' */
 export function scoreBins(scores: number[]) {
-  const labels = ["<40", "40", "50", "60", "70", "80", "90", "100"];
+  const labels = ["<60", "60–69", "70–79", "80–89", "90–100"];
   const bins = labels.map((label) => ({ label, value: 0 }));
-  for (const s of scores) {
-    if (s < 40) bins[0].value++;
-    else if (s >= 100) bins[7].value++;
-    else bins[Math.floor(s / 10) - 3].value++;
-  }
+  for (const s of scores) bins[s < 60 ? 0 : Math.min(4, Math.floor(s / 10) - 5)].value++;
   return bins;
 }
 

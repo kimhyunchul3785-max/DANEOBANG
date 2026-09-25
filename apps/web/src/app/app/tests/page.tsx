@@ -149,7 +149,7 @@ export default async function TestsPage({ searchParams }: { searchParams: Promis
                       <Link href={`/app/tests/${e.id}`} className="font-medium hover:underline">
                         {e.title}
                       </Link>
-                      {e.isRetake && <span className="badge-amber ml-1.5 align-middle">재시험</span>}
+                      {e.isRetake && <span className="ml-1.5 text-[12.5px] font-normal" style={{ color: "var(--ink-3)" }}>재시험</span>}
                     </span>
                   </td>
                   <td className="max-w-[260px] text-xs leading-relaxed text-slate-600" data-label="범위">

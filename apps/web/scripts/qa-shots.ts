@@ -89,7 +89,7 @@ const shot = async (page: Page, name: string) => {
     await p.waitForLoadState("networkidle");
     await shot(p, "11-owner-results-dashboard");
     check("results tab = widget board (9 widgets, no 선생님별/계정) + detail list", (await p.locator("[data-testid='widget-board']").count()) === 1 && (await p.locator("[data-testid^='widget-'][data-w]").count()) >= 8 && (await p.locator("#results-body").count()) === 1 && !(await p.locator("[role='tablist'][aria-label='그룹 기준']").innerText()).includes("선생님별"));
-    check("heatmap cells link to results", (await p.locator("a[href^='/app/results/'][aria-label*='결과 보기']").count()) > 0);
+    check("summary: KPI strip + watch list (heatmap moved out of the default layout in v5.8)", (await p.locator("[data-testid='widget-kpis']").count()) === 1 && (await p.locator("[data-testid='widget-watch']").count()) === 1);
     check("KPI numbers are rolling counters", (await p.locator("[data-value]").count()) >= 4);
     // 정렬: 평균 헤더 클릭 → 오름차순
     await p.locator("th button.sort-h", { hasText: "평균" }).first().click();

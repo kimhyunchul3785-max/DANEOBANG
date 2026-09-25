@@ -85,8 +85,9 @@ export default async function ExamDetailPage({ params, searchParams }: { params:
       ) : (
         <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_320px] 2xl:grid-cols-[minmax(0,1fr)_360px]" data-testid="step-run">
           <div className="min-w-0 space-y-4">
-            {/* 요약 한 줄: 완료 · 평균 · 통과율 · 미달 — 한 표면을 칸막이로 */}
-            <section className="kpis" style={{ ["--n" as string]: 4 }} data-testid="run-summary">
+            {/* 요약 한 줄: 완료 · 평균 · 통과율 · 미달 — 한 표면을 칸막이로.
+                휴대폰은 큰 숫자 하나(완료) + 막대 + 남은 인원, 평균·통과율·미달은 아래 한 줄 요약으로 (.run-kpis) */}
+            <section className="kpis run-kpis" style={{ ["--n" as string]: 4 }} data-testid="run-summary">
               <div>
                 <span className="lbl">완료</span>
                 <span className="kpi-v">
@@ -96,11 +97,10 @@ export default async function ExamDetailPage({ params, searchParams }: { params:
                 <div className="meter" aria-hidden>
                   <i style={{ width: `${exam.assignments.length ? (done / exam.assignments.length) * 100 : 0}%` }} />
                 </div>
-                {overdue > 0 && (
-                  <span className="kpi-s" style={{ color: "var(--accent)" }}>
-                    기한 경과 {overdue}명
-                  </span>
-                )}
+                <span className="kpi-s">
+                  {exam.assignments.length === 0 ? "대상 없음" : done === exam.assignments.length ? "모두 완료" : `${exam.assignments.length - done}명 남음`}
+                  {overdue > 0 && <span style={{ color: "var(--accent)" }}> · 기한 경과 {overdue}명</span>}
+                </span>
               </div>
               <div className="contents" data-testid="run-scores">
                 <div>
@@ -156,11 +156,11 @@ export default async function ExamDetailPage({ params, searchParams }: { params:
               )}
               {/* 공개 정책 · 현재 상태 — 점수/정답 각각 "제출 직후" 인지 "선생님 공개" 인지, 공개했는지 */}
               <div className="mt-2.5 flex flex-wrap items-center gap-1.5" data-testid="release-state" data-released={exam.answersReleased ? "1" : "0"}>
-                <span className="badge-gray" style={{ fontWeight: 500 }}>
-                  점수 · {exam.scoreVisibility === "immediate" ? "제출 직후" : exam.answersReleased ? "공개함" : "공개 전"}
-                </span>
-                <span className="badge-gray" style={{ fontWeight: 500 }}>
-                  정답·오답노트 · {exam.answerVisibility === "immediate" ? "제출 직후" : exam.answersReleased ? "공개함" : "공개 전"}
+                {/* 공개 정책은 메타 정보 — 배지 대신 한 줄 글자 */}
+                <span className="text-[13px]" style={{ color: "var(--ink-2)" }}>
+                  <span style={{ color: "var(--ink-3)" }}>점수</span> {exam.scoreVisibility === "immediate" ? "제출 직후" : exam.answersReleased ? "공개함" : "공개 전"}
+                  <span style={{ color: "var(--ink-4)" }}> · </span>
+                  <span style={{ color: "var(--ink-3)" }}>정답·오답노트</span> {exam.answerVisibility === "immediate" ? "제출 직후" : exam.answersReleased ? "공개함" : "공개 전"}
                 </span>
                 {(exam.scoreVisibility === "after_release" || exam.answerVisibility === "after_release") && (
                   <ActionButton action={releaseAnswersAction.bind(null, exam.id, !exam.answersReleased)} className={`${exam.answersReleased ? "btn-secondary" : "btn-primary"} btn-sm mt-1 w-full`} testId="release-answers">
@@ -188,7 +188,11 @@ export default async function ExamDetailPage({ params, searchParams }: { params:
             <section className="card card-body" data-testid="paper-card">
               <div className="sec-h">
                 <h2 className="sec-t">인쇄 · PDF</h2>
-                {prints > 0 && <span className="badge-gray">시험지 {prints}</span>}
+                {prints > 0 && (
+                  <span className="text-[12.5px] tabular-nums" style={{ color: "var(--ink-3)" }}>
+                    시험지 {prints}
+                  </span>
+                )}
               </div>
               <p className="mt-1 text-[12.5px]" style={{ color: "var(--ink-3)" }}>
                 학생마다 QR이 달라 찍으면 바로 제출·채점됩니다.

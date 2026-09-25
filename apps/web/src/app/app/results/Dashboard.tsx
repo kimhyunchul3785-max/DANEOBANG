@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import type { AcademyContext } from "@/lib/auth";
 import { studentScope } from "@/lib/scope";
 import type { HeatCell } from "@/components/Viz";
-import { Sparkline } from "@/components/Viz";
+import { TrendChart } from "@/components/Viz";
 import { SortHeader, CountUp } from "@/components/Motion";
 import { loadGrades, avg, rate, recentWeeks, weeklySeries, weekLabel, scoreBins, consecutiveFails, trendDelta, weekIndex, bookLineage } from "@/lib/stats";
 import { fmtMD, fmtMDHM, parseJSON } from "@/lib/util";
@@ -213,8 +213,7 @@ export async function GradesDashboard({ ctx, sp, view }: { ctx: AcademyContext; 
     const layout = normalizeLayout(parseJSON<unknown>(ctx.member.dashboardLayout, null));
     return (
       <div>
-        {header}
-        <WidgetBoard data={data} initialLayout={layout} />
+        <WidgetBoard data={data} initialLayout={layout} header={header} />
       </div>
     );
   }
@@ -238,7 +237,16 @@ export async function GradesDashboard({ ctx, sp, view }: { ctx: AcademyContext; 
               학생 상세 →
             </Link>
           </div>
-          <Kpis items={[["평균", picked.a, "", picked.a !== null && picked.a < warnLine], ["통과율", picked.pass, "%", false], ["응시", picked.n, "", false], ["재시험", picked.retake, "", picked.retake > 0]]} />
+          <Kpis items={[["평균", picked.a, "", picked.a !== null && picked.a < warnLine, <DeltaNote key="d" d={picked.delta} series={picked.series} />], ["통과율", picked.pass, "%", false], ["응시", picked.n, "", false], ["재시험", picked.retake, "", picked.retake > 0]]} />
+          <section className="card card-body mb-4" data-testid="student-trend">
+            <div className="sec-h mb-3">
+              <h2 className="sec-t">점수 추이</h2>
+              <span className="text-[12.5px]" style={{ color: "var(--ink-3)" }}>
+                {periodLabel} · 점선 통과 기준 {passLine}
+              </span>
+            </div>
+            <TrendChart values={picked.series} labels={weeks.map(weekLabel)} passLine={passLine} height={200} lastLabel="이번 주" ariaLabel={`${picked.s.name} 주별 평균`} />
+          </section>
           <AttemptTable rows={rows} />
         </div>
       );
@@ -267,14 +275,15 @@ export async function GradesDashboard({ ctx, sp, view }: { ctx: AcademyContext; 
             </span>
           </h2>
         </div>
-        <Kpis items={[["평균", pg.avg, "", pg.avg !== null && pg.avg < warnLine], ["통과율", pg.pass, "%", false], ["재시험", pg.retake, "", pg.retake > 0], ["미응시", pg.overdue, "", pg.overdue > 0]]} />
+        <Kpis items={[["평균", pg.avg, "", pg.avg !== null && pg.avg < warnLine, <DeltaNote key="d" d={pg.delta} series={pg.series} />], ["통과율", pg.pass, "%", false], ["재시험", pg.retake, "", pg.retake > 0], ["미응시", pg.overdue, "", pg.overdue > 0]]} />
         <section className="card card-body mb-4" data-testid="group-trend">
-          <div className="sec-h mb-2">
-            <span className="lbl">
-              {weeks.length}주 추이 · 통과 기준 {passLine}
+          <div className="sec-h mb-3">
+            <h2 className="sec-t">점수 추이</h2>
+            <span className="text-[12.5px]" style={{ color: "var(--ink-3)" }}>
+              {periodLabel} · 점선 통과 기준 {passLine}
             </span>
           </div>
-          <Sparkline values={pg.series} baseline={passLine} accentBelow={passLine} labels={weeks.map(weekLabel)} width={960} height={96} />
+          <TrendChart values={pg.series} labels={weeks.map(weekLabel)} passLine={passLine} height={200} lastLabel="이번 주" ariaLabel={`${pg.label} 주별 평균`} />
         </section>
         <StudentTable rows={pg.rows} warnLine={warnLine} title={`학생 ${pg.rows.length}명`} />
       </div>
@@ -311,7 +320,7 @@ export async function GradesDashboard({ ctx, sp, view }: { ctx: AcademyContext; 
                 <td className="digital" data-label="추세" style={{ color: g.delta !== null && g.delta < 0 ? "var(--accent)" : "var(--ink-2)" }}>
                   <Trend d={g.delta} />
                 </td>
-                <td data-label="재시험">{g.retake ? <span className="badge-red">{g.retake}</span> : <span className="muted">-</span>}</td>
+                <td data-label="재시험">{g.retake ? <span className="font-semibold tabular-nums" style={{ color: "var(--accent)" }}>{g.retake}</span> : <span className="muted">-</span>}</td>
               </tr>
             ))}
             {groups.length === 0 && (
@@ -332,15 +341,28 @@ function Trend({ d }: { d: number | null }) {
   return <>{d === null ? "··" : d > 0 ? `▲${d}` : d < 0 ? `▼${-d}` : "="}</>;
 }
 
-function Kpis({ items }: { items: [string, number | null, string, boolean][] }) {
+/** 추세(trendDelta: 최근 k주 평균 − 직전 k주 평균)를 숫자 아래 한 줄로 — 숫자가 주인공, 이 줄은 방향만 */
+function DeltaNote({ d, series }: { d: number | null; series: (number | null)[] }) {
+  if (d === null) return null;
+  const n = series.filter((v) => v !== null).length;
+  const k = n >= 6 ? 3 : n >= 4 ? 2 : 1;
+  return (
+    <span className="kpi-s" title={`최근 ${k}주 평균 − 직전 ${k}주 평균`}>
+      <span style={{ color: d < 0 ? "var(--accent)" : "var(--ink-2)", fontWeight: 600 }}>{d > 0 ? `+${d}` : d === 0 ? "±0" : d}</span> 최근 {k}주
+    </span>
+  );
+}
+
+function Kpis({ items }: { items: [string, number | null, string, boolean, React.ReactNode?][] }) {
   return (
     <div className="kpis mb-4" style={{ ["--n" as string]: items.length }} data-testid="pick-kpis">
-      {items.map(([l, v, suf, warn]) => (
+      {items.map(([l, v, suf, warn, sub]) => (
         <div key={l}>
           <span className="lbl">{l}</span>
           <span className="kpi-v" style={warn ? { color: "var(--accent)" } : undefined}>
             <CountUp value={v} suffix={suf} placeholder="–" />
           </span>
+          {sub}
         </div>
       ))}
     </div>
@@ -407,7 +429,7 @@ function StudentTable({ rows, warnLine, title }: { rows: StudentRow[]; warnLine:
                 <td className="digital" data-label="추세" style={{ color: p.delta !== null && p.delta < 0 ? "var(--accent)" : "var(--ink-2)" }}>
                   <Trend d={p.delta} />
                 </td>
-                <td data-label="재시험">{p.retake ? <span className="badge-red">{p.retake}</span> : <span className="muted">-</span>}</td>
+                <td data-label="재시험">{p.retake ? <span className="font-semibold tabular-nums" style={{ color: "var(--accent)" }}>{p.retake}</span> : <span className="muted">-</span>}</td>
               </tr>
             ))}
           </tbody>

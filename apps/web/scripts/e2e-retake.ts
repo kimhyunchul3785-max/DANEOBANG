@@ -18,6 +18,13 @@ const fail = (m: string): never => {
 };
 const shot = (p: Page, name: string) => p.screenshot({ path: path.join(OUT, `${name}.png`), fullPage: true });
 
+/** v5.8: 레이아웃 편집은 성적 머리의 ⋯ 메뉴 안에 있다 */
+async function openLayoutEdit(p: Page) {
+  await p.click("[data-testid='board-menu']");
+  await p.click("[data-testid='widgets-edit']");
+  await p.waitForSelector("[data-testid='widget-board'][data-edit='1']");
+}
+
 async function login(browser: Browser, email: string, w = 1280): Promise<[Page, BrowserContext]> {
   const ctx = await browser.newContext({ viewport: { width: w, height: 900 } });
   const p = await ctx.newPage();
@@ -200,14 +207,14 @@ async function main() {
   if ((await t1.locator("#students-body").locator("xpath=..").innerText()).includes("계정")) fail("계정 column must be removed");
   await t1.goto(`${BASE}/app/results`);
   await t1.waitForSelector("[data-testid='widget-board']");
-  await t1.click("[data-testid='widgets-edit']");
+  await openLayoutEdit(t1);
   await t1.locator("[data-testid='widget-missed'] [data-testid='widget-remove']").click();
   await t1.waitForTimeout(900);
   await t1.reload();
   await t1.waitForSelector("[data-testid='widget-board']");
   if ((await t1.locator("[data-testid='widget-missed']").count()) !== 0) fail("removed widget should stay removed after reload");
   // 드래그: 평균 점수를 오른쪽 끝으로
-  await t1.click("[data-testid='widgets-edit']");
+  await openLayoutEdit(t1);
   const handle = t1.locator("[data-testid='widget-avg'] [data-testid='widget-handle']");
   const hb = (await handle.boundingBox())!;
   await t1.mouse.move(hb.x + 20, hb.y + 10);
@@ -232,7 +239,7 @@ async function main() {
   await t1.reload();
   await t1.waitForSelector("[data-testid='widget-board']");
   if (Number(await t1.locator("[data-testid='widget-avg']").getAttribute("data-x")) !== avgX) fail("layout should persist after reload");
-  await t1.click("[data-testid='widgets-edit']");
+  await openLayoutEdit(t1);
   await t1.click("[data-testid='widget-add-missed']");
   await t1.waitForTimeout(700);
   if ((await t1.locator("[data-testid='widget-missed']").count()) !== 1) fail("add widget back");

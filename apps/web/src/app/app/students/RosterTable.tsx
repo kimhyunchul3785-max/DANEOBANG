@@ -199,7 +199,7 @@ export function RosterTable({ rows, classes, members, isOwner, emptyText }: { ro
               <td className="text-[15px] font-bold tabular-nums" data-label="4주 평균" style={{ color: r.avg !== null && r.avg < 70 ? "var(--accent)" : undefined }}>
                 {r.avg ?? "–"}
               </td>
-              <td data-label="재시험" data-empty={r.retake ? undefined : "1"}>{r.retake ? <span className="badge-red">{r.retake}<span className="sm:hidden">&nbsp;재시험</span></span> : <span className="muted">-</span>}</td>
+              <td data-label="재시험" data-empty={r.retake ? undefined : "1"}>{r.retake ? <span className="font-semibold tabular-nums" style={{ color: "var(--accent)" }}>{r.retake}<span className="sm:hidden">&nbsp;재시험</span></span> : <span className="muted">-</span>}</td>
             </tr>
           ))}
         </tbody>

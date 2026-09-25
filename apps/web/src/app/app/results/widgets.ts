@@ -13,15 +13,19 @@ export const WIDGETS: Record<WidgetType, { title: string; hint: string; minW: nu
   pass: { title: "통과율 (첫 응시)", hint: "첫 응시에서 통과 기준을 넘긴 비율", minW: 2, minH: 2, w: 3, h: 2 },
   retake: { title: "재시험", hint: "아직 끝나지 않은 재시험 (출제 전 포함)", minW: 2, minH: 2, w: 3, h: 2 },
   missed: { title: "미응시", hint: "마감이 지났는데 시작하지 않은 시험", minW: 2, minH: 2, w: 3, h: 2 },
-  groups: { title: "그룹별 평균", hint: "반·학교·학년별 평균. 막대를 누르면 그 학생들만", minW: 4, minH: 4, w: 6, h: 6 },
-  trend: { title: "성적 추이", hint: "주별 평균 점수. 점선이 통과 기준, 빨간 점은 미달", minW: 4, minH: 3, w: 6, h: 6 },
-  distribution: { title: "점수 분포", hint: "점수대별 응시 수와 통과·미달·미응시 건수", minW: 3, minH: 4, w: 4, h: 6 },
-  heatmap: { title: "누가 언제 봤나", hint: "학생 × 주. 빈 칸은 그 주 응시 없음, 빨강은 60점 미만", minW: 4, minH: 4, w: 4, h: 6 },
-  watch: { title: "챙겨야 할 학생", hint: "연속 미달·미응시·급락·평균 60 미만", minW: 3, minH: 3, w: 4, h: 6 },
-  recent: { title: "최근 시험", hint: "최근에 낸 시험의 평균과 응시 인원", minW: 3, minH: 3, w: 4, h: 6 },
+  groups: { title: "반별 평균", hint: "반별 평균. 누르면 그 반만", minW: 3, minH: 3, w: 4, h: 5 },
+  trend: { title: "성적 추이", hint: "주별 평균 점수. 점선이 통과 기준", minW: 4, minH: 3, w: 8, h: 5 },
+  distribution: { title: "점수 분포", hint: "점수 구간별 응시 수와 통과 · 미달 · 미응시", minW: 3, minH: 4, w: 4, h: 5 },
+  heatmap: { title: "누가 언제 봤나", hint: "학생 × 주. 빈 칸은 그 주 응시 없음, 빨강은 60점 미만", minW: 6, minH: 4, w: 12, h: 6 },
+  watch: { title: "챙겨야 할 학생", hint: "연속 미달 · 미응시 · 급락 · 평균 60 미만", minW: 3, minH: 3, w: 4, h: 5 },
+  recent: { title: "최근 시험", hint: "최근에 낸 시험의 평균과 응시 인원", minW: 3, minH: 3, w: 4, h: 5 },
 };
 
-// 기본 배치(v5.5): 숫자 4개 → [추이(넓게) | 챙겨야 할 학생] → [그룹 | 분포 | 히트맵]. 높이 5줄로 낮춰 빈 면적을 줄인다
+/**
+ * 기본 배치(v5.8): 숫자 4개(한 줄 띠) → [추이 2/3 | 챙겨야 할 학생 1/3] → [반별 평균 | 점수 분포 | 최근 시험].
+ * 히트맵은 기본에서 뺐다 — 요약에서는 '챙겨야 할 학생' 이 그 역할을 한다. 필요하면 편집에서 다시 넣는다(넓게).
+ * 보기 모드에서 높이(h)는 최소 높이가 아니라 배치 순서 · 추이 차트 크기에만 쓰이고, 카드 높이는 내용에 맞춘다.
+ */
 export const DEFAULT_LAYOUT: LayoutItem[] = [
   { i: "avg", x: 0, y: 0, w: 3, h: 2 },
   { i: "pass", x: 3, y: 0, w: 3, h: 2 },
@@ -31,11 +35,14 @@ export const DEFAULT_LAYOUT: LayoutItem[] = [
   { i: "watch", x: 8, y: 2, w: 4, h: 5 },
   { i: "groups", x: 0, y: 7, w: 4, h: 5 },
   { i: "distribution", x: 4, y: 7, w: 4, h: 5 },
-  { i: "heatmap", x: 8, y: 7, w: 4, h: 5 },
+  { i: "recent", x: 8, y: 7, w: 4, h: 5 },
 ];
 
+/** 숫자 위젯 — 보기 모드에서 같은 줄에 이어 붙어 있으면 한 표면(.kpis 띠)으로 합친다 */
+export const KPI_WIDGETS: WidgetType[] = ["avg", "pass", "retake", "missed"];
+
 /** 휴대폰(한 열)에서 보이는 순서: 숫자 → 할 일(챙길 학생) → 추이 → 나머지 */
-export const MOBILE_ORDER: WidgetType[] = ["avg", "pass", "retake", "missed", "watch", "trend", "recent", "groups", "heatmap", "distribution"];
+export const MOBILE_ORDER: WidgetType[] = ["avg", "pass", "retake", "missed", "watch", "trend", "recent", "groups", "distribution", "heatmap"];
 
 export function normalizeLayout(raw: unknown): LayoutItem[] {
   if (!Array.isArray(raw)) return DEFAULT_LAYOUT;

@@ -143,7 +143,7 @@ async function login(browser: Browser, email: string, w = 1360, h = 900, mobile 
   check("detail: run summary + scores(평균·통과율·미달) + #due + paper on one page", (await t.locator("[data-testid='run-summary']").count()) === 1 && /평균[\s\S]*통과율[\s\S]*미달/.test(await t.locator("[data-testid='run-scores']").innerText()) && (await t.locator("#due [data-testid='due-apply']").count()) === 1 && (await t.locator("[data-testid='paper-card']").count()) === 1);
   const period = await t.locator("[data-testid='period-line']").innerText();
   check("detail: shows 시작 · 마감 line", /시작 \d{4}/.test(period) && /마감 \d{4}/.test(period), period);
-  check("detail: release-state chips show 점수/정답 policy (immediate → no release button)", /점수 · 제출 직후/.test(await t.locator("[data-testid='release-state']").innerText()) && (await t.locator("[data-testid='release-answers']").count()) === 0);
+  check("detail: release-state line shows 점수/정답 policy as text (immediate → no release button)", /점수\s*제출 직후/.test(await t.locator("[data-testid='release-state']").innerText()) && (await t.locator("[data-testid='release-answers']").count()) === 0);
   check("detail: parent link ← 시험 (no cross-jumps)", (await t.locator("[data-testid='exam-back']").innerText()).trim() === "← 시험" && (await t.locator("[data-testid='exam-back']").getAttribute("href")) === "/app/tests");
   // DB: startAt ≈ now, dueAt = startAt + 7d
   const rs = await db.execute({ sql: `SELECT startAt, dueAt FROM Assignment WHERE examId = ?`, args: [examId] });

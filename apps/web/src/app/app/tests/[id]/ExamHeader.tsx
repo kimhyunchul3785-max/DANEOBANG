@@ -46,7 +46,11 @@ export function ExamHeader({ data, parent, sub }: { data: LoadedExam; parent?: {
             </ActionButton>
           )}
         </span>
-        {exam.isRetake && !exam.title.includes("재시험") && <span className="badge-amber">재시험</span>}
+        {exam.isRetake && !exam.title.includes("재시험") && (
+          <span className="text-[13px]" style={{ color: "var(--ink-3)" }}>
+            재시험
+          </span>
+        )}
       </div>
       <p className="mt-1 text-[13px]" style={{ color: "var(--ink-3)" }}>
         {exam.title.startsWith(exam.book.title) ? "" : `${exam.book.title} · `}

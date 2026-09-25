@@ -3,7 +3,7 @@ import { prisma } from "@/lib/db";
 import { requireOwner } from "@/lib/auth";
 import { fmtDate } from "@/lib/util";
 import { ActionButton } from "@/components/ActionForm";
-import { HBars } from "@/components/Viz";
+import { RankBars } from "@/components/Viz";
 import { loadGrades, avg, rate, recentWeeks } from "@/lib/stats";
 import { revokeInvitationAction, setMemberStatusAction } from "../settings/actions";
 import { InviteBox } from "../settings/InviteBox";
@@ -65,7 +65,7 @@ export default async function TeachersPage() {
               <div className="lbl">최근 4주 담당 학생 평균</div>
               <span className="digital">채점 {grades.filter((g) => !g.isRetake).length}건</span>
             </div>
-            <HBars rows={rows.map(({ m, s }) => ({ key: m.id, label: m.user.name, value: s.avg, sub: `${m.students.length}명` }))} accentBelow={70} />
+            <RankBars rows={rows.map(({ m, s }) => ({ key: m.id, label: m.user.name, value: s.avg, sub: `${m.students.length}명`, href: `/app/students?teacher=${m.id}` }))} warnBelow={70} />
           </section>
 
           <section className="card">
